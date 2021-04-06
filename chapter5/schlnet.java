@@ -49,13 +49,15 @@ public class schlnet {
     }
     static void bHelperUtil(int idx, boolean[] visited)
     {
-        visited[idx] = true;
+        if (visited[idx]) return;
         for (int i = 0; i < n; i++) {
-            if (visited[i] || !adj[idx][i]) continue;
+            if (!adj[idx][i]) continue;
             bHelperUtil(i, visited);
+            visited[idx] = true;
             return;
         }
-        adj[idx][lst.get(0)] = true;
+        visited[idx] = true;
+        bAns++;
     }
     static void bHelper(int idx)
     {
@@ -63,23 +65,56 @@ public class schlnet {
         bHelperUtil(idx, visited);
         bAns++;
     }
+    static final int UNVISIT = 0, VISITING = 1, VISITED = 2;
+    static void util(int idx, int[] states)
+    {
+        if (states[idx] == VISITED) return;
+        states[idx] = VISITING;
+        for (int i = 0; i < n; i++) {
+            if (states[i] == VISITING || !adj[idx][i]) continue;
+            if (states[i] == VISITED) {
+                states[idx] = VISITED;
+                return;
+            }
+            util(i, states);
+            states[idx] = VISITED;
+            return;
+        }
+        bAns++;
+        // System.out.println("idx: " + idx);
+        states[idx] = VISITED;
+    }
     static int taskB()
     {
-        for (int i = 1; i < lst.size(); i++) {
-            adj[lst.get(i - 1)][lst.get(i)] = true;
-        }
-        bAns = aAns - 1;
+        // for (int i = 1; i < lst.size(); i++) {
+        //     adj[lst.get(i - 1)][lst.get(i)] = true;
+        // }
+        // bAns = aAns - 1;
         // if (lst.size() > 1) {
         //     adj[lst.get(lst.size() - 1)][lst.get(0)] = true;
         //     bAns++;
         // }
         // System.out.println(lst);
-        for (int i = 0; i < n; i++) {
-            boolean[] current = new boolean[n];
-            int cnt = dfs(i, current);
-            if (cnt == n) continue;
-            bHelper(i);
-        }
+        // for (int i = 0; i < n; i++) {
+        //     boolean[] current = new boolean[n];
+        //     int cnt = dfs(i, current);
+        //     if (cnt == n) continue;
+        //     bHelper(i);
+        // }
+        // return bAns;
+        // bAns = 0;
+        // boolean[] visited = new boolean[n];
+        // for (int i = 0; i < n; i++) {
+        //     bHelperUtil(i, visited);
+        // }
+        // return bAns;
+
+        bAns = 0;
+        int[] states = new int[n];
+        for (int i = 0; i < n; i++)
+            util(i, states);
+        bAns--;
+        // TODO: find in-deg = 0 vertices
         return bAns;
     }
     static void solve()
