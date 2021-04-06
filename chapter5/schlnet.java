@@ -69,10 +69,10 @@ public class schlnet {
             adj[lst.get(i - 1)][lst.get(i)] = true;
         }
         bAns = aAns - 1;
-        if (lst.size() > 1) {
-            adj[lst.get(lst.size() - 1)][lst.get(0)] = true;
-            bAns++;
-        }
+        // if (lst.size() > 1) {
+        //     adj[lst.get(lst.size() - 1)][lst.get(0)] = true;
+        //     bAns++;
+        // }
         // System.out.println(lst);
         for (int i = 0; i < n; i++) {
             boolean[] current = new boolean[n];
