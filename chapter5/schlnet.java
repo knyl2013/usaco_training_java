@@ -9,10 +9,9 @@ import java.util.*;
 
 public class schlnet {
     static boolean[][] adj;
+	static boolean[][] dp;
     static int n, aAns;
     static List<Integer> lst;
-	static int loops;
-    // static List<Integer> represents;
 
     static int dfs(int idx, boolean[] visited)
     {
@@ -48,136 +47,6 @@ public class schlnet {
         dfs(bestIdx, visited);
         return 1 + taskA(visited);
     }
-    static void bHelperUtil(int idx, boolean[] visited)
-    {
-        if (visited[idx]) return;
-        for (int i = 0; i < n; i++) {
-            if (!adj[idx][i]) continue;
-            bHelperUtil(i, visited);
-            visited[idx] = true;
-            return;
-        }
-        visited[idx] = true;
-        // bAns++;
-    }
-    static void bHelper(int idx)
-    {
-        boolean[] visited = new boolean[n];
-        bHelperUtil(idx, visited);
-        // bAns++;
-    }
-    static final int UNVISIT = 0, VISITING = 1, VISITED = 2;
-    static void util(int idx, int[] states, boolean reverse)
-    {
-        if (states[idx] == VISITED) return;
-        states[idx] = VISITING;
-        for (int i = 0; i < n; i++) {
-            if (states[i] == VISITING || (!reverse && !adj[idx][i])) continue;
-			if (states[i] == VISITING || (reverse && !adj[i][idx])) continue;
-            if (states[i] == VISITED) {
-                states[idx] = VISITED;
-                return;
-            }
-            util(i, states, reverse);
-            states[idx] = VISITED;
-            return;
-        }
-        // bAns++;
-		loops++;
-        // System.out.println("idx: " + idx);
-        states[idx] = VISITED;
-    }
-	static void findCycles(int start, int current, boolean[] visited, Stack<Integer> stk, Set<String> cycles)
-	{
-		if (start == current && visited[start]) {
-			List<Integer> tmp = new ArrayList<>();
-			for (int ele : stk)
-				tmp.add(ele);
-			Collections.sort(tmp);
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < tmp.size(); i++) {
-				boolean lastEle = i == tmp.size() - 1;
-				sb.append(tmp.get(i));
-				if (!lastEle) sb.append('|');
-			}
-			cycles.add(sb.toString());
-			return;
-		}
-		visited[current] = true;
-		stk.push(current);
-		for (int i = 0; i < n; i++) {
-			if (!adj[current][i] || current == i) continue;
-			if (visited[i] && i != start) continue;
-			findCycles(start, i, visited, stk, cycles);
-		}
-		stk.pop();
-		visited[current] = false;
-	}
-	/*
-    static int taskB()
-    {
-        // bAns = 0;
-        // int[] states = new int[n];
-        // for (int i = 0; i < n; i++)
-            // util(i, states, false);
-        // bAns--;
-        // TODO: find in-deg = 0 vertices
-		// states = new int[n];
-		// for (int i = 0; i < n; i++)
-			// util(i, states, true);
-        // return bAns;
-		boolean[][] dp = new boolean[n][n];
-		
-		List<Integer> ends = new ArrayList<>();
-		int paths = 0;
-		for (int i = 0; i < n; i++) {
-			int outDeg = dfs(i, dp[i]);
-			if (outDeg == 1) {
-				ends.add(i);
-			}
-		}
-		int[] matches = new int[n];
-		for (int i = 0; i < n; i++) {
-			
-		}
-		int[] states = new int[n];
-		
-		for (int i = 0; i < n; i++) {
-			boolean connectEnd = false;
-			for (int e : ends) {
-				if (dp[i][e]) {
-					connectEnd = true;
-					break;
-				}
-			}
-			if (connectEnd) continue;
-			int inDeg = 0;
-			for (int j = 0; j < n; j++)
-				if (dp[j][i]) inDeg++;
-			if (inDeg == 1) {
-				loops++;
-				continue;
-			}
-			util(i, states, false);
-		}
-		// System.out.println("paths: " + paths);
-		// System.out.println("loops: " + loops);
-		if (paths == 0 && loops == 1) return 0;
-		else return paths + loops;
-		// Set<String> cycles = new HashSet<>();
-		// for (int i = 0; i < n; i++)
-			// findCycles(i, i, new boolean[n], new Stack<>(), cycles);
-		// for (String cycle : cycles) {
-			// List<String> lst = cycle.split("|");
-			// for (String str : lst) {
-				// int vertex = Integer.parseInt(str);
-				
-			// }
-		// }
-		
-		
-		// return bAns;
-    }*/
 	static class Tarjan {
 	  
 		// No. of vertices    
@@ -311,19 +180,41 @@ public class schlnet {
 			return ans;
 		}
 	} // This code is contributed by Prateek Gupta (@prateekgupta10)
-	
+
 	static int taskB()
 	{
 		Tarjan g = new Tarjan(n);
+		dp = new boolean[n][n];
+		for (int i = 0; i < n; i++)
+			dfs(i, dp[i]);
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (adj[i][j])
 					g.addEdge(i, j);
 			}
 		}
-		System.out.println(g.SCC());
-		
-		return -1;
+		List<List<Integer>> groups = g.SCC();
+		int m = groups.size();
+		if (m == 1) return 0;
+		boolean[][] conn = new boolean[m][m];
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < m; j++) {
+				if (i == j) continue;
+				int memi = groups.get(i).get(0), memj = groups.get(j).get(0);
+				conn[i][j] = dp[memi][memj];
+			}
+		}
+		int totIn = 0, totOut = 0;
+		for (int i = 0; i < m; i++) {
+			int inDeg = 0, outDeg = 0;
+			for (int j = 0; j < m; j++) {
+				if (conn[i][j]) outDeg++;
+				if (conn[j][i]) inDeg++;
+			}
+			if (inDeg > 0) totIn++;
+			if (outDeg > 0) totOut++;
+		}
+		return Math.max(m-totIn, m-totOut);
 	}
     static void solve()
     {
@@ -336,13 +227,6 @@ public class schlnet {
                 adj[i][inp - 1] = true;
             }
         }
-		
-		// for (int i = 0; i < n; i++) {
-			// for (int j = 0; j < n; j++) {
-				// System.out.print(adj[i][j] ? "1 " : "0 ");
-			// }
-			// System.out.println();
-		// }
         aAns = taskA(new boolean[n]);
         int bAns = taskB();
         out.printf("%d\n%d\n", aAns, bAns);
@@ -355,8 +239,8 @@ public class schlnet {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-    // static String taskName = "schlnet";
+    // static String taskName = null;
+    static String taskName = "schlnet";
     
     public static void main(String[] args) throws Exception
     {
