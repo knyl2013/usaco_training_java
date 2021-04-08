@@ -10,7 +10,7 @@ import java.util.*;
 public class schlnet {
     static boolean[][] adj;
 	static boolean[][] dp;
-    static int n, aAns;
+    static int n;
     static List<Integer> lst;
 
     static int dfs(int idx, boolean[] visited)
@@ -204,17 +204,17 @@ public class schlnet {
 				conn[i][j] = dp[memi][memj];
 			}
 		}
-		int totIn = 0, totOut = 0;
+		int ins = 0, outs = 0;
 		for (int i = 0; i < m; i++) {
 			int inDeg = 0, outDeg = 0;
 			for (int j = 0; j < m; j++) {
 				if (conn[i][j]) outDeg++;
 				if (conn[j][i]) inDeg++;
 			}
-			if (inDeg > 0) totIn++;
-			if (outDeg > 0) totOut++;
+			if (inDeg == 0) ins++;
+			if (outDeg == 0) outs++;
 		}
-		return Math.max(m-totIn, m-totOut);
+		return Math.max(ins, outs);
 	}
     static void solve()
     {
@@ -227,7 +227,7 @@ public class schlnet {
                 adj[i][inp - 1] = true;
             }
         }
-        aAns = taskA(new boolean[n]);
+        int aAns = taskA(new boolean[n]);
         int bAns = taskB();
         out.printf("%d\n%d\n", aAns, bAns);
     }
