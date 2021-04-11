@@ -22,104 +22,81 @@ public class charrec {
         for (int i = 0; i < ans.length; i++) ans[i] = tmp.get(i);
         return ans;
     }
+    static enum Type {
+        Duplicate,
+        Miss,
+        None
+    }
+    static class Result {
+        Type type;
+        int match;
+        char ch;
+        public Result(int m, char c) {match = m; ch = c;}
+    }
+    static Result max(Result a, Result b)
+    {
+        return a.match < b.match ? a : b;
+    }
+    static Result match(int chIdx, Type type, int fontStart, int fontEnd, int imgStart, int imgEnd, int skipFont, int skipImg)
+    {
+        int fontIdx = fontStart, imgIdx = imgStart;
+        Result ans = new Result(279, '?'); // only >= 280 will be counted as match
+        int cnt = 0;
+        while (fontIdx <= fontEnd && imgIdx <= imgEnd) {
+            int[] font = fonts[chIdx][fontIdx++], img = images[imgIdx++];
+            for (int i = 0; i < 20; i++)
+                if (font[i] != img[i])
+                    cnt++;
+            if (fontIdx == skipFont) fontIdx++;
+            if (imgIdx == skipImg) imgIdx++;
+        }
+        if (cnt < ans.match) {
+            ans = new Result(cnt, chars[chIdx]);
+            ans.type = type;
+        }
+        return ans;
+    }
+    static Result skip(int[][] toSkip, int[][] other, int skipIdx)
+    {
+        int idx = 0;
+        int cnt = 0;
+        Result ans = new Result(279, '?'); // only >= 280 will be counted as match
+        for (int i = 0; i < other.length; i++) {
+            if (idx == skipIdx) idx++;
+            int[] line1 = toSkip[idx++], line2 = other[i];
+            for (int j = 0; j < 20; j++) {
+                if (line1[j] == line2[j])
+                    cnt++;
+            }
+            ans = max(ans, new Result(cnt, (char)(i+'a')));
+        }
+        return ans;
+    }
+    static Result miss(int[][] font, int[][] img)
+    {
+        Result best = skip(font, img, 0);
+        for (int i = 1; i < 20; i++) {
+            best = max(best, skip(font, img, i));
+        }
+        best.type = Type.Miss;
+        return best;
+    }
+    static Result duplicate(int[][] font, int[][] img)
+    {
+        Result best = skip(img, font, 1);
+        for (int i = 2; i < 20; i++) {
+            best = max(best, skip(img, font, i));
+        }
+        best.type = Type.Duplicate;
+        return best;
+    }
     static int[][][] fonts = new int[27][20][20];
     static int[][] images;
-    static char[] chars = new char[] {' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '?'};
-    static int[] chosenChars;
-    static boolean[] dups;
-    static int imgEnd;
-    static final int INF = (int)1e6;
-    static final int QUESTION_MARK = 27;
-    // ans[0] := corruptions, ans[1] := character index
-    static int[] match(int imgStart)
-    {
-        return match(imgStart, -1, -1);
-    }
-    static int[] match(int imgStart, int missIdx, int dupIdx)
-    {
-        int[] ans = new int[]{INF, QUESTION_MARK};
-        for (int i = 0; i < 27; i++) {
-            int[][] font = fonts[i];
-            int corrupt = 0;
-            int imgIdx = imgStart;
-            for (int j = 0; j < 20; j++) {
-                if (j == missIdx) continue;
-                if (imgIdx == dupIdx) imgIdx++;
-                int[] img = images[imgIdx++];
-                for (int k = 0; k < 20; k++) {
-                    if (font[j][k] != img[k])
-                        corrupt++;
-                }
-            }
-            if (ans[0] == -1 || ans[0] > corrupt) {
-                ans[0] = corrupt;
-                if (corrupt <= 120)
-                    ans[1] = i;
-            }
-        }
-        return ans;
-    }
-    static int[] miss(int imgStart)
-    {
-        int[] ans = new int[]{INF, -1};
-        for (int i = 0; i < 20; i++) {
-            int[] cur = match(imgStart, i, -1);
-            if (ans[0] > cur[0])
-                ans = cur;
-        }
-        return ans;
-    }
-    static int[] dup(int imgStart)
-    {
-        int[] ans = new int[]{INF, -1};
-        for (int i = imgStart + 1; i <= imgStart + 20; i++) {
-            if (!dups[i]) continue;
-            int[] cur = match(imgStart, -1, i);
-            if (ans[0] < cur[0]) {
-                ans = cur;
-            }
-        }
-        return ans;
-    }
-    static int dfs(int imgStart)
-    {
-        if (imgStart == images.length)
-            return 0;
-        int imgEnd = images.length - 1;
-        int remain = imgEnd - imgStart + 1;
-        if (remain < 19)
-            return INF;
-        if (remain == 19) {
-            int[] ans = miss(imgStart);
-            chosenChars[imgStart] = ans[1];
-            return ans[0];
-        }
-        int[] ifMatch = match(imgStart);
-        int ifMatchAfter = ifMatch[0] + dfs(imgStart + 20);
-        int ans = ifMatchAfter;
-        int chosenChar = ifMatch[1];
-        if (remain >= 21) {
-            int[] ifDup = dup(imgStart);
-            int ifDupAfter = ifDup[0] + dfs(imgStart + 21);
-            if (ifDupAfter < ans) {
-                ans = ifDupAfter;
-                chosenChar = ifDup[1];
-            }
-        }
-        int[] ifMiss = miss(imgStart);
-        int ifMissAfter = ifMiss[0] + dfs(imgStart + 19);
-        if (ifMissAfter < ans) {
-            ans = ifMissAfter;
-            chosenChar = ifMiss[1];
-        }
-        chosenChars[imgStart] = chosenChar;
-        return ans;
-    }
+    static char[] chars = new char[] {' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
     static void solve() throws Exception
     {
         String[] fontIn = readFile("font.in");
         int idx = 0;
-
         for (int i = 0; i < 27; i++) {
             for (int j = 0; j < 20; j++) {
                 String font = fontIn[idx++];
@@ -130,25 +107,38 @@ public class charrec {
         }
         int n = ni();
         images = new int[n][20];
-        dups = new boolean[n];
-        chosenChars = new int[n];
-        Arrays.fill(chosenChars, -1);
-        imgEnd = images.length - 1;
-        String prev = "";
         for (int i = 0; i < n; i++) {
             String s = ns();
-            if (s.equals(prev)) dups[i] = true;
-            prev = s;
             for (int j = 0; j < 20; j++) {
                 images[i][j] = s.charAt(j) == '0' ? 0 : 1;
             }
         }
-        
-
         StringBuilder sb = new StringBuilder();
-        int corruptions = dfs(0);
-        System.out.println(corruptions);
-        System.out.println(chars[chosenChars[0]]);
+        idx = 0;
+        while (idx < n) {
+            Result cur = new Result(279, '?');
+            for (int i = 0; i < 27; i++) {
+                Result temp = match(i, Type.None, 0, 19, idx, Math.min(n-1,idx+19), -1, -1);
+                cur = max(cur, temp);
+            }
+            for (int i = 0; i < 27; i++) {
+                Result temp = match(i, Type.Miss, 0, 19, idx, Math.min(n-1,idx+19), 0, -1);
+                for (int missIdx = 0; missIdx < 20; missIdx++) {
+                    temp = max(temp, match(i, Type.Miss, 0, 19, idx, Math.min(n-1,idx+19), missIdx, -1));
+                }
+                System.out.println(temp.match);
+                cur = max(cur, temp);
+            }
+            System.out.println(cur.match);
+            sb.append(cur.ch);
+            idx += 20;
+            if (cur.type == Type.Duplicate)
+                idx++;
+            if (cur.type == Type.Miss)
+                idx--;
+        }
+
+
         out.printf("%s\n", sb.toString());
     }
 
