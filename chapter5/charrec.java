@@ -8,7 +8,17 @@ import java.io.*;
 import java.util.*;
 
 public class charrec {
-    static String[] readFile(String fileName) throws Exception
+    static int[][][] fonts = new int[27][20][20];
+    static int[][] images;
+    static char[] chars = new char[] {' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '?'};
+    static int[] chosenChars;
+	static int[] nexts;
+	static int[] memo;
+    static int imgEnd;
+    static final int INF = (int)1e7;
+    static final int QUESTION_MARK = 27;
+	
+	static String[] readFile(String fileName) throws Exception
     {
         List<String> tmp = new ArrayList<>();
         BufferedReader myReader = new BufferedReader(new FileReader(fileName));
@@ -22,20 +32,11 @@ public class charrec {
         for (int i = 0; i < ans.length; i++) ans[i] = tmp.get(i);
         return ans;
     }
-    static int[][][] fonts = new int[27][20][20];
-    static int[][] images;
-    static char[] chars = new char[] {' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '?'};
-    static int[] chosenChars;
-	static int[] nexts;
-	static int[] memo;
-    static int imgEnd;
-    static final int INF = (int)1e7;
-    static final int QUESTION_MARK = 27;
-    // ans[0] := corruptions, ans[1] := character index
     static int[] match(int imgStart)
     {
         return match(imgStart, -1, -1);
     }
+	// ans[0] := corruptions, ans[1] := character index
     static int[] match(int imgStart, int missIdx, int dupIdx)
     {
         int[] ans = new int[]{INF, QUESTION_MARK};
@@ -134,6 +135,7 @@ public class charrec {
                 }
             }
         }
+		
         int n = ni();
         images = new int[n][20];
         chosenChars = new int[n];
@@ -143,16 +145,13 @@ public class charrec {
 		Arrays.fill(nexts, -1);
         Arrays.fill(chosenChars, -1);
         imgEnd = images.length - 1;
-        String prev = "";
         for (int i = 0; i < n; i++) {
             String s = ns();
-            prev = s;
             for (int j = 0; j < 20; j++) {
                 images[i][j] = s.charAt(j) == '0' ? 0 : 1;
             }
         }
         
-
         StringBuilder sb = new StringBuilder();
         int corruptions = dfs(0);
 		int cur = 0;
@@ -160,6 +159,7 @@ public class charrec {
 			sb.append(chars[chosenChars[cur]]);
 			cur = nexts[cur];
 		}
+		
         out.printf("%s\n", sb.toString());
     }
 
