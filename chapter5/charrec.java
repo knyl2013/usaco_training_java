@@ -26,9 +26,10 @@ public class charrec {
     static int[][] images;
     static char[] chars = new char[] {' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '?'};
     static int[] chosenChars;
-    static boolean[] dups;
+	static int[] nexts;
+	static int[] memo;
     static int imgEnd;
-    static final int INF = (int)1e6;
+    static final int INF = (int)1e7;
     static final int QUESTION_MARK = 27;
     // ans[0] := corruptions, ans[1] := character index
     static int[] match(int imgStart)
@@ -51,7 +52,7 @@ public class charrec {
                         corrupt++;
                 }
             }
-            if (ans[0] == -1 || ans[0] > corrupt) {
+            if (ans[0] > corrupt) {
                 ans[0] = corrupt;
                 if (corrupt <= 120)
                     ans[1] = i;
@@ -61,7 +62,7 @@ public class charrec {
     }
     static int[] miss(int imgStart)
     {
-        int[] ans = new int[]{INF, -1};
+        int[] ans = new int[]{INF, QUESTION_MARK};
         for (int i = 0; i < 20; i++) {
             int[] cur = match(imgStart, i, -1);
             if (ans[0] > cur[0])
@@ -71,11 +72,10 @@ public class charrec {
     }
     static int[] dup(int imgStart)
     {
-        int[] ans = new int[]{INF, -1};
+        int[] ans = new int[]{INF, QUESTION_MARK};
         for (int i = imgStart + 1; i <= imgStart + 20; i++) {
-            if (!dups[i]) continue;
             int[] cur = match(imgStart, -1, i);
-            if (ans[0] < cur[0]) {
+            if (ans[0] > cur[0]) {
                 ans = cur;
             }
         }
@@ -89,21 +89,25 @@ public class charrec {
         int remain = imgEnd - imgStart + 1;
         if (remain < 19)
             return INF;
+		if (memo[imgStart] != -1)
+			return memo[imgStart];
         if (remain == 19) {
             int[] ans = miss(imgStart);
             chosenChars[imgStart] = ans[1];
-            return ans[0];
+            return memo[imgStart] = ans[0];
         }
         int[] ifMatch = match(imgStart);
         int ifMatchAfter = ifMatch[0] + dfs(imgStart + 20);
         int ans = ifMatchAfter;
         int chosenChar = ifMatch[1];
+		int nextIdx = imgStart + 20;
         if (remain >= 21) {
             int[] ifDup = dup(imgStart);
             int ifDupAfter = ifDup[0] + dfs(imgStart + 21);
             if (ifDupAfter < ans) {
                 ans = ifDupAfter;
                 chosenChar = ifDup[1];
+				nextIdx = imgStart + 21;
             }
         }
         int[] ifMiss = miss(imgStart);
@@ -111,9 +115,11 @@ public class charrec {
         if (ifMissAfter < ans) {
             ans = ifMissAfter;
             chosenChar = ifMiss[1];
+			nextIdx = imgStart + 19;
         }
         chosenChars[imgStart] = chosenChar;
-        return ans;
+		nexts[imgStart] = nextIdx;
+        return memo[imgStart] = ans;
     }
     static void solve() throws Exception
     {
@@ -130,14 +136,16 @@ public class charrec {
         }
         int n = ni();
         images = new int[n][20];
-        dups = new boolean[n];
         chosenChars = new int[n];
+		nexts = new int[n];
+		memo = new int[n];
+		Arrays.fill(memo, -1);
+		Arrays.fill(nexts, -1);
         Arrays.fill(chosenChars, -1);
         imgEnd = images.length - 1;
         String prev = "";
         for (int i = 0; i < n; i++) {
             String s = ns();
-            if (s.equals(prev)) dups[i] = true;
             prev = s;
             for (int j = 0; j < 20; j++) {
                 images[i][j] = s.charAt(j) == '0' ? 0 : 1;
@@ -147,8 +155,11 @@ public class charrec {
 
         StringBuilder sb = new StringBuilder();
         int corruptions = dfs(0);
-        System.out.println(corruptions);
-        System.out.println(chars[chosenChars[0]]);
+		int cur = 0;
+		while (cur < n && cur != -1) {
+			sb.append(chars[chosenChars[cur]]);
+			cur = nexts[cur];
+		}
         out.printf("%s\n", sb.toString());
     }
 
@@ -161,6 +172,7 @@ public class charrec {
     static PrintWriter out;
     static String INPUT = "";
     static String taskName = null;
+	// static String taskName = "charrec";
     
     public static void main(String[] args) throws Exception
     {
