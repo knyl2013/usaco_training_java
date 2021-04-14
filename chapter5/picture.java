@@ -8,27 +8,57 @@ import java.io.*;
 import java.util.*;
 
 public class picture {
-	static int area(int[] r)
-	{
-		int width = r[2] - r[0], height = r[3] - r[1];
-		if (width <= 0 || height <= 0) return -1;
-		return width * height;
+	static class Rectangle {
+		int[] r;
+		List<Rectangle> overlaps;
+		public Rectangle(int[] r)
+		{
+			this.r = r;
+			overlaps = new ArrayList<>();
+		}
+		public static int area(Rectangle rec)
+		{
+			int[] r = rec.r;
+			int width = r[2] - r[0], height = r[3] - r[1];
+			if (width <= 0 || height <= 0) return -1;
+			return width * height;
+		}
+		public static int peri(Rectangle rec)
+		{
+			int[] r = rec.r;
+			int width = r[2] - r[0], height = r[3] - r[1];
+			if (width <= 0 || height <= 0) return -1;
+			return width * 2 + height * 2;
+		}
+		public static Rectangle overlap(Rectangle rec1, Rectangle rec2)
+		{
+			int[] r1 = rec1.r, r2 = rec2.r;
+			int lowLeftX = Math.max(r1[0], r2[0]);
+			int lowLeftY = Math.max(r1[1], r2[1]);
+			int topRightX = Math.min(r1[2], r2[2]);
+			int topRightY = Math.min(r1[3], r2[3]);
+			return new Rectangle(new int[]{lowLeftX, lowLeftY, topRightX, topRightY});
+		}
+		public static boolean equal(Rectangle rec1, Rectangle rec2)
+		{
+			int[] r1 = rec1.r, r2 = rec2.r;
+			for (int i = 0; i < 4; i++) if (r1[i] != r2[i]) return false;
+			return true;
+		}
 	}
-	// given r1&r2 {low_left_x, low_left_y, top_right_x, top_right_y}, return the overlap rectangle of r1 & r2
-	static int[] overlap(int[] r1, int[] r2) 
-	{
-		int lowLeftX = Math.max(r1[0], r2[0]);
-		int lowLeftY = Math.max(r1[1], r2[1]);
-		int topRightX = Math.min(r1[2], r2[2]);
-		int topRightY = Math.min(r1[3], r2[3]);
-		return new int[]{lowLeftX, lowLeftY, topRightX, topRightY};
-	}
+
     static void solve()
     {
-        int[] r1 = new int[]{3,3,7,7};
-		int[] r2 = new int[]{5,5,10,10};
-		int[] o = overlap(r1, r2);
-		System.out.println(Arrays.toString(o));
+        List<Rectangle> rects = new ArrayList<>();
+		int n = ni();
+		int ans = 0;
+		for (int i = 0; i < n; i++) {
+			int x1 = ni(), y1 = ni(), x2 = ni(), y2 = ni();
+			Rectangle cur = new Rectangle(new int[]{x1, y1, x2, y2});
+			ans += Rectangle.peri(cur);
+			rects.add(cur);
+		}
+		out.printf("%d\n", ans);
     }
 
 
