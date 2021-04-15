@@ -10,24 +10,15 @@ import java.util.*;
 public class picture {
 	static class Rectangle {
 		int[] r;
-		List<Rectangle> overlaps;
 		public Rectangle(int[] r)
 		{
 			this.r = r;
-			overlaps = new ArrayList<>();
-		}
-		public static int area(Rectangle rec)
-		{
-			int[] r = rec.r;
-			int width = r[2] - r[0], height = r[3] - r[1];
-			if (width <= 0 || height <= 0) return -1;
-			return width * height;
 		}
 		public static int peri(Rectangle rec)
 		{
 			int[] r = rec.r;
 			int width = r[2] - r[0], height = r[3] - r[1];
-			if (width <= 0 || height <= 0) return -1;
+			if (width < 0 || height < 0) return -1;
 			return width * 2 + height * 2;
 		}
 		public static Rectangle overlap(Rectangle rec1, Rectangle rec2)
@@ -39,14 +30,66 @@ public class picture {
 			int topRightY = Math.min(r1[3], r2[3]);
 			return new Rectangle(new int[]{lowLeftX, lowLeftY, topRightX, topRightY});
 		}
-		public static boolean equal(Rectangle rec1, Rectangle rec2)
+		public String toString()
 		{
-			int[] r1 = rec1.r, r2 = rec2.r;
-			for (int i = 0; i < 4; i++) if (r1[i] != r2[i]) return false;
-			return true;
+			return Arrays.toString(r);
 		}
 	}
-
+	static int calcPeri(List<Rectangle> rects)
+	{
+		System.out.println(rects);
+		List<Rectangle> filtered = new ArrayList<>();
+		Map<String, Integer> mp = new HashMap<>();
+		for (Rectangle r : rects) {
+			String key = Arrays.toString(r.r);
+			mp.put(key, mp.getOrDefault(key, 0) + 1);
+		}
+		for (Rectangle r : rects) {
+			String key = Arrays.toString(r.r);
+			if (mp.get(key) == 0) continue;
+			filtered.add(r);
+			mp.put(key, 0);
+		}
+		rects = filtered;
+		// List<Rectangle> uniques = new ArrayList<>();
+		// Set<String> seen = new HashSet<>();
+		// for (Rectangle r : rects) {
+			// String key = Arrays.toString(r.r);
+			// if (seen.contains(key)) continue;
+			// seen.add(key);
+			// uniques.add(r);
+		// }
+		// rects = uniques;
+		// List<Rectangle> uniques = new ArrayList<>();
+		// Map<String, Integer> mp = new HashMap<>();
+		// for (Rectangle r : rects) {
+			// String key = Arrays.toString(r.r);
+			// mp.put(key, mp.getOrDefault(key, 0) + 1);
+		// }
+		// for (Rectangle r : rects) {
+			// String key = Arrays.toString(r.r);
+			// if (mp.get(key) > 1) continue;
+			// uniques.add(r);
+		// }
+		// rects = uniques;
+		// System.out.println(rects);
+		if (rects.isEmpty()) return 0;
+		List<Rectangle> overlaps = new ArrayList<>();
+		int sz = rects.size();
+		int ans = 0;
+		for (int i = 0; i < sz; i++) {
+			Rectangle ir = rects.get(i);
+			ans += Rectangle.peri(ir);
+			for (int j = i + 1; j < sz; j++) {
+				Rectangle jr = rects.get(j);
+				Rectangle o = Rectangle.overlap(ir, jr);
+				if (Rectangle.peri(o) <= 0) continue;
+				overlaps.add(o);
+			}
+		}
+		System.out.println("cur: " + ans);
+		return ans - calcPeri(overlaps);
+	}
     static void solve()
     {
         List<Rectangle> rects = new ArrayList<>();
@@ -55,10 +98,30 @@ public class picture {
 		for (int i = 0; i < n; i++) {
 			int x1 = ni(), y1 = ni(), x2 = ni(), y2 = ni();
 			Rectangle cur = new Rectangle(new int[]{x1, y1, x2, y2});
+			int before = ans;
 			ans += Rectangle.peri(cur);
+			List<Rectangle> overlaps = new ArrayList<>();
+			for (Rectangle prev : rects) {
+				Rectangle o = Rectangle.overlap(prev, cur);
+				if (Rectangle.peri(o) <= 0) continue;
+				overlaps.add(o);
+			}
+			
+			int add = Rectangle.peri(cur);
+			int minus = calcPeri(overlaps);
+			ans -= calcPeri(overlaps);
+			System.out.println("overlaps: " + overlaps);
+			System.out.println("before: " + before + ", add: " + add + ", minus: " + minus);
 			rects.add(cur);
 		}
 		out.printf("%d\n", ans);
+		
+		List<Rectangle> tests = new ArrayList<>();
+		tests.add(new Rectangle(new int[]{0, 0, 1, 1}));
+		tests.add(new Rectangle(new int[]{0, 0, 2, 2}));
+		tests.add(new Rectangle(new int[]{0, 0, 3, 3}));
+		System.out.println("=================");
+		System.out.println("test ans: " + calcPeri(tests));
     }
 
 
@@ -70,6 +133,7 @@ public class picture {
     static PrintWriter out;
     static String INPUT = "";
     static String taskName = null;
+	// static String taskName = "picture";
     
     public static void main(String[] args) throws Exception
     {
