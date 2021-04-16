@@ -8,40 +8,6 @@ import java.io.*;
 import java.util.*;
 
 public class picture {
-	static class Line {
-		int[] from;
-		int[] to;
-		boolean isVertical;
-		int length;
-		public Line(int[] from, int[] to)
-		{
-			this.from = from;
-			this.to = to;
-			this.isVertical = from[0] == to[0];
-			if (this.isVertical)
-				length = from[1] - to[1];
-			else
-				length = from[0] - to[0];
-		}
-		public boolean overlap(Line other)
-		{
-			if (this.isVertical != other.isVertical) return false;
-			int start, end, ostart, oend;
-			if (this.isVertical) {
-				start = from[1];
-				end = to[1];
-				ostart = other.from[1];
-				oend = other.to[1];
-			}
-			else {
-				start = from[0];
-				end = to[0];
-				ostart = other.from[1];
-				oend = other.to[1];
-			}
-			return Math.max(start, ostart) - Math.min(end, oend) > 0;
-		}
-	}
 	static class Rectangle {
 		int[] r;
 		public Rectangle(int[] r)
@@ -64,149 +30,98 @@ public class picture {
 			int topRightY = Math.min(r1[3], r2[3]);
 			return new Rectangle(new int[]{lowLeftX, lowLeftY, topRightX, topRightY});
 		}
-		public static boolean equal(Rectangle r1, Rectangle r2)
-		{
-			for (int i = 0; i < 4; i++) if (r1.r[i] != r2.r[i]) return false;
-			return true;
-		}
-		public static boolean inside(Rectangle outer, Rectangle inner)
-		{
-			return Rectangle.equal(Rectangle.overlap(outer, inner), inner);
-		}
-		public static int[] topLeft(Rectangle r)
-		{
-			return new int[]{r.r[0], r.r[3]};
-		}
-		public static int[] topRight(Rectangle r)
-		{
-			return new int[]{r.r[2], r.r[3]};
-		}
-		public static int[] bottomLeft(Rectangle r)
-		{
-			return new int[]{r.r[0], r.r[1]};
-		}
-		public static int[] bottomRight(Rectangle r)
-		{
-			return new int[]{r.r[2], r.r[1]};
-		}
-		public static Line[] lines(Rectangle r)
-		{
-			return new Line[] {
-				new Line(Rectangle.topLeft(r), Rectangle.topRight(r)),
-				new Line(Rectangle.topLeft(r), Rectangle.bottomLeft(r)),
-				new Line(Rectangle.bottomLeft(r), Rectangle.bottomRight(r)),
-				new Line(Rectangle.topRight(r), Rectangle.bottomRight(r))
-			};
-		}
 		public String toString()
 		{
 			return Arrays.toString(r);
 		}
 	}
-	static List<Rectangle> getOverlaps(List<Rectangle> rects)
-	{
-		List<Rectangle> ans = new ArrayList<>();
-		
-		for (int i = 0; i < rects.size(); i++) {
-			for (int j = i + 1; j < rects.size(); j++) {
-				Rectangle o = Rectangle.overlap(rects.get(i), rects.get(j));
-				int op = Rectangle.peri(o);
-				boolean noOverlap = op <= 0;
-				if (noOverlap) continue;
-				ans.add(o);
-			}
-		}
-		
-		return ans;
-	}
 	static int calcPeri(List<Rectangle> rects)
 	{
-		if (rects.isEmpty()) return 0;
-		
-		int n = rects.size();
-		boolean[] deleted = new boolean[n];
-		for (int i = 0; i < n; i++) {
-			if (deleted[i]) continue;
-			for (int j = j + 1; j < n; j++) {
-				if (Rectangle.equal(rects.get(i), rects.get(j)) || Rectangle.inside(rects.get(i), rects.get(j)))
-					deleted[j] = true;
-			}
-		}
+		System.out.println(rects);
 		List<Rectangle> filtered = new ArrayList<>();
-		for (int i = 0; i < n; i++) if (!deleted[i]) filtered.add(rects.get(i));
-		rects = filtered;
-		
-		int ans = 0;
-		for (int i = 0; i < rects.size(); i++) {
-			// {start, end}
-			List<int[]> tops = new ArrayList<>(), bottoms = new ArrayList<>(), lefts = new ArrayList<>(), rights = new ArrayList<>();
-			Rectangle cur = rects.get(i);
-			for (int j = 0; j < rects.size(); j++) {
-				Rectangle o = Rectangle.overlap(cur, rects.get(j));
-				int op = Rectangle.peri(o);
-				boolean noOverlap = op <= 0;
-				if (noOverlap) continue;
-				
-				tops.add(new int[]{o.r[]});
-			}
-			
+		Map<String, Integer> mp = new HashMap<>();
+		for (Rectangle r : rects) {
+			String key = Arrays.toString(r.r);
+			mp.put(key, mp.getOrDefault(key, 0) + 1);
 		}
-		return ans;
-	}
-	// static int calcPeri(List<Rectangle> rects)
-	// {
-		// if (rects.isEmpty()) return 0;
-		// int ans = 0;
-		// for (int i = 0; i < rects.size(); i++) {
-			// List<Rectangle> overlaps = new ArrayList<>();
-			// int cur = Rectangle.peri(rects.get(i));
-			// for (int j = i + 1; j < rects.size(); j++) {
-				// Rectangle o = Rectangle.overlap(rects.get(i), rects.get(j));
-				// int op = Rectangle.peri(o);
-				// boolean noOverlap = op <= 0;
-				// if (noOverlap) continue;
-				// overlaps.add(o);
-				// cur -= op;
-			// }
-			// cur += calcPeri(getOverlaps(overlaps));
-			// ans += cur;
+		for (Rectangle r : rects) {
+			String key = Arrays.toString(r.r);
+			if (mp.get(key) == 0) continue;
+			filtered.add(r);
+			mp.put(key, 0);
+		}
+		rects = filtered;
+		// List<Rectangle> uniques = new ArrayList<>();
+		// Set<String> seen = new HashSet<>();
+		// for (Rectangle r : rects) {
+			// String key = Arrays.toString(r.r);
+			// if (seen.contains(key)) continue;
+			// seen.add(key);
+			// uniques.add(r);
 		// }
-		// return ans;
-	// }
+		// rects = uniques;
+		// List<Rectangle> uniques = new ArrayList<>();
+		// Map<String, Integer> mp = new HashMap<>();
+		// for (Rectangle r : rects) {
+			// String key = Arrays.toString(r.r);
+			// mp.put(key, mp.getOrDefault(key, 0) + 1);
+		// }
+		// for (Rectangle r : rects) {
+			// String key = Arrays.toString(r.r);
+			// if (mp.get(key) > 1) continue;
+			// uniques.add(r);
+		// }
+		// rects = uniques;
+		// System.out.println(rects);
+		if (rects.isEmpty()) return 0;
+		List<Rectangle> overlaps = new ArrayList<>();
+		int sz = rects.size();
+		int ans = 0;
+		for (int i = 0; i < sz; i++) {
+			Rectangle ir = rects.get(i);
+			ans += Rectangle.peri(ir);
+			for (int j = i + 1; j < sz; j++) {
+				Rectangle jr = rects.get(j);
+				Rectangle o = Rectangle.overlap(ir, jr);
+				if (Rectangle.peri(o) <= 0) continue;
+				overlaps.add(o);
+			}
+		}
+		System.out.println("cur: " + ans);
+		return ans - calcPeri(overlaps);
+	}
     static void solve()
     {
         List<Rectangle> rects = new ArrayList<>();
 		int n = ni();
-		// int ans = 0;
+		int ans = 0;
 		for (int i = 0; i < n; i++) {
 			int x1 = ni(), y1 = ni(), x2 = ni(), y2 = ni();
-			rects.add(new Rectangle(new int[]{x1, y1, x2, y2}));
-			// Rectangle cur = new Rectangle(new int[]{x1, y1, x2, y2});
-			// int before = ans;
-			// ans += Rectangle.peri(cur);
-			// List<Rectangle> overlaps = new ArrayList<>();
-			// for (Rectangle prev : rects) {
-				// Rectangle o = Rectangle.overlap(prev, cur);
-				// if (Rectangle.peri(o) <= 0) continue;
-				// overlaps.add(o);
-			// }
+			Rectangle cur = new Rectangle(new int[]{x1, y1, x2, y2});
+			int before = ans;
+			ans += Rectangle.peri(cur);
+			List<Rectangle> overlaps = new ArrayList<>();
+			for (Rectangle prev : rects) {
+				Rectangle o = Rectangle.overlap(prev, cur);
+				if (Rectangle.peri(o) <= 0) continue;
+				overlaps.add(o);
+			}
 			
-			// int add = Rectangle.peri(cur);
-			// int minus = calcPeri(overlaps);
-			// ans -= calcPeri(overlaps);
-			// System.out.println("overlaps: " + overlaps);
-			// System.out.println("before: " + before + ", add: " + add + ", minus: " + minus);
-			// rects.add(cur);
+			int add = Rectangle.peri(cur);
+			int minus = calcPeri(overlaps);
+			ans -= calcPeri(overlaps);
+			System.out.println("overlaps: " + overlaps);
+			System.out.println("before: " + before + ", add: " + add + ", minus: " + minus);
+			rects.add(cur);
 		}
-		int ans = calcPeri(rects);
 		out.printf("%d\n", ans);
 		
-		// List<Rectangle> tests = new ArrayList<>();
-		// tests.add(new Rectangle(new int[]{0, 0, 1, 1}));
-		// tests.add(new Rectangle(new int[]{0, 0, 2, 2}));
-		// tests.add(new Rectangle(new int[]{0, 0, 3, 3}));
-		// System.out.println("=================");
-		// System.out.println("test ans: " + calcPeri(tests));
+		List<Rectangle> tests = new ArrayList<>();
+		tests.add(new Rectangle(new int[]{0, 0, 1, 1}));
+		tests.add(new Rectangle(new int[]{0, 0, 2, 2}));
+		tests.add(new Rectangle(new int[]{0, 0, 3, 3}));
+		System.out.println("=================");
+		System.out.println("test ans: " + calcPeri(tests));
     }
 
 
