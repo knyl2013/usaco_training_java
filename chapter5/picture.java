@@ -106,7 +106,7 @@ public class picture {
 	static List<Rectangle> getOverlaps(List<Rectangle> rects)
 	{
 		List<Rectangle> ans = new ArrayList<>();
-		
+
 		for (int i = 0; i < rects.size(); i++) {
 			for (int j = i + 1; j < rects.size(); j++) {
 				Rectangle o = Rectangle.overlap(rects.get(i), rects.get(j));
@@ -116,13 +116,13 @@ public class picture {
 				ans.add(o);
 			}
 		}
-		
+
 		return ans;
 	}
 	static int calcPeri(List<Rectangle> rects)
 	{
 		if (rects.isEmpty()) return 0;
-		
+
 		int n = rects.size();
 		boolean[] deleted = new boolean[n];
 		for (int i = 0; i < n; i++) {
@@ -135,7 +135,7 @@ public class picture {
 		List<Rectangle> filtered = new ArrayList<>();
 		for (int i = 0; i < n; i++) if (!deleted[i]) filtered.add(rects.get(i));
 		rects = filtered;
-		
+
 		int ans = 0;
 		for (int i = 0; i < rects.size(); i++) {
 			// {start, end}
@@ -146,10 +146,10 @@ public class picture {
 				int op = Rectangle.peri(o);
 				boolean noOverlap = op <= 0;
 				if (noOverlap) continue;
-				
+
 				tops.add(new int[]{o.r[]});
 			}
-			
+
 		}
 		return ans;
 	}
@@ -190,7 +190,7 @@ public class picture {
 				// if (Rectangle.peri(o) <= 0) continue;
 				// overlaps.add(o);
 			// }
-			
+
 			// int add = Rectangle.peri(cur);
 			// int minus = calcPeri(overlaps);
 			// ans -= calcPeri(overlaps);
@@ -200,7 +200,7 @@ public class picture {
 		}
 		int ans = calcPeri(rects);
 		out.printf("%d\n", ans);
-		
+
 		// List<Rectangle> tests = new ArrayList<>();
 		// tests.add(new Rectangle(new int[]{0, 0, 1, 1}));
 		// tests.add(new Rectangle(new int[]{0, 0, 2, 2}));
@@ -219,7 +219,7 @@ public class picture {
     static String INPUT = "";
     static String taskName = null;
 	// static String taskName = "picture";
-    
+
     public static void main(String[] args) throws Exception
     {
         long S = System.currentTimeMillis();
@@ -232,19 +232,19 @@ public class picture {
             is = INPUT.isEmpty() ? System.in : new ByteArrayInputStream(INPUT.getBytes());
             out = new PrintWriter(System.out);
         }
-        
+
         solve();
         out.flush();
         long G = System.currentTimeMillis();
         tr(G-S+"ms");
     }
-    
+
     private static boolean eof()
     {
         if(lenbuf == -1)return true;
         int lptr = ptrbuf;
         while(lptr < lenbuf)if(!isSpaceChar(inbuf[lptr++]))return false;
-        
+
         try {
             is.mark(1000);
             while(true){
@@ -261,10 +261,10 @@ public class picture {
             return true;
         }
     }
-    
+
     private static byte[] inbuf = new byte[1024];
     static int lenbuf = 0, ptrbuf = 0;
-    
+
     private static int readByte()
     {
         if(lenbuf == -1)throw new InputMismatchException();
@@ -275,13 +275,13 @@ public class picture {
         }
         return inbuf[ptrbuf++];
     }
-    
+
     private static boolean isSpaceChar(int c) { return !(c >= 33 && c <= 126); }
     private static int skip() { int b; while((b = readByte()) != -1 && isSpaceChar(b)); return b; }
-    
+
     private static double nd() { return Double.parseDouble(ns()); }
     private static char nc() { return (char)skip(); }
-    
+
     private static String ns()
     {
         int b = skip();
@@ -292,7 +292,7 @@ public class picture {
         }
         return sb.toString();
     }
-    
+
     private static char[] ns(int n)
     {
         char[] buf = new char[n];
@@ -303,21 +303,21 @@ public class picture {
         }
         return n == p ? buf : Arrays.copyOf(buf, p);
     }
-    
+
     private static char[][] nm(int n, int m)
     {
         char[][] map = new char[n][];
         for(int i = 0;i < n;i++)map[i] = ns(m);
         return map;
     }
-    
+
     private static int[] na(int n)
     {
         int[] a = new int[n];
         for(int i = 0;i < n;i++)a[i] = ni();
         return a;
     }
-    
+
     private static int ni()
     {
         int num = 0, b;
@@ -327,7 +327,7 @@ public class picture {
             minus = true;
             b = readByte();
         }
-        
+
         while(true){
             if(b >= '0' && b <= '9'){
                 num = num * 10 + (b - '0');
@@ -337,7 +337,7 @@ public class picture {
             b = readByte();
         }
     }
-    
+
     private static long nl()
     {
         long num = 0;
@@ -348,7 +348,7 @@ public class picture {
             minus = true;
             b = readByte();
         }
-        
+
         while(true){
             if(b >= '0' && b <= '9'){
                 num = num * 10 + (b - '0');
@@ -358,7 +358,6 @@ public class picture {
             b = readByte();
         }
     }
-    
+
     private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
 }
-
