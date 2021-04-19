@@ -50,7 +50,6 @@ public class picture {
 	static int f(List<Line> lines)
 	{
 		Collections.sort(lines);
-		// System.out.println(lines);
 		TreeMap<Integer, Integer> mp = new TreeMap<>();
 		int ans = 0, before = 0;
 		for (Line line : lines) {
