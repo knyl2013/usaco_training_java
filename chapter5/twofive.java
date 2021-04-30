@@ -1,3 +1,9 @@
+/*
+ID: wyli1231
+LANG: JAVA
+TASK: twofive
+*/
+
 import java.io.*;
 import java.util.*;
 
@@ -6,21 +12,90 @@ public class twofive {
 	static boolean[][] adj = new boolean[25][25];
 	static int[] ans = new int[25];
 	
-	static void dfs(int idx, int val)
+	static void swap(int[] arr, int i, int j)
 	{
-		if (val == 25) {
-			System.out.println(Arrays.toString(ans));
-			return;
-		}
-		ans[idx] = val;
-		for (int i = 0; i < 25; i++) {
-			if (!adj[idx][i]) continue;
-			dfs(i, val + 1);
+		int tmp = arr[i];
+		arr[i] = arr[j];
+		arr[j] = tmp;
+	}
+	static void reverse(int[] arr, int start, int end)
+	{
+		while (start < end) {
+			swap(arr, start++, end--);
 		}
 	}
-	
+	static int[] targetArr;
+	static int targetNum;
+	static void permute(int n, char type)
+	{
+		int[] current = new int[n];
+		for (int i = 0; i < n; i++) current[i] = i;
+		int order = 0;
+		while (true) {
+			if (valid(current)) {
+				// System.out.println(Arrays.toString(current));
+				// System.out.println(targetNum);
+				order++;
+				if (type == 'W') {
+						if (Arrays.toString(current).equals(Arrays.toString(targetArr))) {
+						out.printf("%d\n", order);
+						return;
+					}
+				}
+				else {
+					if (--targetNum == 0) {
+						for (int i = 0; i < 25; i++)
+							out.print((char) (current[i] + 'A'));
+						out.print("\n");
+						return;
+					}
+				}
+			}
+			
+			int greatest = n - 1;
+			int idx = n - 1;
+			while (idx >= 0 && current[idx] >= current[greatest]) {
+				greatest = idx;
+				idx--;
+			}
+			if (idx < 0) break;
+			int smallestGreater = greatest;
+			for (int i = idx + 1; i < n; i++) {
+				if (current[i] > current[idx] && current[i] < current[smallestGreater]) {
+					smallestGreater = i;
+				}
+			}
+			swap(current, idx, smallestGreater);
+			reverse(current, idx + 1, n - 1);
+		}
+	}
+	static boolean valid(int[] arr)
+	{
+		for (int i = 0; i < 25; i++) {
+			for (int j = i + 1; j % 5 != 0; j++) {
+				if (arr[j] < arr[i]) return false;
+			}
+			for (int j = i + 5; j < 25; j+=5) {
+				if (arr[j] < arr[i]) return false;
+			}
+		}
+		return true;
+	}
     static void solve()
     {
+		char type = nc();
+		if (type == 'N') {
+			targetNum = ni();
+		}
+		else {
+			targetArr = new int[25];
+			for (int i = 0; i < 25; i++) {
+				char cur = nc();
+				targetArr[i] = cur - 'A';
+			}
+		}
+		permute(25, type);
+		/*
 		for (int i = 0; i < 25; i++) {
 			for (int j = i + 1; j % 5 != 0; j++) {
 				adj[i][j] = true;
@@ -32,28 +107,50 @@ public class twofive {
 			}
 		}
 		// dfs(0, 0);
-		System.out.println(Arrays.toString(inDeg));
-		Queue<Integer> q = new ArrayDeque<>();
+		// System.out.println(Arrays.toString(inDeg));
+		Queue<Integer> q = new PriorityQueue<>();
 		q.offer(0);
 		int idx = 0;
+		// System.out.println(Arrays.toString(inDeg));
 		while (!q.isEmpty()) {
 			int sz = q.size();
-			while (sz-- > 0) {
-				int p = q.poll();
-				System.out.print((char)(p+'A'));
-				ans[p] = idx++;
-				System.out.print(p);
-				System.out.print(" ");
-				for (int i = 0; i < 25; i++) {
-					if (!adj[p][i]) continue;
-					if (--inDeg[i] == 0) {
-						q.offer(i);
-					}
+			List<Integer> poss = new ArrayList<>();
+			int p = q.poll();
+			poss.add(p);
+			ans[p] = idx++;
+			// System.out.print(p);
+			// System.out.print(" ");
+			for (int i = 0; i < 25; i++) {
+				if (!adj[p][i]) continue;
+				if (--inDeg[i] == 0) {
+					q.offer(i);
 				}
 			}
-			System.out.println();
-			
 		}
+		// while (!q.isEmpty()) {
+			// int sz = q.size();
+			// List<Integer> poss = new ArrayList<>();
+			// while (sz-- > 0) {
+				// int p = q.poll();
+				// System.out.print((char)(p+'A'));
+				// poss.add(p);
+			
+				// System.out.print(p);
+				// System.out.print(" ");
+				// for (int i = 0; i < 25; i++) {
+					// if (!adj[p][i]) continue;
+					// if (--inDeg[i] == 0) {
+						// q.offer(i);
+					// }
+				// }
+			// }
+			// Collections.sort(poss);
+			// for (int pos : poss) {
+				// ans[pos] = idx++;
+			// }
+			// System.out.println();
+			
+		// }
 		System.out.println(Arrays.toString(inDeg));
 		for (int i = 0; i < 5; i++) {
 			for (int j = 0; j < 5; j++) {
@@ -63,7 +160,7 @@ public class twofive {
 		}
         // char type = nc();
 		// if (type ==
-		
+		*/
     }
 
 
@@ -75,6 +172,7 @@ public class twofive {
     static PrintWriter out;
     static String INPUT = "";
     static String taskName = null;
+	// static String taskName = "twofive";
     
     public static void main(String[] args) throws Exception
     {
