@@ -50,10 +50,6 @@ public class twofive {
 				order++;
 				System.out.println("order:" + order);
 				display(current);
-				// if (current[19] == 19) {
-				// 	System.out.println(order);
-				// }
-				// System.out.println(current[19]);
 				// System.out.println(cnt);
 				if (type == 'W') {
 						if (Arrays.toString(current).equals(Arrays.toString(targetArr))) {
@@ -100,110 +96,20 @@ public class twofive {
 		}
 		return true;
 	}
-	// solve if there is k elements already fixed in arr[i+1..24]
-	static long f(int i, int k, int x)
-	{
-		// if (i == 19 || k == 0) { // base case
-		// 	return k + 1;
-		// }
-		// int ans = 0;
-		// for (int j = k; j >= 0; j--) {
-		// 	ans += f(i + 1, j);
-		// }
-		// return ans;
-		int m = i % 5;
-		if (m == 0) {
-			return f(i + 1, k, x);
-		}
-		if (k >= m) {
-			return 0;
-		}
-		if (i == 19) {
-			return x - k;
-		}
-		if (m == 4) {
-			int limit = 20 + (i / 5);
-			long ans = 5 * f(i + 1);
-			System.out.println(ans);
-			for (int j = i+5, cnt = 1; j <= limit; j++, cnt++) {
-				ans += f(i + 1, 0, x-cnt);
-			}
-
-			return ans;
-			// return (limit - i + 1 - k) * f(i + 1);
-		}
-
-		long ans = 0;
-
-		for (int j = 0; j+k <= 5; j++) {
-			ans += f(i + 1, j + k, x);
-		}
-
-		return ans;
-	}
-	static long f(int i)
-	{
-		// return f(i, 4); // normally the upper bound is 4
-		return f(i, 0, 5); // nothing is used by default
-	}
-	static void add(int[] current, int[] poss, int idx)
-	{
-		int val = current[idx];
-		int nextPos = poss[val + 1];
-		boolean conflictRight = idx % 5 < 4 && nextPos == idx + 1;
-		boolean conflictDown = nextPos == idx + 5;
-		if (!conflictRight && !conflictDown) {
-			swap(current, idx, nextPos);
-			poss[val + 1] = idx;
-			poss[val] = nextPos;
-		}
-		else {
-			add(current, poss, idx-1);
-		}
-	}
-	static void add(int[] current, int[] poss)
-	{
-		add(current, poss, 19);
-	}
     static void solve()
     {
-    	// int[] current = new int[25], poss = new int[25];
-    	// for (int i = 0; i < 25; i++) {
-    	// 	current[i] = i;
-    	// 	poss[i] = i;
-    	// }
-    	// // display(current);
-    	// for (int i = 0; i < 6; i++) {
-    	// 	System.out.println("order: " + (i + 1));
-    	// 	display(current);
-    	// 	add(current, poss);
-    	// }
-
-		// char type = nc();
-		// if (type == 'N') {
-		// 	targetNum = ni();
-		// }
-		// else {
-		// 	targetArr = new int[25];
-		// 	for (int i = 0; i < 25; i++) {
-		// 		char cur = nc();
-		// 		targetArr[i] = cur - 'A';
-		// 	}
-		// }
-		// permute(25, type);
-
-
-		System.out.println(f(14));
-		// System.out.println(f(15, 0));
-		// System.out.println(f(15, 1));
-		// System.out.println(f(15, 2));
-		// System.out.println(f(17, 3));
-		// System.out.println(f(18, 2));
-		// System.out.println(f(18, 0));
-		// System.out.println(f(18, 1));
-		// System.out.println(f(18, 2));
-		// System.out.println(f(18, 3));
-		// System.out.println(f(18, 4));
+		char type = nc();
+		if (type == 'N') {
+			targetNum = ni();
+		}
+		else {
+			targetArr = new int[25];
+			for (int i = 0; i < 25; i++) {
+				char cur = nc();
+				targetArr[i] = cur - 'A';
+			}
+		}
+		permute(25, type);
 		/*
 		for (int i = 0; i < 25; i++) {
 			for (int j = i + 1; j % 5 != 0; j++) {
@@ -424,4 +330,5 @@ public class twofive {
     
     private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
 }
+
 
