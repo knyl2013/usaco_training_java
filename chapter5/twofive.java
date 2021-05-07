@@ -1,275 +1,36 @@
-/*
-ID: wyli1231
-LANG: JAVA
-TASK: twofive
-*/
-
 import java.io.*;
 import java.util.*;
 
 public class twofive {
-	static int[] inDeg = new int[25];
-	static boolean[][] adj = new boolean[25][25];
-	static int[] ans = new int[25];
+	// static char[] t = new char[30];
 	
-	static void swap(int[] arr, int i, int j)
+	static long f(int a, int b, int c, int d, int e)
 	{
-		int tmp = arr[i];
-		arr[i] = arr[j];
-		arr[j] = tmp;
-	}
-	static void reverse(int[] arr, int start, int end)
-	{
-		while (start < end) {
-			swap(arr, start++, end--);
-		}
-	}
-	static void display(int[] arr)
-	{
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
-				System.out.print(arr[i*5+j] + "\t");	
-			}
-			System.out.println();
-		}
-		System.out.println();
-	}
-	static int[] targetArr;
-	static int targetNum;
-	static void permute(int n, char type)
-	{
-		int[] current = new int[n];
-		for (int i = 0; i < n; i++) current[i] = i;
-		int order = 0;
-		int cnt = 0;
-		while (true) {
-			cnt++;
-			if (valid(current)) {
-				// System.out.println(Arrays.toString(current));
-				// System.out.println(targetNum);
-				order++;
-				System.out.println("order:" + order);
-				display(current);
-				// if (current[19] == 19) {
-				// 	System.out.println(order);
-				// }
-				// System.out.println(current[19]);
-				// System.out.println(cnt);
-				if (type == 'W') {
-						if (Arrays.toString(current).equals(Arrays.toString(targetArr))) {
-						out.printf("%d\n", order);
-						return;
-					}
-				}
-				else {
-					if (--targetNum == 0) {
-						for (int i = 0; i < 25; i++)
-							out.print((char) (current[i] + 'A'));
-						out.print("\n");
-						return;
-					}
-				}
-			}
-			
-			int greatest = n - 1;
-			int idx = n - 1;
-			while (idx >= 0 && current[idx] >= current[greatest]) {
-				greatest = idx;
-				idx--;
-			}
-			if (idx < 0) break;
-			int smallestGreater = greatest;
-			for (int i = idx + 1; i < n; i++) {
-				if (current[i] > current[idx] && current[i] < current[smallestGreater]) {
-					smallestGreater = i;
-				}
-			}
-			swap(current, idx, smallestGreater);
-			reverse(current, idx + 1, n - 1);
-		}
-	}
-	static boolean valid(int[] arr)
-	{
-		for (int i = 0; i < 25; i++) {
-			for (int j = i + 1; j % 5 != 0; j++) {
-				if (arr[j] < arr[i]) return false;
-			}
-			for (int j = i + 5; j < 25; j+=5) {
-				if (arr[j] < arr[i]) return false;
-			}
-		}
-		return true;
-	}
-	// solve if there is k elements already fixed in arr[i+1..24]
-	static long f(int i, int k, int x)
-	{
-		// if (i == 19 || k == 0) { // base case
-		// 	return k + 1;
-		// }
-		// int ans = 0;
-		// for (int j = k; j >= 0; j--) {
-		// 	ans += f(i + 1, j);
-		// }
-		// return ans;
-		int m = i % 5;
-		if (m == 0) {
-			return f(i + 1, k, x);
-		}
-		if (k >= m) {
-			return 0;
-		}
-		if (i == 19) {
-			return x - k;
-		}
-		if (m == 4) {
-			int limit = 20 + (i / 5);
-			long ans = 5 * f(i + 1);
-			System.out.println(ans);
-			for (int j = i+5, cnt = 1; j <= limit; j++, cnt++) {
-				ans += f(i + 1, 0, x-cnt);
-			}
-
-			return ans;
-			// return (limit - i + 1 - k) * f(i + 1);
-		}
-
+		int s = a + b + c + d + e;
+		if (s == 25) return 1;
 		long ans = 0;
-
-		for (int j = 0; j+k <= 5; j++) {
-			ans += f(i + 1, j + k, x);
-		}
-
+		/*if (a < 5 && (t[a]==0||t[a]==s+'A')) ans += f(a+1,b,c,d,e);
+		if (b < a && (t[b+5]==0||t[b+5]==s+'A')) ans += f(a,b+1,c,d,e);
+		if (c < b && (t[c+10]==0||t[c+10]==s+'A')) ans += f(a,b,c+1,d,e);
+		if (d < c && (t[d+15]==0||t[d+15]==s+'A')) ans += f(a,b,c,d+1,e);
+		if (e < d && (t[e+20]==0||t[e+20]==s+'A')) ans += f(a,b,c,d,e+1);*/
+		if (a < 5) ans += f(a+1,b,c,d,e);
+		if (b < a) ans += f(a,b+1,c,d,e);
+		if (c < b) ans += f(a,b,c+1,d,e);
+		if (d < c) ans += f(a,b,c,d+1,e);
+		if (e < d) ans += f(a,b,c,d,e+1);
 		return ans;
 	}
-	static long f(int i)
-	{
-		// return f(i, 4); // normally the upper bound is 4
-		return f(i, 0, 5); // nothing is used by default
-	}
-	static void add(int[] current, int[] poss, int idx)
-	{
-		int val = current[idx];
-		int nextPos = poss[val + 1];
-		boolean conflictRight = idx % 5 < 4 && nextPos == idx + 1;
-		boolean conflictDown = nextPos == idx + 5;
-		if (!conflictRight && !conflictDown) {
-			swap(current, idx, nextPos);
-			poss[val + 1] = idx;
-			poss[val] = nextPos;
-		}
-		else {
-			add(current, poss, idx-1);
-		}
-	}
-	static void add(int[] current, int[] poss)
-	{
-		add(current, poss, 19);
-	}
+	
     static void solve()
     {
-    	// int[] current = new int[25], poss = new int[25];
-    	// for (int i = 0; i < 25; i++) {
-    	// 	current[i] = i;
-    	// 	poss[i] = i;
-    	// }
-    	// // display(current);
-    	// for (int i = 0; i < 6; i++) {
-    	// 	System.out.println("order: " + (i + 1));
-    	// 	display(current);
-    	// 	add(current, poss);
-    	// }
-
-		// char type = nc();
-		// if (type == 'N') {
-		// 	targetNum = ni();
-		// }
-		// else {
-		// 	targetArr = new int[25];
-		// 	for (int i = 0; i < 25; i++) {
-		// 		char cur = nc();
-		// 		targetArr[i] = cur - 'A';
-		// 	}
-		// }
-		// permute(25, type);
-
-
-		System.out.println(f(14));
-		// System.out.println(f(15, 0));
-		// System.out.println(f(15, 1));
-		// System.out.println(f(15, 2));
-		// System.out.println(f(17, 3));
-		// System.out.println(f(18, 2));
-		// System.out.println(f(18, 0));
-		// System.out.println(f(18, 1));
-		// System.out.println(f(18, 2));
-		// System.out.println(f(18, 3));
-		// System.out.println(f(18, 4));
-		/*
-		for (int i = 0; i < 25; i++) {
-			for (int j = i + 1; j % 5 != 0; j++) {
-				adj[i][j] = true;
-				inDeg[j]++;
-			}
-			for (int j = i + 5; j < 25; j+=5) {
-				adj[i][j] = true;
-				inDeg[j]++;
-			}
-		}
-		// dfs(0, 0);
-		// System.out.println(Arrays.toString(inDeg));
-		Queue<Integer> q = new PriorityQueue<>();
-		q.offer(0);
-		int idx = 0;
-		// System.out.println(Arrays.toString(inDeg));
-		while (!q.isEmpty()) {
-			int sz = q.size();
-			List<Integer> poss = new ArrayList<>();
-			int p = q.poll();
-			poss.add(p);
-			ans[p] = idx++;
-			// System.out.print(p);
-			// System.out.print(" ");
-			for (int i = 0; i < 25; i++) {
-				if (!adj[p][i]) continue;
-				if (--inDeg[i] == 0) {
-					q.offer(i);
-				}
-			}
-		}
-		// while (!q.isEmpty()) {
-			// int sz = q.size();
-			// List<Integer> poss = new ArrayList<>();
-			// while (sz-- > 0) {
-				// int p = q.poll();
-				// System.out.print((char)(p+'A'));
-				// poss.add(p);
-			
-				// System.out.print(p);
-				// System.out.print(" ");
-				// for (int i = 0; i < 25; i++) {
-					// if (!adj[p][i]) continue;
-					// if (--inDeg[i] == 0) {
-						// q.offer(i);
-					// }
-				// }
-			// }
-			// Collections.sort(poss);
-			// for (int pos : poss) {
-				// ans[pos] = idx++;
-			// }
-			// System.out.println();
-			
-		// }
-		System.out.println(Arrays.toString(inDeg));
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
-				System.out.print(ans[i*5+j] + " ");
-			}
-			System.out.println();
-		}
-        // char type = nc();
-		// if (type ==
-		*/
+        System.out.println(f(5,5,5,4,0));
+		System.out.println(f(5,5,5,3,0));
+		System.out.println(f(5,5,5,2,0));
+		System.out.println(f(5,5,5,1,0));
+		System.out.println(f(5,5,5,0,0));
+		System.out.println(f(5,5,4,0,0)); 
+		System.out.println(f(5,5,3,0,0));
     }
 
 
@@ -281,7 +42,6 @@ public class twofive {
     static PrintWriter out;
     static String INPUT = "";
     static String taskName = null;
-	// static String taskName = "twofive";
     
     public static void main(String[] args) throws Exception
     {
