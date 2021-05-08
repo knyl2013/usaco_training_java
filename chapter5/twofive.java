@@ -1,36 +1,88 @@
+/*
+ID: wyli1231
+LANG: JAVA
+TASK: twofive
+*/
+
 import java.io.*;
 import java.util.*;
 
 public class twofive {
-	// static char[] t = new char[30];
-	
+	static char[] t = new char[25];
+	static long[][][][][] memo = new long[6][6][6][6][6];
 	static long f(int a, int b, int c, int d, int e)
 	{
 		int s = a + b + c + d + e;
-		if (s == 25) return 1;
+        if (memo[a][b][c][d][e] != -1) return memo[a][b][c][d][e];
+		if (s >= 25) return 1;
 		long ans = 0;
-		/*if (a < 5 && (t[a]==0||t[a]==s+'A')) ans += f(a+1,b,c,d,e);
+		if (a < 5 && (t[a]==0||t[a]==s+'A')) ans += f(a+1,b,c,d,e);
 		if (b < a && (t[b+5]==0||t[b+5]==s+'A')) ans += f(a,b+1,c,d,e);
 		if (c < b && (t[c+10]==0||t[c+10]==s+'A')) ans += f(a,b,c+1,d,e);
 		if (d < c && (t[d+15]==0||t[d+15]==s+'A')) ans += f(a,b,c,d+1,e);
-		if (e < d && (t[e+20]==0||t[e+20]==s+'A')) ans += f(a,b,c,d,e+1);*/
-		if (a < 5) ans += f(a+1,b,c,d,e);
-		if (b < a) ans += f(a,b+1,c,d,e);
-		if (c < b) ans += f(a,b,c+1,d,e);
-		if (d < c) ans += f(a,b,c,d+1,e);
-		if (e < d) ans += f(a,b,c,d,e+1);
-		return ans;
+		if (e < d && (t[e+20]==0||t[e+20]==s+'A')) ans += f(a,b,c,d,e+1);
+		return memo[a][b][c][d][e] = ans;
 	}
-	
+    static void clearMemo()
+    {
+    	for (int i = 0; i <= 5; i++) {
+            for (int j = 0; j <= 5; j++) {
+                for (int k = 0; k <= 5; k++) {
+                    for (int m = 0; m <= 5; m++) {
+                        Arrays.fill(memo[i][j][k][m], -1);
+                    }
+                }
+            }
+        }
+    }
     static void solve()
     {
-        System.out.println(f(5,5,5,4,0));
-		System.out.println(f(5,5,5,3,0));
-		System.out.println(f(5,5,5,2,0));
-		System.out.println(f(5,5,5,1,0));
-		System.out.println(f(5,5,5,0,0));
-		System.out.println(f(5,5,4,0,0)); 
-		System.out.println(f(5,5,3,0,0));
+        char type = nc();
+        if (type == 'W') {
+    		clearMemo();
+    		char[] w = new char[25];
+        	for (int i = 0; i < 25; i++)
+            	w[i] = nc();
+            long ans = 1;
+            int i = 0;
+            while (i < 25 && w[i] == 'A'+i) {
+            	t[i] = (char) ('A'+i);
+            	i++;
+            }
+            for (; i < 25; i++) {
+            	for (t[i] = 'A'; t[i] < w[i]; t[i]++) {
+            		ans += f(0, 0, 0, 0, 0);
+            		clearMemo();
+            	}
+            }
+            out.printf("%d\n", ans);
+        }
+        else { // type == 'N'
+        	long n = nl();
+        	int start = 0;
+        	clearMemo();
+        	while (true) {
+        		int i = start;
+        		int[] used = new int[]{i, i-5, i-10, i-15, i-20};
+	            for (int j = 0; j < 5; j++) {
+	                used[j] = Math.min(used[j], 5);
+	                used[j] = Math.max(used[j], 0);
+	            }
+	            if (f(used[0], used[1], used[2], used[3], used[4]) <= n) break;
+	            start++;
+        	}
+        	for (int i = 0; i < start; i++)
+        		t[i] = (char) ('A' + i);
+        	for (int i = Math.max(0,start - 1); i < 25; i++) {
+        		long x;
+				clearMemo();
+        		for (t[i] = 'A'; (x = f(0,0,0,0,0)) < n; t[i]++) {
+        			n -= x;
+        			clearMemo();
+        		}
+        	}
+        	out.printf("%s\n", new String(t));
+        }
     }
 
 
@@ -41,7 +93,8 @@ public class twofive {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
+    static String taskName = "twofive";
+    // static String taskName = null;
     
     public static void main(String[] args) throws Exception
     {
