@@ -6,69 +6,36 @@ TASK: vans
 
 import java.io.*;
 import java.util.*;
+import java.math.*;
 
 public class vans {
     static int cnt, n;
-    static int[][] dirs = new int[][] {
-        new int[]{1, 0},
-        new int[]{-1, 0},
-        new int[]{0, 1},
-        new int[]{0, -1}
-    };
-    static boolean[][] visited;
-    static void dfs(int x, int y, int vcnt)
+    static BigInteger[] memo = new BigInteger[1005];
+    static BigInteger h(int n)
     {
-        if (x == 0 && y == 0 && visited[x][y]) {
-            if (vcnt == n * 4) cnt++;
-            return;
-        }
-        if (visited[x][y]) return;
-        visited[x][y] = true;
-        for (int[] dir : dirs) {
-            int dx = x + dir[0], dy = y + dir[1];
-            boolean out = dx < 0 || dy < 0 || dx >= 4 || dy >= n;
-            if (out) continue;
-            dfs(dx, dy, vcnt+1);
-        }
-        visited[x][y] = false;
+        if (n == 0) return BigInteger.valueOf(1);
+        if (n == 1) return BigInteger.valueOf(0);
+        if (n == 2) return BigInteger.valueOf(3);
+        return BigInteger.valueOf((n - 1) * 2);
     }
-    static int brute()
-    {
-        visited = new boolean[4][n];
-        cnt = 0;
-        dfs(0, 0, 0);
-        return cnt;
-    }
-    static int f(int x1, int y1, int x2, int y2)
-    {
-        if (x1 == 3 && y1 == n-1 && x2 == 3 && y2 == n-1) return 1;
-        return -1;
-    }
-    static int h(int n)
-    {
-        if (n == 0) return 1;
-        if (n == 1) return 0;
-        if (n == 2) return 3;
-        return (n - 1) * 2;
-    }
-    static int f(int n)
+    static BigInteger f(int n)
     {
         if (n <= 2) return h(n);
-        int ans = 0;
+        if (memo[n] != null) return memo[n];
+        BigInteger ans = BigInteger.valueOf(0);
         for (int i = 2; i <= n; i++) {
-            ans += h(i) * f(n-i);
+            ans = ans.add(f(n-i).multiply(h(i)));
         }
-        return ans;
+        return memo[n] = ans;
     }
-    static int caller()
+    static BigInteger caller()
     {
-        int ans = 0;
+        BigInteger ans = BigInteger.valueOf(0);
         n -= 2;
         for (int left = 0; left <= n; left++) {
             for (int right = 0; right <= n; right++) {
                 if (left+right > n) continue;
-                ans += f(n-left-right) * 2;
-                System.out.println(ans + " " + left + " " + right + " " + n);
+                ans = ans.add(f(n-left-right).multiply(BigInteger.valueOf(2)));
             }
         }
 
@@ -77,8 +44,7 @@ public class vans {
     static void solve()
     {
         n = ni();
-        // out.printf("%d\n", brute());
-        out.printf("%d\n", caller());
+        out.printf("%s\n", caller());
     }
 
 
@@ -89,7 +55,8 @@ public class vans {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
+    // static String taskName = null;
+    static String taskName = "vans";
     
     public static void main(String[] args) throws Exception
     {
@@ -232,5 +199,37 @@ public class vans {
     
     private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
 }
-
+/*
+brute force approach
+static int[][] dirs = new int[][] {
+        new int[]{1, 0},
+        new int[]{-1, 0},
+        new int[]{0, 1},
+        new int[]{0, -1}
+    };
+    static boolean[][] visited;
+    static void dfs(int x, int y, int vcnt)
+    {
+        if (x == 0 && y == 0 && visited[x][y]) {
+            if (vcnt == n * 4) cnt++;
+            return;
+        }
+        if (visited[x][y]) return;
+        visited[x][y] = true;
+        for (int[] dir : dirs) {
+            int dx = x + dir[0], dy = y + dir[1];
+            boolean out = dx < 0 || dy < 0 || dx >= 4 || dy >= n;
+            if (out) continue;
+            dfs(dx, dy, vcnt+1);
+        }
+        visited[x][y] = false;
+    }
+    static int brute()
+    {
+        visited = new boolean[4][n];
+        cnt = 0;
+        dfs(0, 0, 0);
+        return cnt;
+    }
+*/
 
