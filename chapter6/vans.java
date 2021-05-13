@@ -49,6 +49,34 @@ public class vans {
         n = ni();
         out.printf("%d\n", brute());
     }
+    static int h(int n)
+    {
+        if (n == 0) return 1;
+        if (n == 1) return 0;
+        if (n == 2) return 12;
+        return (n - 1) * 2;
+    }
+    static int f(int n)
+    {
+        if (n <= 2) return h(n);
+        int ans = 0;
+        for (int i = 2; i <= n; i++) {
+            ans += h(i) + f(n-i);
+        }
+        return ans;
+    }
+    static int caller(int n)
+    {
+        int ans = 0;
+        for (int left = 0; left <= n; left++) {
+            for (int right = 0; right <= n; right++) {
+                if (left+right > n) continue;
+                
+            }
+        }
+
+        return ans;
+    }
 
 
 
