@@ -7,7 +7,7 @@ h(n)+2	:= consider also the boundary
 f(n)	:= no. possible routes travelling 2*n grid
 f(0)	= 1
 f(1)	= 0
-f(2)	= 4	
+f(2)	= 3
 ans = 0
 for i in 2..n, 2:
 	ans += h(i) * f(n-i)
@@ -18,5 +18,5 @@ caller	:=
 		for left in 0..n:
 			for right in 0..n:
 				if left + right > n: continue
-				ans += 2 * 2 * f(n-left-right)
+				ans += f(n-left-right)
 		return ans

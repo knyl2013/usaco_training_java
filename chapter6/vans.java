@@ -9,8 +9,7 @@ import java.util.*;
 import java.math.*;
 
 public class vans {
-    static int cnt, n;
-    static BigInteger[] memo = new BigInteger[1005];
+    static BigInteger[] memo;
     static BigInteger h(int n)
     {
         if (n == 0) return BigInteger.valueOf(1);
@@ -23,33 +22,23 @@ public class vans {
         if (n <= 2) return h(n);
         if (memo[n] != null) return memo[n];
         BigInteger ans = BigInteger.valueOf(0);
-        for (int i = 2; i <= n; i++) {
+        for (int i = 2; i <= n; i++)
             ans = ans.add(f(n-i).multiply(h(i)));
-        }
         return memo[n] = ans;
     }
-    static BigInteger caller()
+    static BigInteger caller(int n)
     {
         BigInteger ans = BigInteger.valueOf(0);
-        n -= 2;
-        for (int left = 0; left <= n; left++) {
-            for (int right = 0; right <= n; right++) {
-                if (left+right > n) continue;
-                ans = ans.add(f(n-left-right).multiply(BigInteger.valueOf(2)));
-            }
-        }
-
+		for (int i = 0; i <= n-2; i++)
+			ans = ans.add(f(i).multiply(BigInteger.valueOf(2*((n-2)-i+1))));
         return ans;
     }
     static void solve()
     {
-        n = ni();
-        out.printf("%s\n", caller());
+        int n = ni();
+		memo = new BigInteger[n + 1];
+        out.printf("%s\n", caller(n));
     }
-
-
-
-
 
     /*I/O Template*/
     static InputStream is;
@@ -200,7 +189,7 @@ public class vans {
     private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
 }
 /*
-brute force approach
+brute force approach - O(2^n)
 static int[][] dirs = new int[][] {
         new int[]{1, 0},
         new int[]{-1, 0},
@@ -230,6 +219,17 @@ static int[][] dirs = new int[][] {
         cnt = 0;
         dfs(0, 0, 0);
         return cnt;
+    }
+
+suboptimal approach - O(n)
+static BigInteger caller()
+    {
+        BigInteger ans = BigInteger.valueOf(0);
+        n -= 2;
+		for (int i = 0; i <= n; i++) {
+			ans = ans.add(f(i).multiply(BigInteger.valueOf(2*(n-i+1))));
+		}
+        return ans;
     }
 */
 
