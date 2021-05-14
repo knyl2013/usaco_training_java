@@ -11,40 +11,34 @@ import java.math.*;
 public class vans {
     static BigInteger[] memo, sums;
     static BigInteger h(int n)
-    {
-        if (n == 0) return BigInteger.valueOf(1);
-        if (n == 1) return BigInteger.valueOf(0);
-        if (n == 2) return BigInteger.valueOf(3);
-        return BigInteger.valueOf((n - 1) * 2);
-    }
-	static BigInteger sum(int end)
 	{
-		if (end < 0) return BigInteger.valueOf(0);
-		if (sums[end] != null) return sums[end];
-		return sums[end] = f(end).add(sum(end-1));
+		if (n == 0) return BigInteger.valueOf(1);
+		if (n == 1) return BigInteger.valueOf(0);
+		if (n == 2) return BigInteger.valueOf(3);
+		return BigInteger.valueOf((n - 1) * 2);
 	}
-    static BigInteger f(int n)
-    {
-        if (n <= 2) return h(n);
-        if (memo[n] != null) return memo[n];
-		BigInteger ans = f(n - 1);
-		ans = ans.add(sum(n-3)).add(sum(n-4)).add(f(n-2).multiply(h(2)));
-        return memo[n] = ans;
-    }
-    static BigInteger caller(int n)
-    {
-        BigInteger ans = BigInteger.valueOf(0);
-		for (int i = 0; i <= n-2; i++)
-			ans = ans.add(f(i).multiply(BigInteger.valueOf(2*((n-2)-i+1))));
-        return ans;
-    }
-    static void solve()
-    {
-        int n = ni();
+	static void solve()
+	{
+		int n = ni();
 		memo = new BigInteger[n];
 		sums = new BigInteger[n];
-        out.printf("%s\n", caller(n));
-    }
+		
+		for (int i = 0; i <= n-2; i++) {
+			if (i <= 2)
+				memo[i] = h(i);
+			else
+				memo[i] = memo[i-1]
+							.add(i-3<0?BigInteger.valueOf(0):sums[i-3])
+							.add(i-4<0?BigInteger.valueOf(0):sums[i-4])
+							.add(memo[i-2].multiply(h(2)));
+			sums[i] = i-1<0?memo[i]:memo[i].add(sums[i-1]);
+		}
+		
+		BigInteger ans = BigInteger.valueOf(0);
+		for (int i = 0; i <= n-2; i++)
+			ans = ans.add(memo[i].multiply(BigInteger.valueOf(2*((n-2)-i+1))));
+        out.printf("%s\n", ans);
+	}
 
     /*I/O Template*/
     static InputStream is;
@@ -240,5 +234,34 @@ static BigInteger caller()
         }
 		return ans;
     }
-*/
 
+recursive approach - O(n)
+static BigInteger sum(int end)
+{
+	if (end < 0) return BigInteger.valueOf(0);
+	if (sums[end] != null) return sums[end];
+	return sums[end] = f(end).add(sum(end-1));
+}
+static BigInteger f(int n)
+{
+	if (n <= 2) return h(n);
+	if (memo[n] != null) return memo[n];
+	BigInteger ans = f(n - 1);
+	ans = ans.add(sum(n-3)).add(sum(n-4)).add(f(n-2).multiply(h(2)));
+	return memo[n] = ans;
+}
+static BigInteger caller(int n)
+{
+	BigInteger ans = BigInteger.valueOf(0);
+	for (int i = 0; i <= n-2; i++)
+		ans = ans.add(f(i).multiply(BigInteger.valueOf(2*((n-2)-i+1))));
+	return ans;
+}
+static void solve()
+{
+	int n = ni();
+	memo = new BigInteger[n];
+	sums = new BigInteger[n];
+	out.printf("%s\n", caller(n));
+}
+*/
