@@ -9,7 +9,8 @@ import java.util.*;
 import java.math.*;
 
 public class vans {
-    static BigInteger[] memo, sums;
+	static BigInteger curMemo, curSum; // curMemo = memo[i], curSum = sums[i]
+	static BigInteger mim1, mim2, sim1, sim2, sim3, sim4; // mim1 = memo[i-1], sim3 = sums[i-3], etc..
     static BigInteger h(int n)
 	{
 		if (n == 0) return BigInteger.valueOf(1);
@@ -20,23 +21,25 @@ public class vans {
 	static void solve()
 	{
 		int n = ni();
-		memo = new BigInteger[n];
-		sums = new BigInteger[n];
-		
+		BigInteger ans = BigInteger.valueOf(0);
+
 		for (int i = 0; i <= n-2; i++) {
 			if (i <= 2)
-				memo[i] = h(i);
+				curMemo = h(i);
 			else
-				memo[i] = memo[i-1]
-							.add(i-3<0?BigInteger.valueOf(0):sums[i-3])
-							.add(i-4<0?BigInteger.valueOf(0):sums[i-4])
-							.add(memo[i-2].multiply(h(2)));
-			sums[i] = i-1<0?memo[i]:memo[i].add(sums[i-1]);
+				curMemo = mim1
+							.add(i-3<0?BigInteger.valueOf(0):sim3)
+							.add(i-4<0?BigInteger.valueOf(0):sim4)
+							.add(mim2.multiply(h(2)));
+
+			curSum = i-1<0?curMemo:curMemo.add(sim1);
+			ans = ans.add(curMemo.multiply(BigInteger.valueOf(2*((n-2)-i+1))));
+			// for memos: current becomes last, last becomes second last, etc..
+			mim2 = mim1; mim1 = curMemo;
+			// for sums: current becomes last, last becomes second last, etc..
+			sim4 = sim3; sim3 = sim2; sim2 = sim1; sim1 = curSum;
 		}
-		
-		BigInteger ans = BigInteger.valueOf(0);
-		for (int i = 0; i <= n-2; i++)
-			ans = ans.add(memo[i].multiply(BigInteger.valueOf(2*((n-2)-i+1))));
+
         out.printf("%s\n", ans);
 	}
 
