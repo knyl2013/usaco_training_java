@@ -9,7 +9,7 @@ import java.util.*;
 import java.math.*;
 
 public class vans {
-    static BigInteger[] memo;
+    static BigInteger[] memo, sums;
     static BigInteger h(int n)
     {
         if (n == 0) return BigInteger.valueOf(1);
@@ -17,13 +17,18 @@ public class vans {
         if (n == 2) return BigInteger.valueOf(3);
         return BigInteger.valueOf((n - 1) * 2);
     }
+	static BigInteger sum(int end)
+	{
+		if (end < 0) return BigInteger.valueOf(0);
+		if (sums[end] != null) return sums[end];
+		return sums[end] = f(end).add(sum(end-1));
+	}
     static BigInteger f(int n)
     {
         if (n <= 2) return h(n);
         if (memo[n] != null) return memo[n];
-        BigInteger ans = BigInteger.valueOf(0);
-        for (int i = 2; i <= n; i++)
-            ans = ans.add(f(n-i).multiply(h(i)));
+		BigInteger ans = f(n - 1);
+		ans = ans.add(sum(n-3)).add(sum(n-4)).add(f(n-2).multiply(h(2)));
         return memo[n] = ans;
     }
     static BigInteger caller(int n)
@@ -36,7 +41,8 @@ public class vans {
     static void solve()
     {
         int n = ni();
-		memo = new BigInteger[n + 1];
+		memo = new BigInteger[n];
+		sums = new BigInteger[n];
         out.printf("%s\n", caller(n));
     }
 
