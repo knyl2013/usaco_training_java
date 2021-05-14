@@ -221,15 +221,18 @@ static int[][] dirs = new int[][] {
         return cnt;
     }
 
-suboptimal approach - O(n)
+suboptimal approach - O(n^2)
 static BigInteger caller()
     {
         BigInteger ans = BigInteger.valueOf(0);
-        n -= 2;
-		for (int i = 0; i <= n; i++) {
-			ans = ans.add(f(i).multiply(BigInteger.valueOf(2*(n-i+1))));
-		}
-        return ans;
+		n -= 2;
+        for (int left = 0; left <= n; left++) {
+            for (int right = 0; right <= n; right++) {
+                if (left+right > n) continue;
+                ans = ans.add(f(n-left-right).multiply(BigInteger.valueOf(2)));
+            }
+        }
+		return ans;
     }
 */
 

@@ -1,15 +1,9 @@
-h(n) 	:= no. possible routes travelling 2*n grid without using left			/right bound
-		= (n-1) * 2
-		special case when n == 2:
-		= 12
-h(n)+2	:= consider also the boundary
-
 f(n)	:= no. possible routes travelling 2*n grid
 f(0)	= 1
 f(1)	= 0
 f(2)	= 3
 ans = 0
-for i in 2..n, 2:
+for i in 2..n:
 	ans += h(i) * f(n-i)
 return ans
 
