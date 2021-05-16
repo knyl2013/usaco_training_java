@@ -1,0 +1,11 @@
+dp[i][j] := no. of consecutive up ok cells
+
+inputs:
+1101
+0111
+1111
+
+dp:
+1101
+0212
+1323
