@@ -8,19 +8,6 @@ import java.io.*;
 import java.util.*;
 
 public class rectbarn {
-    static int largestRectBrute(int[] heights)
-    {
-        int n = heights.length;
-        int ans = 0;
-        for (int i = 0; i < n; i++) {
-            int mini = heights[i];
-            for (int j = i; j < n; j++) {
-                mini = Math.min(mini, heights[j]);
-                ans = Math.max(ans, mini * (j - i + 1));
-            }
-        }
-        return ans;
-    }
     static int largestRect(int[] heights)
     {
         int n = heights.length;
@@ -31,8 +18,12 @@ public class rectbarn {
 
         for (int i = 0; i < n; i++) {
             int curHeight = heights[i];
+            int cnt = 0;
             while (!stk.isEmpty() && heights[stk.peek()] >= curHeight) {
-                widths[i] += widths[stk.pop()];
+                int j = stk.pop();
+                widths[i] += widths[j];
+                cnt += widths[j];
+                ans = Math.max(ans, heights[j] * cnt);
             }
             stk.push(i);
             ans = Math.max(ans, curHeight * widths[i]);
@@ -47,47 +38,14 @@ public class rectbarn {
 
         return ans;
     }
-    static void display(boolean[][] grid)
-    {
-        int h = grid.length, w = grid[0].length;
-        for (int i = 0; i < h; i++) {
-            for (int j = 0; j < w; j++) {
-                System.out.print(grid[i][j] ? 0 : 1);
-            }
-            System.out.println();
-        }
-    }
-    static int[] randomArr(int n, int lo, int hi)
-    {
-        int[] ans = new int[n];
-        for (int i = 0; i < n; i++) {
-            ans[i] = (int) ((Math.random() * (hi - lo + 1)) + lo);
-        }
-        return ans;
-    }
     static void solve()
     {
-        int[] arr;
-        while (true) {
-            arr = randomArr(3, 1, 10);
-            if (largestRect(arr) != largestRectBrute(arr)) {
-                break;
-            }
-            System.out.println("ok");
-        }
-        System.out.println(Arrays.toString(arr));
-        System.out.println(largestRect(arr) + " " + largestRectBrute(arr));
-        // int[] heights = new int[]{3,4,5,7};
-        // int[] heights = new int[]{7,5,4,3};
-        // System.out.println(largestRectBrute(heights));
-
         int h = ni(), w = ni(), p = ni();
         boolean[][] grid = new boolean[h][w];
         for (int i = 0; i < p; i++) {
             int r = ni() - 1, c = ni() - 1;
             grid[r][c] = true;
         }
-        // display(grid);
         int[] row = new int[w];
         int ans = 0;
         for (int i = 0; i < h; i++) {
@@ -99,7 +57,7 @@ public class rectbarn {
                     row[j]++;
                 }
             }
-            ans = Math.max(ans, largestRectBrute(row));
+            ans = Math.max(ans, largestRect(row));
         }
         out.printf("%d\n", ans);
     }
@@ -112,8 +70,8 @@ public class rectbarn {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-    // static String taskName = "rectbarn";
+    // static String taskName = null;
+    static String taskName = "rectbarn";
     
     public static void main(String[] args) throws Exception
     {
