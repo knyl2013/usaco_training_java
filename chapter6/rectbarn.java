@@ -8,6 +8,19 @@ import java.io.*;
 import java.util.*;
 
 public class rectbarn {
+    static int largestRectBrute(int[] heights)
+    {
+        int n = heights.length;
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            int mini = heights[i];
+            for (int j = i; j < n; j++) {
+                mini = Math.min(mini, heights[j]);
+                ans = Math.max(ans, mini * (j - i + 1));
+            }
+        }
+        return ans;
+    }
     static int largestRect(int[] heights)
     {
         int n = heights.length;
@@ -44,10 +57,29 @@ public class rectbarn {
             System.out.println();
         }
     }
+    static int[] randomArr(int n, int lo, int hi)
+    {
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            ans[i] = (int) ((Math.random() * (hi - lo + 1)) + lo);
+        }
+        return ans;
+    }
     static void solve()
     {
-        // int[] heights = new int[]{3,4,5,7,1,1,1,1,1,1,1,1,1,1,1};
-        // System.out.println(largestRect(heights));
+        int[] arr;
+        while (true) {
+            arr = randomArr(3, 1, 10);
+            if (largestRect(arr) != largestRectBrute(arr)) {
+                break;
+            }
+            System.out.println("ok");
+        }
+        System.out.println(Arrays.toString(arr));
+        System.out.println(largestRect(arr) + " " + largestRectBrute(arr));
+        // int[] heights = new int[]{3,4,5,7};
+        // int[] heights = new int[]{7,5,4,3};
+        // System.out.println(largestRectBrute(heights));
 
         int h = ni(), w = ni(), p = ni();
         boolean[][] grid = new boolean[h][w];
@@ -67,7 +99,7 @@ public class rectbarn {
                     row[j]++;
                 }
             }
-            ans = Math.max(ans, largestRect(row));
+            ans = Math.max(ans, largestRectBrute(row));
         }
         out.printf("%d\n", ans);
     }
