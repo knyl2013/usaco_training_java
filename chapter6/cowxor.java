@@ -9,6 +9,104 @@ import java.io.*;
 import java.util.*;
 
 public class cowxor {
+	static void swap(List<List<Integer>> a, List<List<Integer>> b, int idx)
+	{
+		List<Integer> tmp = a.get(idx);
+		a.set(idx, b.get(idx));
+		b.set(idx, tmp);
+	}
+	static int[] answer(int[] a)
+	{
+		int n = a.length;
+		int[] ans = new int[3];
+		int maxi = (1 << 21) - 1;
+		// int[][] ons = new int[21][n], offs = new int[21][n];
+		// for (int i = 0; i < 21; i++) {
+			// Arrays.fill(ons[i], -1);
+			// Arrays.fill(offs[i], -1);
+		// }
+		Arrays.fill(ans, -1);
+		List<List<Integer>> ons = new ArrayList<>(), offs = new ArrayList<>();
+		for (int i = 0; i < 21; i++) {
+			ons.add(new ArrayList<>());
+			offs.add(new ArrayList<>());
+		}
+		
+		ans[0] = 0;
+		for (int i = 0; i < n; i++) {
+			int lastOk = -1;
+			for (int j = 0; j < 21; j++) {
+				int bit = (a[i] >> j) & 1;
+				if (bit == 0) {
+					offs.get(j).add(i);
+				}
+				else {
+					swap(ons, offs, j);
+					ons.get(j).add(i);
+				}
+				if (!ons.get(j).isEmpty())
+					lastOk = j;
+			}
+			if (lastOk == -1) continue;
+			int cur = (1 << lastOk);
+			Set<Integer> st = new HashSet<>(ons.get(lastOk));
+			// for (int j = lastOk-1; j >= 0; j--) {
+				// if (ons.get(j).isEmpty()) continue;
+				// for (int o : offs.get(j)) {
+					// st.remove(o);
+				// }
+			// }
+			System.out.println("i: " + i);
+			System.out.println("lastOk: " + lastOk);
+			System.out.println(st);
+			// System.out.println("ons: " + ons);
+			// System.out.println("offs: " + offs);
+			System.out.println("\n");
+			ans[0] = Math.max(ans[0], cur);
+			// int left = 0, right = i;
+			// int val = 0;
+			// for (int j = 20; j >= 0; j--) {
+				// int bit = (a[i] >> j) & 1;
+				// int want = bit ^ 1;
+				// List<List<Integer>> target = want == 1 ? ons : offs;
+				// List<Integer> range = target.get(j);
+				// boolean setLeft = false, setRight = false;
+				// for (int r : range) {
+					// if (r < left || r > right) continue;
+					// val = val | (1 << j);
+					// if (!setLeft) {
+						// left = r;
+						// setLeft = true;
+					// }
+					// right = Math.min(right, r);
+				// }
+				// System.out.println(left + " " + right);
+				// System.out.println(range);
+			// }
+			// System.out.println("i: " + i + ", val: " + val);
+			// System.out.println("\n");
+			// int want = maxi ^ a[i];
+			// System.out.println(Integer.toBinaryString(want));
+			// for (int j = 0; j < 21; j++) {
+				// int bit = (a[i] >> j) & 1;
+				// int[][] target = want == 1 ? ons : offs;
+			// }
+			// for (int j = 0; j < 21; j++) {
+				// int bit = (a[i] >> j) & 1;
+				// if (bit == 1) {
+					// ons.get(j).add(i);
+				// }
+				// else {
+					// offs.get(j).add(i);
+				// }
+			// }
+		}
+		
+		// System.out.println(ons);
+		// System.out.println(offs);
+		
+		return ans;
+	}
     static int[] brute(int[] a)
     {
         int n = a.length;
@@ -35,7 +133,8 @@ public class cowxor {
     static void solve()
     {
         int[] a = na(ni());
-        int[] ans = brute(a);
+        // int[] ans = brute(a);
+		int[] ans = answer(a);
         out.printf("%d %d %d\n", ans[0], ans[1], ans[2]);
     }
 
