@@ -9,62 +9,160 @@ import java.io.*;
 import java.util.*;
 
 public class cowxor {
-    static class TrieNode {
-        TrieNode[] children;
-        int start;
-        public TrieNode() 
-        {
-            children = new TrieNode[2];
-            start = -1;
+	static void swap(List<List<Integer>> a, List<List<Integer>> b, int idx)
+	{
+		List<Integer> tmp = a.get(idx);
+		a.set(idx, b.get(idx));
+		b.set(idx, tmp);
+	}
+    static int[] randomArr(int n, int lo, int hi)
+    {
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            ans[i] = (int) ((Math.random() * (hi - lo + 1)) + lo);
         }
+        return ans;
+    }
+
+	static int[] answer(int[] a)
+	{
+		int n = a.length;
+		int[] ans = new int[3];
+		int maxi = (1 << 21) - 1;
+		// int[][] ons = new int[21][n], offs = new int[21][n];
+		// for (int i = 0; i < 21; i++) {
+			// Arrays.fill(ons[i], -1);
+			// Arrays.fill(offs[i], -1);
+		// }
+		Arrays.fill(ans, -1);
+		List<List<Integer>> ons = new ArrayList<>(), offs = new ArrayList<>();
+		for (int i = 0; i < 21; i++) {
+			ons.add(new ArrayList<>());
+			offs.add(new ArrayList<>());
+		}
+		
+		ans[0] = 0;
+		for (int i = 0; i < n; i++) {
+			int lastOk = -1;
+			for (int j = 0; j < 21; j++) {
+				int bit = (a[i] >> j) & 1;
+				if (bit == 0) {
+					offs.get(j).add(i);
+				}
+				else {
+					swap(ons, offs, j);
+					ons.get(j).add(i);
+				}
+				if (!ons.get(j).isEmpty())
+					lastOk = j;
+			}
+			if (lastOk == -1) continue;
+			int cur = (1 << lastOk);
+			TreeSet<Integer> st = new TreeSet<>(ons.get(lastOk));
+			for (int j = lastOk-1; j >= 0 && st.size() >= 1; j--) {
+                TreeSet<Integer> nxt = new TreeSet<>();
+                for (int o : ons.get(j)) {
+                    if (!st.contains(o)) continue;
+                    nxt.add(o);
+                }
+                if (nxt.size() > 0) {
+                    cur = cur | (1 << j);
+                    st = nxt;
+                }
+			}
+            if (ans[0] <= cur) {
+                ans[0] = cur;
+                ans[1] = st.last() + 1;
+                ans[2] = i + 1;
+            }
+			// System.out.println("i: " + i);
+			// System.out.println("lastOk: " + lastOk);
+   //          System.out.println("cur: " + cur);
+			// System.out.println(st);
+			// System.out.println("ons: " + ons);
+   //          System.out.println("start: " + st.last());
+			// System.out.println("offs: " + offs);
+			// System.out.println("\n");
+            
+			// ans[0] = Math.max(ans[0], cur);
+			// int left = 0, right = i;
+			// int val = 0;
+			// for (int j = 20; j >= 0; j--) {
+				// int bit = (a[i] >> j) & 1;
+				// int want = bit ^ 1;
+				// List<List<Integer>> target = want == 1 ? ons : offs;
+				// List<Integer> range = target.get(j);
+				// boolean setLeft = false, setRight = false;
+				// for (int r : range) {
+					// if (r < left || r > right) continue;
+					// val = val | (1 << j);
+					// if (!setLeft) {
+						// left = r;
+						// setLeft = true;
+					// }
+					// right = Math.min(right, r);
+				// }
+				// System.out.println(left + " " + right);
+				// System.out.println(range);
+			// }
+			// System.out.println("i: " + i + ", val: " + val);
+			// System.out.println("\n");
+			// int want = maxi ^ a[i];
+			// System.out.println(Integer.toBinaryString(want));
+			// for (int j = 0; j < 21; j++) {
+				// int bit = (a[i] >> j) & 1;
+				// int[][] target = want == 1 ? ons : offs;
+			// }
+			// for (int j = 0; j < 21; j++) {
+				// int bit = (a[i] >> j) & 1;
+				// if (bit == 1) {
+					// ons.get(j).add(i);
+				// }
+				// else {
+					// offs.get(j).add(i);
+				// }
+			// }
+		}
+		
+		// System.out.println(ons);
+		// System.out.println(offs);
+		
+		return ans;
+	}
+    static int[] brute(int[] a)
+    {
+        int n = a.length;
+        int[] ans = new int[3];
+        Arrays.fill(ans, -1);
+        for (int i = 0; i < n; i++) {
+            int xor = 0;
+            for (int j = i; j < n; j++) {
+                xor ^= a[j];
+                boolean better = xor > ans[0] || 
+                                (xor == ans[0] && j > ans[1]) ||
+                                (xor == ans[0] && j == ans[1] && (j-i)>(ans[2]-ans[1]));
+                if (better) {
+                    ans[0] = xor;
+                    ans[1] = i;
+                    ans[2] = j;
+                }
+            }
+        }
+        ans[1]++;
+        ans[2]++;
+        return ans;
     }
     static void solve()
     {
-        int n = ni();
-        int[] arr = na(n);
-        int xor = 0;
-        int ans = -1, start = -1, end = -1;
-        TrieNode root = new TrieNode();
-        for (int i = 0; i < n; i++) {
-            xor ^= arr[i];
-            TrieNode cur = root;
-            int val = 0;
-            for (int j = 20; j >= 0 && i > 0; j--) {
-                int bit = (xor >> j) & 1;
-                int want = bit ^ 1;
-                if (cur.children[want] != null) {
-                    cur = cur.children[want];
-                    val = val | (1 << j);
-                }
-                else {
-                    cur = cur.children[bit];
-                }
-            }
-            if (ans <= val) {
-                ans = val;
-                start = cur.start;
-                end = i + 1;
-            }
-            if (ans <= arr[i]) {
-                ans = arr[i];
-                start = i + 1;
-                end = i + 1;
-            }
+        int[] a = na(ni());
+        int[] ans = brute(a);
+        out.printf("%d %d %d\n", ans[0], ans[1], ans[2]);
 
-
-            cur = root;
-            for (int j = 20; j >= 0; j--) {
-                int bit = (xor >> j) & 1;
-                if (cur.children[bit] == null)
-                    cur.children[bit] = new TrieNode();
-                cur = cur.children[bit];
-            }
-            cur.start = i + 2;
-            // System.out.println("val: " + val);
-            // ans = Math.max(ans, Math.max(arr[i], val));
-        }
-        // System.out.println(ans);
-        out.printf("%d %d %d\n", ans, start, end);
+        // while (true) {
+        //     int[] a = randomArr(100000, 1, 10000);
+        //     int[] ans = answer(a);
+        //     System.out.printf("%d %d %d\n", ans[0], ans[1], ans[2]);
+        // }
     }
 
 
