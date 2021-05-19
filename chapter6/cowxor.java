@@ -49,20 +49,32 @@ public class cowxor {
 			}
 			if (lastOk == -1) continue;
 			int cur = (1 << lastOk);
-			Set<Integer> st = new HashSet<>(ons.get(lastOk));
-			// for (int j = lastOk-1; j >= 0; j--) {
-				// if (ons.get(j).isEmpty()) continue;
-				// for (int o : offs.get(j)) {
-					// st.remove(o);
-				// }
-			// }
-			System.out.println("i: " + i);
-			System.out.println("lastOk: " + lastOk);
-			System.out.println(st);
+			TreeSet<Integer> st = new TreeSet<>(ons.get(lastOk));
+			for (int j = lastOk-1; j >= 0 && st.size() >= 1; j--) {
+                TreeSet<Integer> nxt = new TreeSet<>();
+                for (int o : ons.get(j)) {
+                    if (!st.contains(o)) continue;
+                    nxt.add(o);
+                }
+                if (nxt.size() > 0) {
+                    cur = cur | (1 << j);
+                    st = nxt;
+                }
+			}
+			// System.out.println("i: " + i);
+			// System.out.println("lastOk: " + lastOk);
+   //          System.out.println("cur: " + cur);
+			// System.out.println(st);
 			// System.out.println("ons: " + ons);
+   //          System.out.println("start: " + st.last());
 			// System.out.println("offs: " + offs);
-			System.out.println("\n");
-			ans[0] = Math.max(ans[0], cur);
+			// System.out.println("\n");
+            if (ans[0] <= cur) {
+                ans[0] = cur;
+                ans[1] = st.last() + 1;
+                ans[2] = i + 1;
+            }
+			// ans[0] = Math.max(ans[0], cur);
 			// int left = 0, right = i;
 			// int val = 0;
 			// for (int j = 20; j >= 0; j--) {
