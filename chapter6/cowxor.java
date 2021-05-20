@@ -40,17 +40,16 @@ public class cowxor {
                     cur = cur.children[bit];
                 }
             }
-            if (ans <= val) {
+            if (i > 0 && ans < val) {
                 ans = val;
                 start = cur.start;
                 end = i + 1;
             }
-            if (ans <= arr[i]) {
+            if (ans < arr[i]) {
                 ans = arr[i];
                 start = i + 1;
                 end = i + 1;
             }
-
 
             cur = root;
             for (int j = 20; j >= 0; j--) {
@@ -75,7 +74,8 @@ public class cowxor {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
+    // static String taskName = null;
+	static String taskName = "cowxor";
     
     public static void main(String[] args) throws Exception
     {

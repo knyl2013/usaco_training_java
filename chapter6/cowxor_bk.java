@@ -8,7 +8,7 @@ TASK: cowxor
 import java.io.*;
 import java.util.*;
 
-public class cowxor {
+public class cowxor_bk {
 	static void swap(List<List<Integer>> a, List<List<Integer>> b, int idx)
 	{
 		List<Integer> tmp = a.get(idx);
