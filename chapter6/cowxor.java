@@ -9,63 +9,57 @@ import java.io.*;
 import java.util.*;
 
 public class cowxor {
-    static class TrieNode {
-        TrieNode[] children;
-        int start;
-        public TrieNode() 
-        {
-            children = new TrieNode[2];
-            start = -1;
-        }
-    }
-    static void solve()
-    {
-        int n = ni();
-        int[] arr = na(n);
-        int xor = 0;
+	static int[] dp = new int[1 << 22];
+	static int[] answer(int[] arr)
+	{
+		Arrays.fill(dp, 0);
+		int n = arr.length;
+		int xor = 0;
         int ans = -1, start = -1, end = -1;
-        TrieNode root = new TrieNode();
-        for (int i = 0; i < n; i++) {
+		for (int i = 0; i < dp.length; i = i*2+2)
+			dp[i] = 1;
+		for (int i = 0; i < n; i++) {
             xor ^= arr[i];
-            TrieNode cur = root;
+			int cur = 0;
             int val = 0;
-            for (int j = 20; j >= 0 && i > 0; j--) {
-                int bit = (xor >> j) & 1;
-                int want = bit ^ 1;
-                if (cur.children[want] != null) {
-                    cur = cur.children[want];
-                    val = val | (1 << j);
-                }
-                else {
-                    cur = cur.children[bit];
-                }
-            }
-            if (i > 0 && ans < val) {
-                ans = val;
-                start = cur.start;
-                end = i + 1;
-            }
-            if (ans < arr[i]) {
-                ans = arr[i];
-                start = i + 1;
-                end = i + 1;
-            }
-
-            cur = root;
             for (int j = 20; j >= 0; j--) {
                 int bit = (xor >> j) & 1;
-                if (cur.children[bit] == null)
-                    cur.children[bit] = new TrieNode();
-                cur = cur.children[bit];
+				int on = cur * 2 + 1, off = cur * 2 + 2;
+				int want = (bit ^ 1) == 1 ? on : off;
+				if (dp[want] != 0) {
+					cur = want;
+					val = val | (1 << j);
+				}
+                else {
+					cur = (want == on) ? off : on;
+                }
             }
-            cur.start = i + 2;
-            // System.out.println("val: " + val);
-            // ans = Math.max(ans, Math.max(arr[i], val));
+            if (ans < val) {
+                ans = val;
+                start = dp[cur];
+                end = i + 1;
+            }
+			cur = 0;
+            for (int j = 20; j >= 0; j--) {
+                int bit = (xor >> j) & 1;
+				int next = (bit == 1) ? cur * 2 + 1 : cur * 2 + 2;
+				cur = next;
+				dp[cur] = 1;
+            }
+			
+			dp[cur] = i + 2;
         }
-        // System.out.println(ans);
-        out.printf("%d %d %d\n", ans, start, end);
-    }
 
+		return new int[]{ans, start, end};
+	}
+	
+	static void solve()
+    {
+        int[] arr = na(ni());
+		int[] ans = answer(arr);
+		out.printf("%d %d %d\n", ans[0], ans[1], ans[2]);
+    }
+	
 
 
 
@@ -219,4 +213,65 @@ public class cowxor {
     private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
 }
 
+/*
+static class TrieNode {
+        TrieNode[] children;
+        int start;
+        public TrieNode() 
+        {
+            children = new TrieNode[2];
+            start = -1;
+        }
+    }
+	static int[] brute(int[] arr)
+	{
+		int n = arr.length;
+        int xor = 0;
+        int ans = -1, start = -1, end = -1;
+        TrieNode root = new TrieNode();
+        for (int i = 0; i < n; i++) {
+            xor ^= arr[i];
+            TrieNode cur = root;
+            int val = 0;
+            for (int j = 20; j >= 0 && i > 0; j--) {
+                int bit = (xor >> j) & 1;
+                int want = bit ^ 1;
+                if (cur.children[want] != null) {
+                    cur = cur.children[want];
+                    val = val | (1 << j);
+                }
+                else {
+                    cur = cur.children[bit];
+                }
+            }
+            if (i > 0 && ans < val) {
+                ans = val;
+                start = cur.start;
+                end = i + 1;
+            }
+            if (ans < arr[i]) {
+                ans = arr[i];
+                start = i + 1;
+                end = i + 1;
+            }
 
+            cur = root;
+            for (int j = 20; j >= 0; j--) {
+                int bit = (xor >> j) & 1;
+                if (cur.children[bit] == null)
+                    cur.children[bit] = new TrieNode();
+                cur = cur.children[bit];
+            }
+            cur.start = i + 2;
+        }
+		return new int[]{ans, start, end};
+	}
+	static int[] randomArr(int n, int lo, int hi)
+    {
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            ans[i] = (int) ((Math.random() * (hi - lo + 1)) + lo);
+        }
+        return ans;
+    }
+*/
