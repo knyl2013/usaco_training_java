@@ -32,7 +32,7 @@ public class calfflac {
 			boolean lower = ch >= 'a' && ch <= 'z';
 			boolean upper = ch >= 'A' && ch <= 'Z';
 			if (lower || upper) n++;
-			sb.append((char)b);
+			sb.append(ch);
 		}
 		arr = new char[n];
 		mp = new int[n];
