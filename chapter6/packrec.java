@@ -38,10 +38,29 @@ public class packrec {
 	}
 	static void shape3(int[] a, int[] b, int[] c, int[] d)
 	{
-		int width = Math.max(a[0]+b[0]+c[0], c[0]+d[0]);
+        int width = Math.max(a[0]+b[0], d[0]) + c[0];
 		int height = Math.max(Math.max(a[1], b[1])+d[1], c[1]);
 		add(width, height);
 	}
+    static void shape4(int[] a, int[] b, int[] c, int[] d)
+    {
+        int width = a[0] + Math.max(b[0], c[0]) + d[0];
+        int height = Math.max(a[1], Math.max(b[1]+c[1], d[1]));
+        add(width, height);
+    }
+    static void shape5(int[] a, int[] b, int[] c, int[] d)
+    {
+        int width = Math.max(a[0], b[0]) + c[0] + d[0];
+        int height = Math.max(a[1]+b[1], Math.max(c[1], d[1]));
+        add(width, height);
+    }
+    static void shape6(int[] a, int[] b, int[] c, int[] d)
+    {
+        if (a[0]>b[0] || d[1]<b[1]) return;
+        int width = Math.max(a[0] + c[0], b[0] + d[0]);
+        int height = Math.max(a[1]+b[1], c[1]+d[1]);
+        add(width, height);
+    }
 	static int[] swap(int[] r)
 	{
 		return new int[]{r[1], r[0]};
@@ -57,6 +76,9 @@ public class packrec {
 			shape1(pa, pb, pc, pd); 
 			shape2(pa, pb, pc, pd); 
 			shape3(pa, pb, pc, pd);
+            shape4(pa, pb, pc, pd);
+            shape5(pa, pb, pc, pd);
+            shape6(pa, pb, pc, pd);
 		}
 	}
 	static void solve()
@@ -72,7 +94,6 @@ public class packrec {
 						Set<Integer> s = new HashSet<>(Arrays.asList(i1,i2,i3,i4));
 						if (s.size() < 4) continue;
 						shapes(rects[i1], rects[i2], rects[i3], rects[i4]);
-						// System.out.println(i1 + " " + i2 + " " + i3 + " " + i4);
 					}
 				}
 			}
@@ -92,8 +113,8 @@ public class packrec {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-	// static String taskName = "packrec";
+    // static String taskName = null;
+	static String taskName = "packrec";
     
     public static void main(String[] args) throws Exception
     {
