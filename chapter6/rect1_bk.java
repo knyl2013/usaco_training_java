@@ -27,12 +27,6 @@ public class rect1 {
         if (area(ans) <= 0) return null;
         return ans;
     }
-    static boolean under(int[] inside, int[] outside)
-    {
-        boolean lower = outside[LOW_LEFT_X] <= inside[LOW_LEFT_X] && outside[LOW_LEFT_Y] <= inside[LOW_LEFT_Y];
-        boolean higher = outside[UP_RIGHT_X] >= inside[UP_RIGHT_X] && outside[UP_RIGHT_Y] >= inside[UP_RIGHT_Y];
-        return lower && higher;
-    }
     static int totArea(List<int[]> rects)
     {
         int ans = 0, n = rects.size();
@@ -49,42 +43,23 @@ public class rect1 {
 
         return ans;   
     }
-    static List<int[]> append(int[] r, List<int[]> prevs)
-    {
-        List<int[]> nexts = new ArrayList<>();
-        nexts.add(r);
-        for (int[] prev : prevs) {
-            int[] o = overlap(r, prev);
-            if (o == null) {
-                nexts.add(prev);
-            }
-            else if (!under(prev, o)) {
-                
-            }
-        }
-        return nexts;
-
-    }
     static void solve()
     {
         int a = ni(), b = ni(), n = ni();
         int[][] rects = new int[n][5];
         int[] colors = new int[2501];
-        List<int[]> prevs = new ArrayList<>();
         for (int i = 0; i < n; i++) 
             for (int j = 0; j < 5; j++)
                 rects[i][j] = ni();
         
         for (int i = n-1; i >= 0; i--) {
-            int cur = area(rects[i]);
-            for (int[] prev : prevs) {
-                int[] o = overlap(prev, rects[i]);
+            List<int[]> overlaps = new ArrayList<>();
+            for (int j = i + 1; j < n; j++) {
+                int[] o = overlap(rects[j], rects[i]);
                 if (o == null) continue;
-                cur -= area(o);
+                overlaps.add(o);
             }
-            // colors[rects[i][COLOR]] += area(rects[i]) - totArea(overlaps);
-            colors[rects[i][COLOR]] += area(rects[i]) - tot;
-            prevs = append(rects[i], prevs);
+            colors[rects[i][COLOR]] += area(rects[i]) - totArea(overlaps);
         }
         colors[1] = a*b;
         for (int i = 2; i <= 2500; i++) {
