@@ -93,15 +93,18 @@ public class rect1 {
 	{
 		int[] o = overlap(rect, cutter);
 		if (o == null) return Arrays.asList(rect);
+        List<int[]> ans = new ArrayList<>();
 		int code = getStatus(rect, cutter);
-		if (code == INSIDE) return new ArrayList<>();
+		if (code == INSIDE) return ans;
 		if (code == HORIZONTAL) {
 			int[] left = new int[4], right = new int[4];
 			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
 			left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
 			left[TOP_RIGHT_X] = o[LOW_LEFT_X];
 			left[TOP_RIGHT_Y] = o[TOP_RIGHT_Y];
-			return Arrays.asList(left, right);
+            if (area(left) > 0) ans.add(left);
+            if (area(right) > 0) ans.add(right);
+			return ans;
 		}
 		if (code == VERTICAL) {
 			int[] top = new int[4], bottom = new int[4];
@@ -109,10 +112,29 @@ public class rect1 {
 			top[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
 			top[LOW_LEFT_X] = rect[LOW_LEFT_X];
 			top[LOW_LEFT_Y] = o[TOP_RIGHT_Y];
-			return Arrays.asList(top, bottom);
+			if (area(top) > 0) ans.add(top);
+            if (area(bottom) > 0) ans.add(bottom);
+            return ans;
 		}
 		if (code == UP) {
-			
+			int[] left = new int[4], middle = new int[4], right = new int[4];
+            left[LOW_LEFT_X] = rect[LOW_LEFT_X];
+            left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+            left[TOP_RIGHT_X] = o[LOW_LEFT_X];
+            left[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
+            middle[LOW_LEFT_X] = o[LOW_LEFT_X];
+            middle[LOW_LEFT_Y] = o[TOP_RIGHT_Y];
+            middle[TOP_RIGHT_X] = o[TOP_RIGHT_X];
+            middle[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
+            right[LOW_LEFT_X] = o[TOP_RIGHT_X];
+            right[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+            right[TOP_RIGHT_X] = rect[TOP_RIGHT_X];
+            right[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
+            if (area(middle) > 0) ans.add(middle);
+            if (area(left) > 0) ans.add(left);
+            if (area(right) > 0) ans.add(right);
+            return ans;
+
 		}
 	}
     static List<int[]> append(int[] r, List<int[]> prevs)
