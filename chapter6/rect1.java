@@ -10,6 +10,7 @@ import java.util.*;
 
 public class rect1 {
 	static final int LOW_LEFT_X = 0, LOW_LEFT_Y = 1, UP_RIGHT_X = 2, UP_RIGHT_Y = 3, COLOR = 4;
+	static final int UP = 0, LEFT = 1, RIGHT = 2, LOW = 3, VERTICAL = 4, HORIZONTAL = 5, INSIDE = 6, OUTSIDE = 7;
 	static int area(int[] r)
     {
         int width = r[UP_RIGHT_X] - r[LOW_LEFT_X];
@@ -27,12 +28,37 @@ public class rect1 {
         if (area(ans) <= 0) return null;
         return ans;
     }
-    static boolean under(int[] inside, int[] outside)
+    static boolean isInside(int[] inside, int[] outside)
     {
         boolean lower = outside[LOW_LEFT_X] <= inside[LOW_LEFT_X] && outside[LOW_LEFT_Y] <= inside[LOW_LEFT_Y];
         boolean higher = outside[UP_RIGHT_X] >= inside[UP_RIGHT_X] && outside[UP_RIGHT_Y] >= inside[UP_RIGHT_Y];
         return lower && higher;
     }
+	static int[] upRight(int[] r)
+	{
+		return new int[]{r[UP_RIGHT_X], r[UP_RIGHT_Y]};
+	}
+	static int[] lowLeft(int[] r)
+	{
+		return new int[]{r[LOW_LEFT_X], r[LOW_LEFT_Y]};
+	}
+	static int[] lowRight(int[] r)
+	{
+		return new int[]{r[UP_RIGHT_X], r[LOW_LEFT_Y]};
+	}
+	static int[] upLeft(int[] r)
+	{
+		return new int[]{r[LOW_LEFT_X], r[TOP_RIGHT_Y]};
+	}
+	static boolean equal(int[] a, int[] b)
+	{
+		if (a.legnth != b.length) throw new IllegalArgumentException();
+		for (int i = 0; i < a.length; i++)
+			if (a[i] != b[i])
+				return false;
+		return true;
+	}
+	
     static int totArea(List<int[]> rects)
     {
         int ans = 0, n = rects.size();
@@ -49,18 +75,80 @@ public class rect1 {
 
         return ans;   
     }
+	static int getStatus(int[] r1, int[] r2) // if ans = 0(UP), it means r1 is on the upper of r2
+	{
+		if (isInside(r1, r2)) return INSIDE; // r2 is the ouside rectangle, so r1 is the inside
+		if (isInside(r2, r1)) return OUTSIDE; // r2 is the inside rectangle, so r1 is the outside
+		boolean up = r1[TOP_RIGHT_Y] > r2[TOP_RIGHT_Y], low = r1[LOW_LEFT_Y] < r2[LOW_LEFT_Y];
+		boolean left = r1[LOW_LEFT_X] < r2[LOW_LEFT_X], right = r1[TOP_RIGHT_Y] > r2[TOP_RIGHT_Y];
+		if (up && low) return VERTICAL;
+		if (left && right) return HORIZONTAL;
+		if (up) return UP;
+		if (left) return LEFT;
+		if (low) return LOW;
+		if (right) return RIGHT;
+		throw new IllegalArgumentException();
+	}
+	static List<int[]> cut(int[] rect, int[] cutter)
+	{
+		int[] o = overlap(rect, cutter);
+		if (o == null) return Arrays.asList(rect);
+		int code = getStatus(rect, cutter);
+		if (code == INSIDE) return new ArrayList<>();
+		if (code == HORIZONTAL) {
+			int[] left = new int[4], right = new int[4];
+			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			left[TOP_RIGHT_X] = o[LOW_LEFT_X];
+			left[TOP_RIGHT_Y] = o[TOP_RIGHT_Y];
+			return Arrays.asList(left, right);
+		}
+		if (code == VERTICAL) {
+			int[] top = new int[4], bottom = new int[4];
+			top[TOP_RIGHT_X] = rect[TOP_RIGHT_X];
+			top[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
+			top[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			top[LOW_LEFT_Y] = o[TOP_RIGHT_Y];
+			return Arrays.asList(top, bottom);
+		}
+		if (code == UP) {
+			
+		}
+	}
     static List<int[]> append(int[] r, List<int[]> prevs)
     {
         List<int[]> nexts = new ArrayList<>();
         nexts.add(r);
+		
         for (int[] prev : prevs) {
-            int[] o = overlap(r, prev);
-            if (o == null) {
-                nexts.add(prev);
-            }
-            else if (!under(prev, o)) {
-                
-            }
+			List<int[]> cuts = cut(prev, r);
+			for (int[] c : cuts) {
+				nexts.add(c);
+			}
+            // int[] o = overlap(r, prev);
+            // if (o == null) {
+                // nexts.add(prev);
+            // }
+            // else if (!under(prev, o)) {
+				// if (equal(upRight(o), upRight(prev))) {
+					// prev[TOP_RIGHT_X] = o[BOTTOM_LEFT_X];
+					// nexts.add(prev);
+					// int[] extra = new int[4];
+					// int[] oBottomRight = bottomRight(o);
+					// extra[LOW_LEFT_X] = o[LOW_LEFT_X];
+					// extra[LOW_LEFT_Y] = prev[LOW_LEFT_Y];
+					// extra[UP_RIHGT_X] = oBottomRight[0];
+					// extra[UP_RIGHT_Y] = oBottomRight[1];
+					// if (area(extra) > 0) nexts.add(extra);
+				// }
+				// else if (equal(lowLeft(o), lowLeft(prev)){
+					// prev[LOW_LEFT_X] = o[TOP_RIGHT_X];
+					// nexts.add(prev);
+					// int[] extra = new int[4];
+					// extra[LOW_LEFT_X] = o[LOW_LEFT_X];
+					// extra[LOW_LEFT_Y] =  
+				// }
+            // }
         }
         return nexts;
 
