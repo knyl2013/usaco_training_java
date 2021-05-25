@@ -80,13 +80,13 @@ public class rect1 {
 		if (isInside(r1, r2)) return INSIDE; // r2 is the ouside rectangle, so r1 is the inside
 		if (isInside(r2, r1)) return OUTSIDE; // r2 is the inside rectangle, so r1 is the outside
 		int[] o = overlap(r1, r2);
-		boolean up = o[UP_RIGHT_Y] == r2[UP_RIGHT_Y];
-		boolean low = o[LOW_LEFT_Y] == r2[LOW_LEFT_Y];
-		boolean left = o[LOW_LEFT_X] == r2[LOW_LEFT_X];
-		boolean right = o[UP_RIGHT_X] == r2[UP_RIGHT_X];
-		System.out.println(up + " " + low + " " + left + " " + right);
-		if (up && low) return VERTICAL;
-		if (left && right) return HORIZONTAL;
+		boolean low = o[UP_RIGHT_Y] == r1[UP_RIGHT_Y];
+		boolean up = o[LOW_LEFT_Y] == r1[LOW_LEFT_Y];
+		boolean right = o[LOW_LEFT_X] == r1[LOW_LEFT_X];
+		boolean left = o[UP_RIGHT_X] == r1[UP_RIGHT_X];
+		// System.out.println(up + " " + low + " " + left + " " + right);
+		if (up && low && !left && !right) return HORIZONTAL;
+		if (left && right && !up && !left) return VERTICAL;
 		if (left) return LEFT;
 		if (right) return RIGHT;
 		if (up) return UP;
@@ -112,7 +112,7 @@ public class rect1 {
 		int[][] rects = new int[5][4];
 		int[] left = rects[0], right = rects[1], low = rects[2], up = rects[3], middle = rects[4];
 		int code = getStatus(rect, cutter);
-		System.out.println("code: " + code);
+		// System.out.println("code: " + code);
 		if (code == INSIDE) return ans;
 		if (code == HORIZONTAL) {
 			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
@@ -135,7 +135,7 @@ public class rect1 {
 			low[UP_RIGHT_Y] = o[LOW_LEFT_Y];
 		}
 		else if (code == UP) {
-			System.out.println("UP");
+			// System.out.println("UP");
             left[LOW_LEFT_X] = rect[LOW_LEFT_X];
             left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
             left[UP_RIGHT_X] = o[LOW_LEFT_X];
@@ -150,7 +150,7 @@ public class rect1 {
             right[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
 		}
 		else if (code == LOW) {
-			System.out.println("LOW");
+			// System.out.println("LOW");
 			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
 			left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
 			left[UP_RIGHT_X] = o[LOW_LEFT_X];
@@ -245,20 +245,20 @@ public class rect1 {
             }
             colors[rects[i][COLOR]] += cur;
             prevs = append(rects[i], prevs);
-			for (int[] prev : prevs) {
-				System.out.println(Arrays.toString(prev));
-			}
-			System.out.println();
+			// for (int[] prev : prevs) {
+			// 	System.out.println(Arrays.toString(prev));
+			// }
+			// System.out.println();
 		
         }
         colors[1] = a*b;
         for (int i = 2; i <= 2500; i++) {
             colors[1] -= colors[i];
         }
-		for (int[] prev : prevs) {
-			System.out.println(Arrays.toString(prev));
-		}
-		System.out.println();
+		// for (int[] prev : prevs) {
+		// 	System.out.println(Arrays.toString(prev));
+		// }
+		// System.out.println();
 		return colors;
 	}
 	static int[] brute(int[][] rects, int n, int a, int b)
