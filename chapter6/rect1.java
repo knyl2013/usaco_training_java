@@ -48,11 +48,11 @@ public class rect1 {
 	}
 	static int[] upLeft(int[] r)
 	{
-		return new int[]{r[LOW_LEFT_X], r[TOP_RIGHT_Y]};
+		return new int[]{r[LOW_LEFT_X], r[UP_RIGHT_Y]};
 	}
 	static boolean equal(int[] a, int[] b)
 	{
-		if (a.legnth != b.length) throw new IllegalArgumentException();
+		if (a.length != b.length) throw new IllegalArgumentException();
 		for (int i = 0; i < a.length; i++)
 			if (a[i] != b[i])
 				return false;
@@ -79,14 +79,29 @@ public class rect1 {
 	{
 		if (isInside(r1, r2)) return INSIDE; // r2 is the ouside rectangle, so r1 is the inside
 		if (isInside(r2, r1)) return OUTSIDE; // r2 is the inside rectangle, so r1 is the outside
-		boolean up = r1[TOP_RIGHT_Y] > r2[TOP_RIGHT_Y], low = r1[LOW_LEFT_Y] < r2[LOW_LEFT_Y];
-		boolean left = r1[LOW_LEFT_X] < r2[LOW_LEFT_X], right = r1[TOP_RIGHT_Y] > r2[TOP_RIGHT_Y];
+		int[] o = overlap(r1, r2);
+		boolean up = o[UP_RIGHT_Y] == r2[UP_RIGHT_Y];
+		boolean low = o[LOW_LEFT_Y] == r2[LOW_LEFT_Y];
+		boolean left = o[LOW_LEFT_X] == r2[LOW_LEFT_X];
+		boolean right = o[UP_RIGHT_X] == r2[UP_RIGHT_X];
+		System.out.println(up + " " + low + " " + left + " " + right);
 		if (up && low) return VERTICAL;
 		if (left && right) return HORIZONTAL;
-		if (up) return UP;
 		if (left) return LEFT;
-		if (low) return LOW;
 		if (right) return RIGHT;
+		if (up) return UP;
+		if (low) return LOW;
+		
+		// boolean up = r1[UP_RIGHT_Y] > r2[UP_RIGHT_Y], low = r1[LOW_LEFT_Y] < r2[LOW_LEFT_Y];
+		// boolean left = r1[LOW_LEFT_X] < r2[LOW_LEFT_X], right = r1[UP_RIGHT_X] > r2[UP_RIGHT_X];
+		// if (up && low && !left && !right) return VERTICAL;
+		// if (left && right && !up && !low) return HORIZONTAL;
+		// if (up) return UP;
+		// if (left) return LEFT;
+		// if (low) return LOW;
+		// if (right) return RIGHT;
+		// System.out.println(Arrays.toString(r1));
+		// System.out.println(Arrays.toString(r2));
 		throw new IllegalArgumentException();
 	}
 	static List<int[]> cut(int[] rect, int[] cutter)
@@ -94,48 +109,114 @@ public class rect1 {
 		int[] o = overlap(rect, cutter);
 		if (o == null) return Arrays.asList(rect);
         List<int[]> ans = new ArrayList<>();
+		int[][] rects = new int[5][4];
+		int[] left = rects[0], right = rects[1], low = rects[2], up = rects[3], middle = rects[4];
 		int code = getStatus(rect, cutter);
+		System.out.println("code: " + code);
 		if (code == INSIDE) return ans;
 		if (code == HORIZONTAL) {
-			int[] left = new int[4], right = new int[4];
 			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
 			left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
-			left[TOP_RIGHT_X] = o[LOW_LEFT_X];
-			left[TOP_RIGHT_Y] = o[TOP_RIGHT_Y];
-            if (area(left) > 0) ans.add(left);
-            if (area(right) > 0) ans.add(right);
-			return ans;
+			left[UP_RIGHT_X] = o[LOW_LEFT_X];
+			left[UP_RIGHT_Y] = o[UP_RIGHT_Y];
+			right[LOW_LEFT_X] = o[UP_RIGHT_X];
+			right[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			right[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			right[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
 		}
-		if (code == VERTICAL) {
-			int[] top = new int[4], bottom = new int[4];
-			top[TOP_RIGHT_X] = rect[TOP_RIGHT_X];
-			top[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
-			top[LOW_LEFT_X] = rect[LOW_LEFT_X];
-			top[LOW_LEFT_Y] = o[TOP_RIGHT_Y];
-			if (area(top) > 0) ans.add(top);
-            if (area(bottom) > 0) ans.add(bottom);
-            return ans;
+		else if (code == VERTICAL) {
+			up[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			up[LOW_LEFT_Y] = o[UP_RIGHT_Y];
+			up[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			up[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
+			low[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			low[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			low[UP_RIGHT_X] = o[UP_RIGHT_X];
+			low[UP_RIGHT_Y] = o[LOW_LEFT_Y];
 		}
-		if (code == UP) {
-			int[] left = new int[4], middle = new int[4], right = new int[4];
+		else if (code == UP) {
+			System.out.println("UP");
             left[LOW_LEFT_X] = rect[LOW_LEFT_X];
             left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
-            left[TOP_RIGHT_X] = o[LOW_LEFT_X];
-            left[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
+            left[UP_RIGHT_X] = o[LOW_LEFT_X];
+            left[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
             middle[LOW_LEFT_X] = o[LOW_LEFT_X];
-            middle[LOW_LEFT_Y] = o[TOP_RIGHT_Y];
-            middle[TOP_RIGHT_X] = o[TOP_RIGHT_X];
-            middle[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
-            right[LOW_LEFT_X] = o[TOP_RIGHT_X];
+            middle[LOW_LEFT_Y] = o[UP_RIGHT_Y];
+            middle[UP_RIGHT_X] = o[UP_RIGHT_X];
+            middle[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
+            right[LOW_LEFT_X] = o[UP_RIGHT_X];
             right[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
-            right[TOP_RIGHT_X] = rect[TOP_RIGHT_X];
-            right[TOP_RIGHT_Y] = rect[TOP_RIGHT_Y];
-            if (area(middle) > 0) ans.add(middle);
-            if (area(left) > 0) ans.add(left);
-            if (area(right) > 0) ans.add(right);
-            return ans;
-
+            right[UP_RIGHT_X] = rect[UP_RIGHT_X];
+            right[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
 		}
+		else if (code == LOW) {
+			System.out.println("LOW");
+			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			left[UP_RIGHT_X] = o[LOW_LEFT_X];
+			left[UP_RIGHT_Y] = o[LOW_LEFT_Y];
+			middle[LOW_LEFT_X] = o[LOW_LEFT_X];
+			middle[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			middle[UP_RIGHT_X] = o[UP_RIGHT_X];
+			middle[UP_RIGHT_Y] = o[LOW_LEFT_Y];
+			right[LOW_LEFT_X] = o[UP_RIGHT_X];
+			right[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			right[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			right[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
+		}
+		else if (code == RIGHT) {
+			up[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			up[LOW_LEFT_Y] = o[UP_RIGHT_Y];
+			up[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			up[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
+			middle[LOW_LEFT_X] = o[UP_RIGHT_X];
+			middle[LOW_LEFT_Y] = o[LOW_LEFT_Y];
+			middle[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			middle[UP_RIGHT_Y] = o[UP_RIGHT_Y];
+			low[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			low[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			low[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			low[UP_RIGHT_Y] = o[LOW_LEFT_Y];
+		}
+		else if (code == LEFT) {
+			up[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			up[LOW_LEFT_Y] = o[UP_RIGHT_Y];
+			up[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			up[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
+			middle[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			middle[LOW_LEFT_Y] = o[LOW_LEFT_Y];
+			middle[UP_RIGHT_X] = o[LOW_LEFT_X];
+			middle[UP_RIGHT_Y] = o[UP_RIGHT_Y];
+			low[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			low[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			low[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			low[UP_RIGHT_Y] = o[LOW_LEFT_Y];
+		}
+		else if (code == OUTSIDE) {
+			up[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			up[LOW_LEFT_Y] = o[UP_RIGHT_Y];
+			up[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			up[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
+			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			left[LOW_LEFT_Y] = o[LOW_LEFT_Y];
+			left[UP_RIGHT_X] = o[LOW_LEFT_X];
+			left[UP_RIGHT_Y] = o[UP_RIGHT_Y];
+			right[LOW_LEFT_X] = o[UP_RIGHT_X];
+			right[LOW_LEFT_Y] = o[LOW_LEFT_Y];
+			right[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			right[UP_RIGHT_Y] = o[UP_RIGHT_Y];
+			low[LOW_LEFT_X] = rect[LOW_LEFT_X];
+			low[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
+			low[UP_RIGHT_X] = rect[UP_RIGHT_X];
+			low[UP_RIGHT_Y] = o[LOW_LEFT_Y];
+		}
+		else throw new IllegalArgumentException();
+		
+		for (int[] r : rects) {
+			if (area(r) > 0) ans.add(r);
+		}
+		
+		return ans;
 	}
     static List<int[]> append(int[] r, List<int[]> prevs)
     {
@@ -147,61 +228,127 @@ public class rect1 {
 			for (int[] c : cuts) {
 				nexts.add(c);
 			}
-            // int[] o = overlap(r, prev);
-            // if (o == null) {
-                // nexts.add(prev);
-            // }
-            // else if (!under(prev, o)) {
-				// if (equal(upRight(o), upRight(prev))) {
-					// prev[TOP_RIGHT_X] = o[BOTTOM_LEFT_X];
-					// nexts.add(prev);
-					// int[] extra = new int[4];
-					// int[] oBottomRight = bottomRight(o);
-					// extra[LOW_LEFT_X] = o[LOW_LEFT_X];
-					// extra[LOW_LEFT_Y] = prev[LOW_LEFT_Y];
-					// extra[UP_RIHGT_X] = oBottomRight[0];
-					// extra[UP_RIGHT_Y] = oBottomRight[1];
-					// if (area(extra) > 0) nexts.add(extra);
-				// }
-				// else if (equal(lowLeft(o), lowLeft(prev)){
-					// prev[LOW_LEFT_X] = o[TOP_RIGHT_X];
-					// nexts.add(prev);
-					// int[] extra = new int[4];
-					// extra[LOW_LEFT_X] = o[LOW_LEFT_X];
-					// extra[LOW_LEFT_Y] =  
-				// }
-            // }
         }
         return nexts;
 
     }
-    static void solve()
-    {
-        int a = ni(), b = ni(), n = ni();
-        int[][] rects = new int[n][5];
-        int[] colors = new int[2501];
+	static int[] answer(int[][] rects, int n, int a, int b)
+	{
+		int[] colors = new int[2501];
         List<int[]> prevs = new ArrayList<>();
-        for (int i = 0; i < n; i++) 
-            for (int j = 0; j < 5; j++)
-                rects[i][j] = ni();
-        
-        for (int i = n-1; i >= 0; i--) {
+		for (int i = n-1; i >= 0; i--) {
             int cur = area(rects[i]);
             for (int[] prev : prevs) {
                 int[] o = overlap(prev, rects[i]);
                 if (o == null) continue;
                 cur -= area(o);
             }
-            // colors[rects[i][COLOR]] += area(rects[i]) - totArea(overlaps);
-            colors[rects[i][COLOR]] += area(rects[i]) - tot;
+            colors[rects[i][COLOR]] += cur;
             prevs = append(rects[i], prevs);
+			for (int[] prev : prevs) {
+				System.out.println(Arrays.toString(prev));
+			}
+			System.out.println();
+		
         }
         colors[1] = a*b;
         for (int i = 2; i <= 2500; i++) {
             colors[1] -= colors[i];
         }
-
-        for (int i = 1; i <= 2500; i++) {
+		for (int[] prev : prevs) {
+			System.out.println(Arrays.toString(prev));
+		}
+		System.out.println();
+		return colors;
+	}
+	static int[] brute(int[][] rects, int n, int a, int b)
+	{
+		int[] colors = new int[2501];
+		for (int i = n-1; i >= 0; i--) {
+			List<int[]> overlaps = new ArrayList<>();
+			for (int j = i+1; j < n; j++) {
+				int[] prev = rects[j];
+                int[] o = overlap(prev, rects[i]);
+                if (o == null) continue;
+				overlaps.add(o);
+            }
+            colors[rects[i][COLOR]] += area(rects[i]) - totArea(overlaps);
+        }
+        colors[1] = a*b;
+        for (int i = 2; i <= 2500; i++) {
+            colors[1] -= colors[i];
+        }
+		return colors;
+	}
+	static int[] randomArr(int n, int lo, int hi)
+    {
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            ans[i] = (int) ((Math.random() * (hi - lo + 1)) + lo);
+        }
+        return ans;
+    }
+	static void testcase()
+	{
+		outer:
+		while (true) {
+			int n = randomArr(1, 1, 3)[0];
+			// int a = randomArr(1, 1, 5)[0];
+			// int b = randomArr(1, 1, 5)[0];
+			int a = 50;
+			int b = 50;
+			int[][] rects = new int[n][5];
+			for (int i = 0; i < n; i++) {
+				rects[i][LOW_LEFT_X] = randomArr(1, 1, 5)[0];
+				rects[i][LOW_LEFT_Y] = randomArr(1, 1, 5)[0];
+				rects[i][UP_RIGHT_X] = randomArr(1, rects[i][LOW_LEFT_X], 5)[0];
+				rects[i][UP_RIGHT_Y] = randomArr(1, rects[i][LOW_LEFT_Y], 5)[0];
+				rects[i][COLOR] = randomArr(1, 1, 5)[0];
+			}
+			int[] expect = brute(rects, n, a, b);
+			int[] actual = answer(rects, n, a, b);
+			for (int i = 0; i < expect.length; i++) {
+				if (expect[i] != actual[i]) {
+					System.out.println(a + " " + b + " " + n);
+					for (int[] r : rects) {
+						for (int j = 0; j < r.length; j++) {
+							System.out.print(r[j]);
+							System.out.print(j==r.length-1?"\n":" ");
+						}
+					}
+					System.out.println();
+					System.out.print("expect: \n");
+					display(expect);
+					System.out.print("actual: \n");
+					display(actual);
+					break outer;
+				}
+			}
+			System.out.println("ok");
+		}
+	}
+	static void display(int[] colors)
+	{
+		for (int i = 1; i <= 2500; i++) {
+            if (colors[i] == 0) continue;
+            System.out.printf("%d %d\n", i, colors[i]);
+        }
+	}
+    static void solve()
+    {
+		boolean debug = false;
+		if (debug) {
+			testcase();
+			return;
+		}
+        int a = ni(), b = ni(), n = ni();
+        int[][] rects = new int[n][5];
+        for (int i = 0; i < n; i++) 
+            for (int j = 0; j < 5; j++)
+                rects[i][j] = ni();
+        
+		int[] colors = answer(rects, n, a, b);
+		for (int i = 1; i <= 2500; i++) {
             if (colors[i] == 0) continue;
             out.printf("%d %d\n", i, colors[i]);
         }
