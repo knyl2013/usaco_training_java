@@ -28,53 +28,13 @@ public class rect1 {
         if (area(ans) <= 0) return null;
         return ans;
     }
-    static boolean isInside(int[] inside, int[] outside)
-    {
-        boolean lower = outside[LOW_LEFT_X] <= inside[LOW_LEFT_X] && outside[LOW_LEFT_Y] <= inside[LOW_LEFT_Y];
-        boolean higher = outside[UP_RIGHT_X] >= inside[UP_RIGHT_X] && outside[UP_RIGHT_Y] >= inside[UP_RIGHT_Y];
-        return lower && higher;
-    }
-	static int[] upRight(int[] r)
-	{
-		return new int[]{r[UP_RIGHT_X], r[UP_RIGHT_Y]};
-	}
-	static int[] lowLeft(int[] r)
-	{
-		return new int[]{r[LOW_LEFT_X], r[LOW_LEFT_Y]};
-	}
-	static int[] lowRight(int[] r)
-	{
-		return new int[]{r[UP_RIGHT_X], r[LOW_LEFT_Y]};
-	}
-	static int[] upLeft(int[] r)
-	{
-		return new int[]{r[LOW_LEFT_X], r[UP_RIGHT_Y]};
-	}
-	static boolean equal(int[] a, int[] b)
-	{
-		if (a.length != b.length) throw new IllegalArgumentException();
-		for (int i = 0; i < a.length; i++)
-			if (a[i] != b[i])
-				return false;
-		return true;
-	}
 	
-    static int totArea(List<int[]> rects)
-    {
-        int ans = 0, n = rects.size();
+	static boolean isInside(int[] inside, int[] outside)
+	{
+		return 	outside[LOW_LEFT_X] <= inside[LOW_LEFT_X] && outside[LOW_LEFT_Y] <= inside[LOW_LEFT_Y] &&
+				outside[UP_RIGHT_X] >= inside[UP_RIGHT_X] && outside[UP_RIGHT_Y] >= inside[UP_RIGHT_Y];
+	}
 
-        for (int i = 0; i < n; i++) {
-            List<int[]> overlaps = new ArrayList<>();
-            for (int j = i + 1; j < n; j++) {
-                int[] o = overlap(rects.get(i), rects.get(j));
-                if (o == null) continue;
-                overlaps.add(o);
-            }
-            ans += area(rects.get(i)) - totArea(overlaps);
-        }
-
-        return ans;   
-    }
 	static int getStatus(int[] r1, int[] r2) // if ans = 0(UP), it means r1 is on the upper of r2
 	{
 		if (isInside(r1, r2)) return INSIDE; // r2 is the ouside rectangle, so r1 is the inside
@@ -84,24 +44,12 @@ public class rect1 {
 		boolean up = o[LOW_LEFT_Y] == r1[LOW_LEFT_Y];
 		boolean right = o[LOW_LEFT_X] == r1[LOW_LEFT_X];
 		boolean left = o[UP_RIGHT_X] == r1[UP_RIGHT_X];
-		// System.out.println(up + " " + low + " " + left + " " + right);
 		if (up && low && !left && !right) return HORIZONTAL;
 		if (left && right && !up && !left) return VERTICAL;
 		if (left) return LEFT;
 		if (right) return RIGHT;
 		if (up) return UP;
 		if (low) return LOW;
-		
-		// boolean up = r1[UP_RIGHT_Y] > r2[UP_RIGHT_Y], low = r1[LOW_LEFT_Y] < r2[LOW_LEFT_Y];
-		// boolean left = r1[LOW_LEFT_X] < r2[LOW_LEFT_X], right = r1[UP_RIGHT_X] > r2[UP_RIGHT_X];
-		// if (up && low && !left && !right) return VERTICAL;
-		// if (left && right && !up && !low) return HORIZONTAL;
-		// if (up) return UP;
-		// if (left) return LEFT;
-		// if (low) return LOW;
-		// if (right) return RIGHT;
-		// System.out.println(Arrays.toString(r1));
-		// System.out.println(Arrays.toString(r2));
 		throw new IllegalArgumentException();
 	}
 	static List<int[]> cut(int[] rect, int[] cutter)
@@ -112,7 +60,6 @@ public class rect1 {
 		int[][] rects = new int[5][4];
 		int[] left = rects[0], right = rects[1], low = rects[2], up = rects[3], middle = rects[4];
 		int code = getStatus(rect, cutter);
-		// System.out.println("code: " + code);
 		if (code == INSIDE) return ans;
 		if (code == HORIZONTAL) {
 			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
@@ -135,7 +82,6 @@ public class rect1 {
 			low[UP_RIGHT_Y] = o[LOW_LEFT_Y];
 		}
 		else if (code == UP) {
-			// System.out.println("UP");
             left[LOW_LEFT_X] = rect[LOW_LEFT_X];
             left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
             left[UP_RIGHT_X] = o[LOW_LEFT_X];
@@ -150,11 +96,10 @@ public class rect1 {
             right[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
 		}
 		else if (code == LOW) {
-			// System.out.println("LOW");
 			left[LOW_LEFT_X] = rect[LOW_LEFT_X];
 			left[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
 			left[UP_RIGHT_X] = o[LOW_LEFT_X];
-			left[UP_RIGHT_Y] = o[LOW_LEFT_Y];
+			left[UP_RIGHT_Y] = rect[UP_RIGHT_Y];
 			middle[LOW_LEFT_X] = o[LOW_LEFT_X];
 			middle[LOW_LEFT_Y] = rect[LOW_LEFT_Y];
 			middle[UP_RIGHT_X] = o[UP_RIGHT_X];
@@ -245,102 +190,16 @@ public class rect1 {
             }
             colors[rects[i][COLOR]] += cur;
             prevs = append(rects[i], prevs);
-			// for (int[] prev : prevs) {
-			// 	System.out.println(Arrays.toString(prev));
-			// }
-			// System.out.println();
 		
         }
         colors[1] = a*b;
         for (int i = 2; i <= 2500; i++) {
             colors[1] -= colors[i];
         }
-		// for (int[] prev : prevs) {
-		// 	System.out.println(Arrays.toString(prev));
-		// }
-		// System.out.println();
 		return colors;
-	}
-	static int[] brute(int[][] rects, int n, int a, int b)
-	{
-		int[] colors = new int[2501];
-		for (int i = n-1; i >= 0; i--) {
-			List<int[]> overlaps = new ArrayList<>();
-			for (int j = i+1; j < n; j++) {
-				int[] prev = rects[j];
-                int[] o = overlap(prev, rects[i]);
-                if (o == null) continue;
-				overlaps.add(o);
-            }
-            colors[rects[i][COLOR]] += area(rects[i]) - totArea(overlaps);
-        }
-        colors[1] = a*b;
-        for (int i = 2; i <= 2500; i++) {
-            colors[1] -= colors[i];
-        }
-		return colors;
-	}
-	static int[] randomArr(int n, int lo, int hi)
-    {
-        int[] ans = new int[n];
-        for (int i = 0; i < n; i++) {
-            ans[i] = (int) ((Math.random() * (hi - lo + 1)) + lo);
-        }
-        return ans;
-    }
-	static void testcase()
-	{
-		outer:
-		while (true) {
-			int n = randomArr(1, 1, 3)[0];
-			// int a = randomArr(1, 1, 5)[0];
-			// int b = randomArr(1, 1, 5)[0];
-			int a = 50;
-			int b = 50;
-			int[][] rects = new int[n][5];
-			for (int i = 0; i < n; i++) {
-				rects[i][LOW_LEFT_X] = randomArr(1, 1, 5)[0];
-				rects[i][LOW_LEFT_Y] = randomArr(1, 1, 5)[0];
-				rects[i][UP_RIGHT_X] = randomArr(1, rects[i][LOW_LEFT_X], 5)[0];
-				rects[i][UP_RIGHT_Y] = randomArr(1, rects[i][LOW_LEFT_Y], 5)[0];
-				rects[i][COLOR] = randomArr(1, 1, 5)[0];
-			}
-			int[] expect = brute(rects, n, a, b);
-			int[] actual = answer(rects, n, a, b);
-			for (int i = 0; i < expect.length; i++) {
-				if (expect[i] != actual[i]) {
-					System.out.println(a + " " + b + " " + n);
-					for (int[] r : rects) {
-						for (int j = 0; j < r.length; j++) {
-							System.out.print(r[j]);
-							System.out.print(j==r.length-1?"\n":" ");
-						}
-					}
-					System.out.println();
-					System.out.print("expect: \n");
-					display(expect);
-					System.out.print("actual: \n");
-					display(actual);
-					break outer;
-				}
-			}
-			System.out.println("ok");
-		}
-	}
-	static void display(int[] colors)
-	{
-		for (int i = 1; i <= 2500; i++) {
-            if (colors[i] == 0) continue;
-            System.out.printf("%d %d\n", i, colors[i]);
-        }
 	}
     static void solve()
     {
-		boolean debug = false;
-		if (debug) {
-			testcase();
-			return;
-		}
         int a = ni(), b = ni(), n = ni();
         int[][] rects = new int[n][5];
         for (int i = 0; i < n; i++) 
@@ -362,8 +221,8 @@ public class rect1 {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-	// static String taskName = "rect1";
+    // static String taskName = null;
+	static String taskName = "rect1";
     
     public static void main(String[] args) throws Exception
     {
@@ -506,3 +365,91 @@ public class rect1 {
     
     private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
 }
+
+/*
+TLE version
+	static int totArea(List<int[]> rects)
+    {
+        int ans = 0, n = rects.size();
+
+        for (int i = 0; i < n; i++) {
+            List<int[]> overlaps = new ArrayList<>();
+            for (int j = i + 1; j < n; j++) {
+                int[] o = overlap(rects.get(i), rects.get(j));
+                if (o == null) continue;
+                overlaps.add(o);
+            }
+            ans += area(rects.get(i)) - totArea(overlaps);
+        }
+
+        return ans;   
+    }
+	static int[] brute(int[][] rects, int n, int a, int b)
+	{
+		int[] colors = new int[2501];
+		for (int i = n-1; i >= 0; i--) {
+			List<int[]> overlaps = new ArrayList<>();
+			for (int j = i+1; j < n; j++) {
+				int[] prev = rects[j];
+                int[] o = overlap(prev, rects[i]);
+                if (o == null) continue;
+				overlaps.add(o);
+            }
+            colors[rects[i][COLOR]] += area(rects[i]) - totArea(overlaps);
+        }
+        colors[1] = a*b;
+        for (int i = 2; i <= 2500; i++) {
+            colors[1] -= colors[i];
+        }
+		return colors;
+	}
+*/
+
+/*
+Random test case
+static int[] randomArr(int n, int lo, int hi)
+    {
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            ans[i] = (int) ((Math.random() * (hi - lo + 1)) + lo);
+        }
+        return ans;
+    }
+	static void testcase()
+	{
+		outer:
+		while (true) {
+			int n = randomArr(1, 1, 10)[0];
+			int a = 50;
+			int b = 50;
+			int[][] rects = new int[n][5];
+			for (int i = 0; i < n; i++) {
+				rects[i][LOW_LEFT_X] = randomArr(1, 1, 5)[0];
+				rects[i][LOW_LEFT_Y] = randomArr(1, 1, 5)[0];
+				rects[i][UP_RIGHT_X] = randomArr(1, rects[i][LOW_LEFT_X], 5)[0];
+				rects[i][UP_RIGHT_Y] = randomArr(1, rects[i][LOW_LEFT_Y], 5)[0];
+				rects[i][COLOR] = randomArr(1, 1, 5)[0];
+			}
+			int[] expect = brute(rects, n, a, b);
+			int[] actual = answer(rects, n, a, b);
+			for (int i = 0; i < expect.length; i++) {
+				if (expect[i] != actual[i]) {
+					System.out.println(a + " " + b + " " + n);
+					for (int[] r : rects) {
+						for (int j = 0; j < r.length; j++) {
+							System.out.print(r[j]);
+							System.out.print(j==r.length-1?"\n":" ");
+						}
+					}
+					System.out.println();
+					System.out.print("expect: \n");
+					display(expect);
+					System.out.print("actual: \n");
+					display(actual);
+					break outer;
+				}
+			}
+			System.out.println("ok");
+		}
+	}
+*/
