@@ -90,21 +90,53 @@ public class fence8 {
 		}
 		return ans;
 	}
+	List<Integer> canUse;
+	int[][] memo;
+	static int dfs(int val, int last)
+	{
+		if (val == 0) return 0;
+		if (last < 0) return val;
+		int ans = dfs(val, last-1);
+		if (val >= rails[canUse.get(last)]) {
+			ans = Math.min(ans, dfs(val - rails[canUse.get(last)], last-1));
+		}
+		return ans;
+	}
 	static List<Integer> changeHelper(int val, boolean[] railMarked)
 	{
-		List<Integer> canUse = new ArrayList<>();
+		canUse = new ArrayList<>();
 		int k = railMarked.length;
 		for (int i = 0; i < k; i++)
 			if (!railMarked[i])
 				canUse.add(i);
+		int len = canUse.size();
+		memo = new int[val+1][len-1];
+		for (int i = 0; i < memo.length; i++)
+			Arrays.fill(memo[i], -1);
+		int mini = dfs(val, len-1);
+		List<Integer> ans = new ArrayList<>();
+		ans.add(mini);
 		
+		int idx = len-1;
+		int v = val;
+		while (idx >= 0) {
+			int chooseIdx = dfs(v - rails[canUse.get(idx)], last-1);
+			int ignoreIdx = dfs(v, last-1);
+			if (chooseIdx < ignoreIdx) {
+				ans.add(idx);
+				v -= rails[canUse.get(idx)];
+			}
+			idx--;
+		}
+		
+		return ans;
 	}
 	static int change(boolean[] boardMarked, boolean[] railMarked)
 	{
 		int best = 0, bestIdx = 0;
 		List<Integer> bestList = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
-			if (remains[i] == 0) continue;
+			if (boardMarked[i]) continue;
 			List<Integer> cur = changeHelper(boards[i], railMarked);
 			if (cur.size() > 0 && cur.get(0) > best) {
 				best = cur.get(0);
