@@ -62,14 +62,23 @@ public class fence8 {
             return false;
         }
         int deadSpace = 0;
+        boolean[] deads = new boolean[n];
         for (int i = 0; i < n; i++) {
-            if (rails[0] > boards[i]) // boards[i] is not usable
+            if (rails[0] > boards[i]) { // boards[i] is not usable
                 deadSpace += boards[i];
+                deads[i] = true;
+            }
         }
         if (railPrefix[idx] > totBoard-deadSpace) {
             // System.out.println("pruned3");
             mp.put(key, false);
             return false;
+        }
+        for (int i = 0; i < n; i++) {
+            if (!deads[i] && rails[1] > boards[i]) {
+                deadSpace += boards[i];
+                deads[i] = true;
+            }
         }
         // visited++;
 
