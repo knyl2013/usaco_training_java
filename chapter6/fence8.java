@@ -14,6 +14,8 @@ public class fence8 {
     static int totBoard;
     static int visited;
     static boolean found;
+	static List<HashSet<String>> sets;
+	
     static boolean larger(int[] a, int[] b)
     {
         for (int i = 0; i < a.length; i++) {
@@ -23,6 +25,13 @@ public class fence8 {
         }
         return true;
     }
+	static String encode()
+	{
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < n; i++)
+			sb.append(boards[i]).append('-');
+		return sb.toString();
+	}
     static boolean dfsid(int limit)
     {
         if (limit == 0 || found) {
@@ -34,15 +43,19 @@ public class fence8 {
         //     return false;
         // }
         int idx = limit - 1;
+		String key = encode();
+		Set<String> s = sets.get(idx);
+		if (s.contains(key)) return false;
+		s.add(key);
         if (larger(boards, bestSoFar[idx])) {
-            System.out.println("pruned1");
+            // System.out.println("pruned1");
             return false;
         }
         if (larger(bestSoFar[idx], boards)) {
             bestSoFar[idx] = boards.clone();
         }
         if (railPrefix[idx] > totBoard) {
-            System.out.println("pruned2");
+            // System.out.println("pruned2");
             return false;
         }
         int deadSpace = 0;
@@ -51,7 +64,7 @@ public class fence8 {
                 deadSpace += boards[i];
         }
         if (railPrefix[idx] > totBoard-deadSpace) {
-            System.out.println("pruned3");
+            // System.out.println("pruned3");
             return false;
         }
         // visited++;
@@ -64,6 +77,10 @@ public class fence8 {
             totBoard += rails[idx];
             boards[i] += rails[idx];
             if (found) return true;
+			if (boards[i] == rails[idx]) {
+				// System.out.println("pruned4");
+				break;
+			}
         }
 
         return false;
@@ -89,9 +106,12 @@ public class fence8 {
         }
         int ans = 0;
         for (int i = 1; i <= r; i++) {
+			sets = new ArrayList<>();
+			for (int j = 0; j < i; j++)
+				sets.add(new HashSet<>());
             visited = 0;
             found = false;
-            System.out.println(i);
+            // System.out.println(i);
             if (dfsid(i)) {
                 ans = i;
             }
@@ -111,7 +131,9 @@ public class fence8 {
     static PrintWriter out;
     static String INPUT = "";
     static String taskName = null;
-    // static String taskName = "fence8";
+	// static String taskName = "fence8";
+	static boolean logTime = !true;
+    
     
     public static void main(String[] args) throws Exception
     {
@@ -252,7 +274,7 @@ public class fence8 {
         }
     }
     
-    private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
+    private static void tr(Object... o) { if(logTime)System.out.println(Arrays.deepToString(o)); }
 }
 
 
