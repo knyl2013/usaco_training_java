@@ -14,7 +14,7 @@ public class fence8 {
     static int totBoard;
     static int visited;
     static boolean found;
-	static List<HashSet<String>> sets;
+	static List<Map<String, Boolean>> maps;
 	
     static boolean larger(int[] a, int[] b)
     {
@@ -28,8 +28,10 @@ public class fence8 {
 	static String encode()
 	{
 		StringBuilder sb = new StringBuilder();
+        int[] sorted = boards.clone();
+        Arrays.sort(sorted);
 		for (int i = 0; i < n; i++)
-			sb.append(boards[i]).append('-');
+			sb.append(sorted[i]).append('-');
 		return sb.toString();
 	}
     static boolean dfsid(int limit)
@@ -44,11 +46,11 @@ public class fence8 {
         // }
         int idx = limit - 1;
 		String key = encode();
-		Set<String> s = sets.get(idx);
-		if (s.contains(key)) return false;
-		s.add(key);
+		Map<String, Boolean> mp = maps.get(idx);
+		if (mp.containsKey(key)) return mp.get(key);
         if (larger(boards, bestSoFar[idx])) {
             // System.out.println("pruned1");
+            mp.put(key, false);
             return false;
         }
         if (larger(bestSoFar[idx], boards)) {
@@ -56,6 +58,7 @@ public class fence8 {
         }
         if (railPrefix[idx] > totBoard) {
             // System.out.println("pruned2");
+            mp.put(key, false);
             return false;
         }
         int deadSpace = 0;
@@ -65,6 +68,7 @@ public class fence8 {
         }
         if (railPrefix[idx] > totBoard-deadSpace) {
             // System.out.println("pruned3");
+            mp.put(key, false);
             return false;
         }
         // visited++;
@@ -76,13 +80,16 @@ public class fence8 {
             dfsid(limit-1);
             totBoard += rails[idx];
             boards[i] += rails[idx];
-            if (found) return true;
+            if (found) {
+                mp.put(key, true);
+                return true;
+            }
 			if (boards[i] == rails[idx]) {
 				// System.out.println("pruned4");
 				break;
 			}
         }
-
+        mp.put(key, false);
         return false;
     }
     static void solve()
@@ -105,10 +112,11 @@ public class fence8 {
             railPrefix[i] = run;
         }
         int ans = 0;
+        maps = new ArrayList<>();
+        for (int j = 0; j < r; j++) {
+            maps.add(new HashMap<>());
+        }
         for (int i = 1; i <= r; i++) {
-			sets = new ArrayList<>();
-			for (int j = 0; j < i; j++)
-				sets.add(new HashSet<>());
             visited = 0;
             found = false;
             // System.out.println(i);
@@ -132,7 +140,7 @@ public class fence8 {
     static String INPUT = "";
     static String taskName = null;
 	// static String taskName = "fence8";
-	static boolean logTime = !true;
+	static boolean logTime = true;
     
     
     public static void main(String[] args) throws Exception
