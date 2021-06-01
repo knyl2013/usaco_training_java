@@ -9,22 +9,11 @@ import java.util.*;
 
 public class fence8 {
     static int[] boards, rails, railPrefix;
-    static int[][] bestSoFar;
     static int n, r;
     static int totBoard;
-    static int visited;
     static boolean found;
 	static List<Map<String, Boolean>> maps;
 	
-    static boolean larger(int[] a, int[] b)
-    {
-        for (int i = 0; i < a.length; i++) {
-            if (a[i] < b[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
 	static String encode()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -40,48 +29,24 @@ public class fence8 {
             found = true;
             return true;
         }
-        // System.out.println(Arrays.toString(boards));
-        // if (visited > 1e9) {
-        //     return false;
-        // }
         int idx = limit - 1;
 		String key = encode();
 		Map<String, Boolean> mp = maps.get(idx);
 		if (mp.containsKey(key)) return mp.get(key);
-        if (larger(boards, bestSoFar[idx])) {
-            // System.out.println("pruned1");
-            mp.put(key, false);
-            return false;
-        }
-        if (larger(bestSoFar[idx], boards)) {
-            bestSoFar[idx] = boards.clone();
-        }
         if (railPrefix[idx] > totBoard) {
-            // System.out.println("pruned2");
             mp.put(key, false);
             return false;
         }
         int deadSpace = 0;
-        boolean[] deads = new boolean[n];
         for (int i = 0; i < n; i++) {
             if (rails[0] > boards[i]) { // boards[i] is not usable
                 deadSpace += boards[i];
-                deads[i] = true;
             }
         }
         if (railPrefix[idx] > totBoard-deadSpace) {
-            // System.out.println("pruned3");
             mp.put(key, false);
             return false;
         }
-        for (int i = 0; i < n; i++) {
-            if (!deads[i] && rails[1] > boards[i]) {
-                deadSpace += boards[i];
-                deads[i] = true;
-            }
-        }
-        // visited++;
-
         for (int i = 0; i < n; i++) {
             if (boards[i] < rails[idx]) continue;
             boards[i] -= rails[idx];
@@ -93,10 +58,6 @@ public class fence8 {
                 mp.put(key, true);
                 return true;
             }
-			if (boards[i] == rails[idx]) {
-				// System.out.println("pruned4");
-				break;
-			}
         }
         mp.put(key, false);
         return false;
@@ -108,9 +69,6 @@ public class fence8 {
         r = ni();
         rails = na(r);
         railPrefix = new int[r];
-        bestSoFar = new int[r][n];
-        for (int i = 0; i < r; i++)
-            Arrays.fill(bestSoFar[i], Integer.MAX_VALUE);
         Arrays.sort(rails);
         Arrays.sort(boards);
         for (int i = 0; i < n; i++)
@@ -122,20 +80,20 @@ public class fence8 {
         }
         int ans = 0;
         maps = new ArrayList<>();
-        for (int j = 0; j < r; j++) {
+        for (int j = 0; j < r; j++)
             maps.add(new HashMap<>());
-        }
-        for (int i = 1; i <= r; i++) {
-            visited = 0;
-            found = false;
-            // System.out.println(i);
-            if (dfsid(i)) {
-                ans = i;
-            }
-            else {
-                break;
-            }
-        }
+		int lo = 1, hi = r;
+		while (lo <= hi) {
+			int mid = (lo + hi) / 2;
+			found = false;
+			if (dfsid(mid)) {
+				ans = mid;
+				lo = mid + 1;
+			}
+			else {
+				hi = mid - 1;
+			}
+		}
         out.printf("%d\n", ans);
     }
 
@@ -147,9 +105,9 @@ public class fence8 {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-	// static String taskName = "fence8";
-	static boolean logTime = true;
+    // static String taskName = null;
+	static String taskName = "fence8";
+	static boolean logTime = !true;
     
     
     public static void main(String[] args) throws Exception
