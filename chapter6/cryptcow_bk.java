@@ -9,15 +9,17 @@ import java.util.*;
 
 public class cryptcow {
 	static String start = "Begin the Escape execution at the Break of Dawn";
+	static int[] freq;
 	static final int LIMIT = 75;
-	static boolean found;
+	static char[] current, encrypted;
 	static Set<String> seen;
-	
-	static int getTimes(String encrypted)
+	static int n;
+	static boolean found;
+	static int getTimes()
 	{
-		int[] freq = new int[128];
-		for (int i = 0; i < encrypted.length(); i++) {
-			freq[encrypted.charAt(i)]++;
+		freq = new int[128];
+		for (int i = 0; i < n; i++) {
+			freq[encrypted[i]]++;
 		}
 		for (int i = 0; i < start.length(); i++) {
 			freq[start.charAt(i)]--;
@@ -31,81 +33,98 @@ public class cryptcow {
 		if (!allEquals) return -1;
 		return freq['C'];
 	}
-	
-	static String decrypt(String s, int cIdx, int oIdx, int wIdx)
+	static void encrypt(int cIdx, int oIdx, int wIdx, int curLen)
+	{
+		char[] newCurrent = new char[current.length];
+		int idx = 0;
+		while (idx < cIdx) {
+			newCurrent[idx] = current[idx];
+			idx++;
+		}
+		newCurrent[idx++] = 'C';
+		for (int i = oIdx+1; i <= wIdx; i++) {
+			newCurrent[idx++] = current[i];
+		}
+		newCurrent[idx++] = 'O';
+		for (int i = cIdx; i <= oIdx; i++) {
+			newCurrent[idx++] = current[i];
+		}
+		newCurrent[idx++] = 'W';
+		for (int i = wIdx+1; i < curLen; i++) {
+			newCurrent[idx++] = current[i];
+		}
+		
+		current = newCurrent;
+	}
+	static void show(int len)
 	{
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < cIdx; i++)
-			sb.append(s.charAt(i));
-		for (int i = oIdx+1; i < wIdx; i++)
-			sb.append(s.charAt(i));
-		for (int i = cIdx+1; i < oIdx; i++)
-			sb.append(s.charAt(i));
-		for (int i = wIdx+1; i < s.length(); i++)
-			sb.append(s.charAt(i));
+		for (int i = 0; i < len; i++)
+			sb.append(current[i]);
+		System.out.println(sb);
+	}
+	static String encode(int curLen)
+	{
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < curLen; i++)
+			sb.append(current[i]);
 		return sb.toString();
 	}
-	
-	static boolean dfs(String current)
+	static boolean dfs(int curLen)
 	{
 		if (found) return true;
-		if (current.length() == start.length()) {
-			if (current.equals(start)) {
-				found = true;
-				return true;
+		if (curLen == n) {
+			boolean isEqual = true;
+			for (int i = 0; i < n; i++) {
+				if (current[i] != encrypted[i]) return false;
 			}
-			return false;
+			found = true;
+			return true;
 		}
-		if (seen.contains(current)) return false;
-		seen.add(current);
-		List<Integer> cIdxs = new ArrayList<>(), oIdxs = new ArrayList<>(), wIdxs = new ArrayList<>();
-		
-		for (int i = 0; i < current.length(); i++) {
-			char ch = current.charAt(i);
-			if (ch == 'C')
-				cIdxs.add(i);
-			else if (ch == 'O')
-				oIdxs.add(i);
-			else if (ch == 'W')
-				wIdxs.add(i);
-		}
-		if (new HashSet<>(Arrays.asList(cIdxs.size(), oIdxs.size(), wIdxs.size())).size() > 1)
-			return false;
-		int k = cIdxs.size();
-		int oPt = 0, wPt = 0;
-		for (int cIdx : cIdxs) {
-			while (oPt < k && oIdxs.get(oPt) < cIdx) oPt++;
-			if (oPt == k) return false;
-			while (wPt < k && wIdxs.get(wPt) < oIdxs.get(oPt)) wPt++;
-			if (wPt == k) return false;
-			for (int i = oPt; i < k; i++) {
-				int oIdx = oIdxs.get(i);
-				for (int j = wPt; j < k; j++) {
-					int wIdx = wIdxs.get(j);
-					if (wIdx < oIdx) continue;
-					if (dfs(decrypt(current, cIdx, oIdx, wIdx))) return true;
+		String key = encode(curLen);
+		if (seen.contains(key)) return false;
+		seen.add(key);
+		if (key.startsWith("CB"))show(curLen);
+		char[] backup = current.clone();
+		for (int cIdx = 0; cIdx < curLen; cIdx++) {
+			for (int oIdx = cIdx; oIdx < curLen; oIdx++) {
+				for (int wIdx = oIdx; wIdx < curLen; wIdx++) {
+					encrypt(cIdx, oIdx, wIdx, curLen);
+					// if (curLen+3==n)
+						// show(curLen + 3);
+					if (dfs(curLen + 3)) return true;
+					for (int i = 0; i < backup.length; i++) {
+						current[i] = backup[i];
+					}
 				}
 			}
 		}
-		
 		return false;
 	}
-	
-	static int[] answer(String encrypted)
+	static boolean dfsCaller()
 	{
-		if (encrypted.equals(start)) return new int[]{1, 0};
-		int times = getTimes(encrypted);
+		current = new char[75];
+		for (int i = 0; i < start.length(); i++) {
+			current[i] = start.charAt(i);
+		}
+		found = false;
+		int curLen = start.length();
+		return dfs(curLen);
+	}
+	static int[] answer()
+	{
+		if (new String(encrypted).equals(start)) return new int[]{1, 0};
+		int times = getTimes();
 		if (times == -1) return new int[]{0, 0};
 		if (times*3 > LIMIT-start.length()) return new int[]{0, 0};
-		if (start.length()+times*3 != encrypted.length()) return new int[]{0, 0};
-		found = false;
-		seen = new HashSet<>();
-		if (!dfs(encrypted)) return new int[]{0, 0};
+		if (start.length()+times*3 != n) return new int[]{0, 0};
+		if (!dfsCaller()) return new int[]{0, 0};
 		return new int[]{1, times};
 	}
-	
     static void solve()
     {
+		// System.out.println(start.length());
+		seen = new HashSet<>();
 		StringBuilder sb = new StringBuilder();
 		int b;
 		try {
@@ -122,8 +141,13 @@ public class cryptcow {
 		catch (Exception e) {
 			
 		}
-		String encrypted = sb.toString();
-		int[] ans = answer(encrypted);
+		// System.out.println(sb);
+		n = sb.length();
+		// System.out.println(n);
+		encrypted = new char[n];
+		for (int i = 0; i < n; i++)
+			encrypted[i] = sb.charAt(i);
+		int[] ans = answer();
         out.printf("%d %d\n", ans[0], ans[1]);
     }
 
@@ -136,7 +160,6 @@ public class cryptcow {
     static PrintWriter out;
     static String INPUT = "";
     static String taskName = null;
-	static boolean logTime = true;
 	// static String taskName = "cryptcow";
     
     public static void main(String[] args) throws Exception
@@ -278,6 +301,6 @@ public class cryptcow {
         }
     }
     
-    private static void tr(Object... o) { if(logTime)System.out.println(Arrays.deepToString(o)); }
+    private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
 }
 
