@@ -83,8 +83,29 @@ public class cryptcow {
 		
 		// return h > 0 && !startSubstrHashs.contains(h);
 	}
+	static boolean prefixFail(String current)
+	{
+		int idx = 0;
+		for (int i = 0; i < current.length(); i++) {
+			char ch = current.charAt(i);
+			if (ch == 'C' || ch == 'O' || ch == 'W') break;
+			if (start.charAt(idx++) != ch) return true;
+		}
+		return false;
+	}
+	static boolean suffixFail(String current)
+	{
+		int idx = start.length()-1;
+		for (int i = current.length()-1; i >= 0; i--) {
+			char ch = current.charAt(i);
+			if (ch == 'C' || ch == 'O' || ch == 'W') break;
+			if (start.charAt(idx--) != ch) return true;
+		}
+		return false;
+	}
 	static boolean dfs(String current)
 	{
+		if (current == null) return false;
 		if (found) return true;
 		if (current.length() == start.length()) {
 			if (current.equals(start)) {
@@ -96,8 +117,14 @@ public class cryptcow {
 		if (seen.contains(current)) return false;
 		seen.add(current);
 		if (substringFail(current)) return false;
-		// if (prefixFail(current)) return false;
-		// if (suffixFail(current)) return false;
+		// if (prefixFail(current)) {
+			// System.out.println("prune1");
+			// return false;
+		// }
+		// if (suffixFail(current)) {
+			// System.out.println("prune2");
+			// return false;
+		// }
 		// System.out.println(current);
 		int k = (current.length() - start.length()) / 3;
 		int cPt = 0, oPt = 0, wPt = 0;
