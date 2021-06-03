@@ -16,15 +16,15 @@ public class cryptcow {
 	static Set<String> startSubstrs;
 	static Set<Long> startSubstrHashs;
 	
-	static long hash(String s)
-	{
-		long ans = 0;
-		for (int i = 0; i < s.length(); i++) {
-			long val = (long) s.charAt(i);
-			ans = ans * p + val;
-		}
-		return ans;
-	}
+	// static long hash(String s)
+	// {
+	// 	long ans = 0;
+	// 	for (int i = 0; i < s.length(); i++) {
+	// 		long val = (long) s.charAt(i);
+	// 		ans = ans * p + val;
+	// 	}
+	// 	return ans;
+	// }
 	
 	static int getTimes(String encrypted)
 	{
@@ -93,6 +93,37 @@ public class cryptcow {
 		}
 		return false;
 	}
+	static boolean isBalance(String current)
+	{
+		int cCnt = 0, oCnt = 0;
+		int len = current.length();
+
+		for (int i = 0; i < len; i++) {
+			char ch = current.charAt(i);
+			if (ch == 'C') {
+				cCnt++;
+			}
+			else if (ch == 'O') {
+				if (cCnt == 0) {
+					// System.out.println("o, i: " + i);
+					return false;
+				}
+				return true;
+				// cCnt--;
+				// oCnt++;
+			}
+			else if (ch == 'W') {
+				if (oCnt == 0) {
+					// System.out.println("w, i: " + i);
+					return false;
+				}
+				oCnt--;
+			}
+		}
+		// return true;
+		return cCnt == 0 && oCnt == 0;
+
+	}
 	static boolean suffixFail(String current)
 	{
 		int idx = start.length()-1;
@@ -102,6 +133,20 @@ public class cryptcow {
 			if (start.charAt(idx--) != ch) return true;
 		}
 		return false;
+	}
+	static String encode(String current)
+	{
+		char[] ans = new char[current.length()];
+		for (int i = 0; i < current.length(); i++) {
+			char ch = current.charAt(i);
+			if (ch == 'C' || ch == 'O' || ch == 'W') {
+				ans[i] = '|';
+			}
+			else {
+				ans[i] = current.charAt(i);
+			}
+		}
+		return new String(ans);
 	}
 	static boolean dfs(String current)
 	{
@@ -114,9 +159,14 @@ public class cryptcow {
 			}
 			return false;
 		}
+		// String key = encode(current);
+		if (substringFail(current)) return false;
+		if (!isBalance(current)) return false;
 		if (seen.contains(current)) return false;
 		seen.add(current);
-		if (substringFail(current)) return false;
+		
+
+		// System.out.println(current);
 		// if (prefixFail(current)) {
 			// System.out.println("prune1");
 			// return false;
