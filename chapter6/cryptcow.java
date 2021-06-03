@@ -12,6 +12,19 @@ public class cryptcow {
 	static final int LIMIT = 75;
 	static boolean found;
 	static Set<String> seen;
+	static long p = 131;
+	static Set<String> startSubstrs;
+	static Set<Long> startSubstrHashs;
+	
+	static long hash(String s)
+	{
+		long ans = 0;
+		for (int i = 0; i < s.length(); i++) {
+			long val = (long) s.charAt(i);
+			ans = ans * p + val;
+		}
+		return ans;
+	}
 	
 	static int getTimes(String encrypted)
 	{
@@ -45,7 +58,31 @@ public class cryptcow {
 			sb.append(s.charAt(i));
 		return sb.toString();
 	}
-	
+	static boolean substringFail(String current)
+	{
+		String[] words = current.split("C|O|W");
+		for (String word : words) {
+			if (word.isEmpty()) continue;
+			if (!startSubstrs.contains(word)) return true;
+			// if (start.indexOf(word) ==-1)return true;
+		}
+		return false;
+		// System.out.println(startSubstrHashs);
+		// long h = 0;
+		// for (int i = 0; i < current.length(); i++) {
+			// char ch = current.charAt(i);
+			// if (ch == 'C' || ch == 'O' || ch == 'W') {
+				// if (h > 0 && !startSubstrHashs.contains(h)) return true;
+				// h = 0;
+			// }
+			// else {
+				// long val = (long) ch;
+				// h = h * p + val;
+			// }
+		// } 
+		
+		// return h > 0 && !startSubstrHashs.contains(h);
+	}
 	static boolean dfs(String current)
 	{
 		if (found) return true;
@@ -58,30 +95,35 @@ public class cryptcow {
 		}
 		if (seen.contains(current)) return false;
 		seen.add(current);
-		List<Integer> cIdxs = new ArrayList<>(), oIdxs = new ArrayList<>(), wIdxs = new ArrayList<>();
+		if (substringFail(current)) return false;
+		// if (prefixFail(current)) return false;
+		// if (suffixFail(current)) return false;
+		// System.out.println(current);
+		int k = (current.length() - start.length()) / 3;
+		int cPt = 0, oPt = 0, wPt = 0;
+		int[] cIdxs = new int[k], oIdxs = new int[k], wIdxs = new int[k];
+		// List<Integer> cIdxs = new ArrayList<>(), oIdxs = new ArrayList<>(), wIdxs = new ArrayList<>();
 		
 		for (int i = 0; i < current.length(); i++) {
 			char ch = current.charAt(i);
 			if (ch == 'C')
-				cIdxs.add(i);
+				cIdxs[cPt++] = i;
 			else if (ch == 'O')
-				oIdxs.add(i);
+				oIdxs[oPt++] = i;
 			else if (ch == 'W')
-				wIdxs.add(i);
+				wIdxs[wPt++] = i;
 		}
-		if (new HashSet<>(Arrays.asList(cIdxs.size(), oIdxs.size(), wIdxs.size())).size() > 1)
-			return false;
-		int k = cIdxs.size();
-		int oPt = 0, wPt = 0;
+		oPt = 0;
+		wPt = 0;
 		for (int cIdx : cIdxs) {
-			while (oPt < k && oIdxs.get(oPt) < cIdx) oPt++;
+			while (oPt < k && oIdxs[oPt] < cIdx) oPt++;
 			if (oPt == k) return false;
-			while (wPt < k && wIdxs.get(wPt) < oIdxs.get(oPt)) wPt++;
+			while (wPt < k && wIdxs[wPt] < oIdxs[oPt]) wPt++;
 			if (wPt == k) return false;
 			for (int i = oPt; i < k; i++) {
-				int oIdx = oIdxs.get(i);
+				int oIdx = oIdxs[i];
 				for (int j = wPt; j < k; j++) {
-					int wIdx = wIdxs.get(j);
+					int wIdx = wIdxs[j];
 					if (wIdx < oIdx) continue;
 					if (dfs(decrypt(current, cIdx, oIdx, wIdx))) return true;
 				}
@@ -100,6 +142,19 @@ public class cryptcow {
 		if (start.length()+times*3 != encrypted.length()) return new int[]{0, 0};
 		found = false;
 		seen = new HashSet<>();
+		// startSubstrHashs = new HashSet<>();
+		// for (int i = 0; i < start.length(); i++) {
+			// for (int j = i; j < start.length(); j++) {
+				// startSubstrHashs.add(hash(start.substring(i, j+1)));
+			// }
+		// }
+		startSubstrs = new HashSet<>();
+		for (int i = 0; i < start.length(); i++) {
+			for (int j = i; j < start.length(); j++) {
+				startSubstrs.add(start.substring(i, j+1));
+			}
+		}
+		// System.out.println(startSubstrs);
 		if (!dfs(encrypted)) return new int[]{0, 0};
 		return new int[]{1, times};
 	}
