@@ -15,6 +15,7 @@ public class cryptcow {
 	static long p = 131;
 	static Set<String> startSubstrs;
 	static Set<Long> startSubstrHashs;
+	static Set<String> badCows;
 	
 	// static long hash(String s)
 	// {
@@ -47,16 +48,18 @@ public class cryptcow {
 	
 	static String decrypt(String s, int cIdx, int oIdx, int wIdx)
 	{
-		StringBuilder sb = new StringBuilder();
+		char[] ans = new char[s.length()-3];
+		int idx = 0;
+		// StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < cIdx; i++)
-			sb.append(s.charAt(i));
+			ans[idx++] = s.charAt(i);
 		for (int i = oIdx+1; i < wIdx; i++)
-			sb.append(s.charAt(i));
+			ans[idx++] = s.charAt(i);
 		for (int i = cIdx+1; i < oIdx; i++)
-			sb.append(s.charAt(i));
+			ans[idx++] = s.charAt(i);
 		for (int i = wIdx+1; i < s.length(); i++)
-			sb.append(s.charAt(i));
-		return sb.toString();
+			ans[idx++] = s.charAt(i);
+		return new String(ans);
 	}
 	static boolean substringFail(String current)
 	{
@@ -64,7 +67,6 @@ public class cryptcow {
 		for (String word : words) {
 			if (word.isEmpty()) continue;
 			if (!startSubstrs.contains(word)) return true;
-			// if (start.indexOf(word) ==-1)return true;
 		}
 		return false;
 		// System.out.println(startSubstrHashs);
@@ -93,35 +95,53 @@ public class cryptcow {
 		}
 		return false;
 	}
-	static boolean isBalance(String current)
+	static boolean isSuffixBalance(String current)
 	{
-		int cCnt = 0, oCnt = 0;
 		int len = current.length();
-
+		for (int i = len-1; i >= 0; i--) {
+			char ch = current.charAt(i);
+			if (ch == 'O' || ch == 'C') return false;
+			if (ch == 'W') return true;
+		}
+		return true;
+	}
+	static boolean isPrefixBalance(String current)
+	{
+		int len = current.length();
 		for (int i = 0; i < len; i++) {
 			char ch = current.charAt(i);
-			if (ch == 'C') {
-				cCnt++;
-			}
-			else if (ch == 'O') {
-				if (cCnt == 0) {
+			if (ch == 'O' || ch == 'W') return false;
+			if (ch == 'C') return true;
+		}
+		return true;
+		// int cCnt = 0, oCnt = 0;
+		// int len = current.length();
+
+		// for (int i = 0; i < len; i++) {
+			// char ch = current.charAt(i);
+			// if (ch == 'C') {
+				// cCnt++;
+				// return true;
+			// }
+			// else if (ch == 'O') {
+				// if (cCnt == 0) {
 					// System.out.println("o, i: " + i);
-					return false;
-				}
-				return true;
+					// return false;
+				// }
+				// return true;
 				// cCnt--;
 				// oCnt++;
-			}
-			else if (ch == 'W') {
-				if (oCnt == 0) {
+			// }
+			// else if (ch == 'W') {
+				// if (oCnt == 0) {
 					// System.out.println("w, i: " + i);
-					return false;
-				}
-				oCnt--;
-			}
-		}
+					// return false;
+				// }
+				// oCnt--;
+			// }
+		// }
 		// return true;
-		return cCnt == 0 && oCnt == 0;
+		// return cCnt == 0 && oCnt == 0;
 
 	}
 	static boolean suffixFail(String current)
@@ -148,6 +168,41 @@ public class cryptcow {
 		}
 		return new String(ans);
 	}
+	static boolean existPrefixWant(String current)
+	{
+		int len = current.length();
+		int firstC = -1;
+		for (int i = 0; i < len; i++) {
+			if (current.charAt(i) == 'C') {
+				firstC = i;
+				break;
+			}
+		}
+		if (firstC==-1) return true;
+		char want = start.charAt(firstC);
+		boolean alreadyMatching = current.charAt(firstC+1) == want;
+		if (alreadyMatching) return true;
+		for (int i = firstC+1; i < len-1; i++) {
+			char cur = current.charAt(i), next = current.charAt(i+1);
+			if (cur == 'O' && next == want) return true;
+			// if (alreadyMatching && cur == 'O' && next == 'W') return true;
+		}
+		
+		return false;
+	}
+	static String encodeCow(String current)
+	{
+		int len = current.length();
+		int k = len - start.length();
+		char[] ans = new char[k];
+		int idx = 0;
+		for (int i = 0; i < len; i++) {
+			char ch = current.charAt(i);
+			if (ch == 'C' || ch == 'O' || ch == 'W')
+				ans[idx++] = ch;
+		}
+		return new String(ans);
+	}
 	static boolean dfs(String current)
 	{
 		if (current == null) return false;
@@ -159,14 +214,28 @@ public class cryptcow {
 			}
 			return false;
 		}
-		// String key = encode(current);
+		// current = current.replaceAll("COW", "");
 		if (substringFail(current)) return false;
-		if (!isBalance(current)) return false;
+		String key = encodeCow(current);
+		if (!isPrefixBalance(current) || !isSuffixBalance(current)) {
+			badCows.add(key);
+			return false;
+		}
+		if (badCows.contains(key)) {
+			// System.out.println("prune");
+			return false;
+		}
+		// if (suffixFail(current)) return false;
+		// if (!existPrefixWant(current)) {
+			// System.out.println("prune");
+			// return false;
+		// }
 		if (seen.contains(current)) return false;
 		seen.add(current);
 		
+		
 
-		// System.out.println(current);
+		
 		// if (prefixFail(current)) {
 			// System.out.println("prune1");
 			// return false;
@@ -194,9 +263,15 @@ public class cryptcow {
 		wPt = 0;
 		for (int cIdx : cIdxs) {
 			while (oPt < k && oIdxs[oPt] < cIdx) oPt++;
-			if (oPt == k) return false;
+			if (oPt == k) {
+				badCows.add(key);
+				return false;
+			}
 			while (wPt < k && wIdxs[wPt] < oIdxs[oPt]) wPt++;
-			if (wPt == k) return false;
+			if (wPt == k) {
+				badCows.add(key);
+				return false;
+			}
 			for (int i = oPt; i < k; i++) {
 				int oIdx = oIdxs[i];
 				for (int j = wPt; j < k; j++) {
@@ -206,7 +281,7 @@ public class cryptcow {
 				}
 			}
 		}
-		
+		// System.out.println(current);
 		return false;
 	}
 	
@@ -219,6 +294,7 @@ public class cryptcow {
 		if (start.length()+times*3 != encrypted.length()) return new int[]{0, 0};
 		found = false;
 		seen = new HashSet<>();
+		badCows = new HashSet<>();
 		// startSubstrHashs = new HashSet<>();
 		// for (int i = 0; i < start.length(); i++) {
 			// for (int j = i; j < start.length(); j++) {
@@ -257,6 +333,7 @@ public class cryptcow {
 		String encrypted = sb.toString();
 		int[] ans = answer(encrypted);
         out.printf("%d %d\n", ans[0], ans[1]);
+		// System.out.println(seen.size());
     }
 
 
