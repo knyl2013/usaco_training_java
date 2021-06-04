@@ -218,7 +218,7 @@ public class cryptcow {
 		if (substringFail(current)) return false;
 		String key = encodeCow(current);
 		if (!isPrefixBalance(current) || !isSuffixBalance(current)) {
-			badCows.add(key);
+			// badCows.add(key);
 			return false;
 		}
 		if (badCows.contains(key)) {
@@ -261,15 +261,16 @@ public class cryptcow {
 		}
 		oPt = 0;
 		wPt = 0;
+		boolean noMatch = true;
 		for (int cIdx : cIdxs) {
 			while (oPt < k && oIdxs[oPt] < cIdx) oPt++;
 			if (oPt == k) {
-				badCows.add(key);
+				if (noMatch) badCows.add(key);
 				return false;
 			}
 			while (wPt < k && wIdxs[wPt] < oIdxs[oPt]) wPt++;
 			if (wPt == k) {
-				badCows.add(key);
+				if (noMatch) badCows.add(key);
 				return false;
 			}
 			for (int i = oPt; i < k; i++) {
@@ -277,6 +278,7 @@ public class cryptcow {
 				for (int j = wPt; j < k; j++) {
 					int wIdx = wIdxs[j];
 					if (wIdx < oIdx) continue;
+					noMatch = false;
 					if (dfs(decrypt(current, cIdx, oIdx, wIdx))) return true;
 				}
 			}
@@ -334,6 +336,14 @@ public class cryptcow {
 		int[] ans = answer(encrypted);
         out.printf("%d %d\n", ans[0], ans[1]);
 		// System.out.println(seen.size());
+		// System.out.println(badCows);
+		int showCnt = 10;
+		System.out.println("bad cows:");
+		for (String cow : badCows) {
+			// if (cow.length()>=8)continue;
+			System.out.println(cow);
+			if (--showCnt==0) break;
+		}
     }
 
 
