@@ -16,7 +16,52 @@ public class cryptcow {
 	static Set<String> startSubstrs;
 	static Set<Long> startSubstrHashs;
 	static Set<String> badCows;
-	
+	static Map<String, Boolean> memo = new HashMap<>();
+	static boolean isGood(String current)
+	{
+		// if (current.length()>=7*3) return true;
+		if (current.isEmpty()) return true;
+		if (memo.containsKey(current)) return memo.get(current);
+		int k = current.length() / 3;
+		int[] cIdxs = new int[k], oIdxs = new int[k], wIdxs = new int[k];
+		int cPt = 0, oPt = 0, wPt = 0;
+		for (int i = 0; i < current.length(); i++) {
+			char ch = current.charAt(i);
+			if (ch == 'C')
+				cIdxs[cPt++] = i;
+			else if (ch == 'O')
+				oIdxs[oPt++] = i;
+			else if (ch == 'W')
+				wIdxs[wPt++] = i;
+		}
+		oPt = 0;
+		wPt = 0;
+		for (int cIdx : cIdxs) {
+			while (oPt < k && oIdxs[oPt] < cIdx) oPt++;
+			if (oPt == k) {
+				memo.put(current, false);
+				return false;
+			}
+			while (wPt < k && wIdxs[wPt] < oIdxs[oPt]) wPt++;
+			if (wPt == k) {
+				memo.put(current, false);
+				return false;
+			}
+			for (int i = oPt; i < k; i++) {
+				int oIdx = oIdxs[i];
+				for (int j = wPt; j < k; j++) {
+					int wIdx = wIdxs[j];
+					if (wIdx < oIdx) continue;
+					if (isGood(decrypt(current, cIdx, oIdx, wIdx))) {
+						memo.put(current, true);
+						return true;
+					}
+				}
+			}
+		}
+		memo.put(current, false);
+		return false;
+	}
 	// static long hash(String s)
 	// {
 	// 	long ans = 0;
@@ -48,8 +93,8 @@ public class cryptcow {
 	
 	static String decrypt(String s, int cIdx, int oIdx, int wIdx)
 	{
-		char[] ans = new char[s.length()-3];
-		int idx = 0;
+		int len = s.length(), idx = 0;
+		char[] ans = new char[len-3];
 		// StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < cIdx; i++)
 			ans[idx++] = s.charAt(i);
@@ -57,7 +102,7 @@ public class cryptcow {
 			ans[idx++] = s.charAt(i);
 		for (int i = cIdx+1; i < oIdx; i++)
 			ans[idx++] = s.charAt(i);
-		for (int i = wIdx+1; i < s.length(); i++)
+		for (int i = wIdx+1; i < len; i++)
 			ans[idx++] = s.charAt(i);
 		return new String(ans);
 	}
@@ -216,15 +261,19 @@ public class cryptcow {
 		}
 		// current = current.replaceAll("COW", "");
 		if (substringFail(current)) return false;
-		String key = encodeCow(current);
+		// String key = encodeCow(current);
 		if (!isPrefixBalance(current) || !isSuffixBalance(current)) {
 			// badCows.add(key);
 			return false;
 		}
-		if (badCows.contains(key)) {
+		// if (!isGood(key)) {
 			// System.out.println("prune");
-			return false;
-		}
+			// return false;
+		// }
+		// if (badCows.contains(key)) {
+		// 	System.out.println("prune");
+		// 	return false;
+		// }
 		// if (suffixFail(current)) return false;
 		// if (!existPrefixWant(current)) {
 			// System.out.println("prune");
@@ -261,25 +310,28 @@ public class cryptcow {
 		}
 		oPt = 0;
 		wPt = 0;
-		boolean noMatch = true;
+		// boolean noMatch = true;
 		for (int cIdx : cIdxs) {
 			while (oPt < k && oIdxs[oPt] < cIdx) oPt++;
 			if (oPt == k) {
-				if (noMatch) badCows.add(key);
+				// if (noMatch) badCows.add(key);
 				return false;
 			}
 			while (wPt < k && wIdxs[wPt] < oIdxs[oPt]) wPt++;
 			if (wPt == k) {
-				if (noMatch) badCows.add(key);
+				// if (noMatch) badCows.add(key);
 				return false;
 			}
 			for (int i = oPt; i < k; i++) {
 				int oIdx = oIdxs[i];
-				for (int j = wPt; j < k; j++) {
+				for (int j = k-1; j >= wPt; j--) {
 					int wIdx = wIdxs[j];
-					if (wIdx < oIdx) continue;
-					noMatch = false;
-					if (dfs(decrypt(current, cIdx, oIdx, wIdx))) return true;
+					if (wIdx < oIdx) break;
+					// noMatch = false;
+					if (dfs(decrypt(current, cIdx, oIdx, wIdx))) {
+						// System.out.println(current);
+						return true;
+					}
 				}
 			}
 		}
@@ -337,13 +389,13 @@ public class cryptcow {
         out.printf("%d %d\n", ans[0], ans[1]);
 		// System.out.println(seen.size());
 		// System.out.println(badCows);
-		int showCnt = 10;
-		System.out.println("bad cows:");
-		for (String cow : badCows) {
+		// int showCnt = 10;
+		// System.out.println("bad cows:");
+		// for (String cow : badCows) {
 			// if (cow.length()>=8)continue;
-			System.out.println(cow);
-			if (--showCnt==0) break;
-		}
+			// System.out.println(cow);
+			// if (--showCnt==0) break;
+		// }
     }
 
 
