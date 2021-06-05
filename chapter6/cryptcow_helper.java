@@ -74,7 +74,7 @@ public class cryptcow_helper {
 		System.out.println(isGood(""));
 		System.out.println(isGood("COW"));
 		System.out.println(isGood("WOOCOCOCWWWC"));
-		int k = 7;
+		int k = 2;
 		List<Character> chars = new ArrayList<>();
 		Set<String> seen = new HashSet<>();
 		for (int i = 0; i < k; i++) {

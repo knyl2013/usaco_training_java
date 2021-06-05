@@ -266,6 +266,10 @@ public class cryptcow {
 			// badCows.add(key);
 			return false;
 		}
+		if (prefixFail(current) || suffixFail(current)) {
+			// System.out.println("prune");
+			return false;
+		}
 		// if (!isGood(key)) {
 			// System.out.println("prune");
 			// return false;
@@ -406,9 +410,9 @@ public class cryptcow {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-	static boolean logTime = true;
-	// static String taskName = "cryptcow";
+    // static String taskName = null;
+	static boolean logTime = !true;
+	static String taskName = "cryptcow";
     
     public static void main(String[] args) throws Exception
     {
