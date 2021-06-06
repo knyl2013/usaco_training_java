@@ -109,9 +109,14 @@ public class cryptcow {
 	static boolean substringFail(String current)
 	{
 		String[] words = current.split("C|O|W");
+		Set<String> seenSubstrs = new HashSet<>();
 		for (String word : words) {
 			if (word.isEmpty()) continue;
 			if (!startSubstrs.contains(word)) return true;
+			if (word.length() > 2) continue;
+			if (word.length() == 2 && (word.charAt(0)==' '||word.charAt(1)==' ')) continue;
+			if (seenSubstrs.contains(word)) return true;
+			seenSubstrs.add(word);
 		}
 		return false;
 		// System.out.println(startSubstrHashs);
@@ -410,9 +415,9 @@ public class cryptcow {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    // static String taskName = null;
-	static boolean logTime = !true;
-	static String taskName = "cryptcow";
+    static String taskName = null;
+	static boolean logTime = true;
+	// static String taskName = "cryptcow";
     
     public static void main(String[] args) throws Exception
     {
