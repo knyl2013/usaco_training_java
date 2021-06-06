@@ -109,16 +109,19 @@ public class cryptcow {
 	static boolean substringFail(String current)
 	{
 		String[] words = current.split("C|O|W");
-		Set<String> seenSubstrs = new HashSet<>();
+		// Arrays.sort(words, (a,b)->Integer.compare(b.length(), a.length()));
+		// System.out.println(Arrays.toString(words));
+		// String startCopy = start;
 		for (String word : words) {
 			if (word.isEmpty()) continue;
-			if (!startSubstrs.contains(word)) return true;
-			if (word.length() > 2) continue;
-			if (word.length() == 2 && (word.charAt(0)==' '||word.charAt(1)==' ')) continue;
-			if (seenSubstrs.contains(word)) return true;
-			seenSubstrs.add(word);
+			if (start.indexOf(word) == -1) return true;
+			// System.out.println(startCopy);
+			// String nxt = startCopy.replaceFirst(word, "");
+			// if (nxt.length() == startCopy.length()) return true;
+			// startCopy = nxt;
 		}
 		return false;
+		// return !startCopy.isEmpty();
 		// System.out.println(startSubstrHashs);
 		// long h = 0;
 		// for (int i = 0; i < current.length(); i++) {
@@ -265,16 +268,18 @@ public class cryptcow {
 			return false;
 		}
 		// current = current.replaceAll("COW", "");
-		if (substringFail(current)) return false;
-		// String key = encodeCow(current);
-		if (!isPrefixBalance(current) || !isSuffixBalance(current)) {
-			// badCows.add(key);
-			return false;
-		}
 		if (prefixFail(current) || suffixFail(current)) {
 			// System.out.println("prune");
 			return false;
 		}
+		if (!isPrefixBalance(current) || !isSuffixBalance(current)) {
+			// badCows.add(key);
+			return false;
+		}
+		if (substringFail(current)) return false;
+		// String key = encodeCow(current);
+		
+		
 		// if (!isGood(key)) {
 			// System.out.println("prune");
 			// return false;
@@ -357,19 +362,19 @@ public class cryptcow {
 		if (start.length()+times*3 != encrypted.length()) return new int[]{0, 0};
 		found = false;
 		seen = new HashSet<>();
-		badCows = new HashSet<>();
+		// badCows = new HashSet<>();
 		// startSubstrHashs = new HashSet<>();
 		// for (int i = 0; i < start.length(); i++) {
 			// for (int j = i; j < start.length(); j++) {
 				// startSubstrHashs.add(hash(start.substring(i, j+1)));
 			// }
 		// }
-		startSubstrs = new HashSet<>();
-		for (int i = 0; i < start.length(); i++) {
-			for (int j = i; j < start.length(); j++) {
-				startSubstrs.add(start.substring(i, j+1));
-			}
-		}
+		// startSubstrs = new HashSet<>();
+		// for (int i = 0; i < start.length(); i++) {
+		// 	for (int j = i; j < start.length(); j++) {
+		// 		startSubstrs.add(start.substring(i, j+1));
+		// 	}
+		// }
 		// System.out.println(startSubstrs);
 		if (!dfs(encrypted)) return new int[]{0, 0};
 		return new int[]{1, times};
