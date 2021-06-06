@@ -15,8 +15,10 @@ public class cryptcow {
 	static long p = 131;
 	static Set<String> startSubstrs;
 	static Set<Long> startSubstrHashs;
-	static Set<String> badCows;
+	static Set<String> badCows = new HashSet<>();
 	static Map<String, Boolean> memo = new HashMap<>();
+	static final int OK_CONTENT = 0, OK_COW = 1, FAIL_BOTH = 2, FAIL_CONTENT = 3;
+	static Set<String> goodCows = new HashSet<>();
 	static boolean isGood(String current)
 	{
 		// if (current.length()>=7*3) return true;
@@ -256,28 +258,27 @@ public class cryptcow {
 		}
 		return new String(ans);
 	}
-	static boolean dfs(String current)
+	static int dfs(String current)
 	{
-		if (current == null) return false;
-		if (found) return true;
+		if (found) return OK_CONTENT;
 		if (current.length() == start.length()) {
 			if (current.equals(start)) {
 				found = true;
-				return true;
+				return OK_CONTENT;
 			}
-			return false;
+			return OK_COW;
 		}
 		// current = current.replaceAll("COW", "");
 		if (prefixFail(current) || suffixFail(current)) {
 			// System.out.println("prune");
-			return false;
+			return FAIL_BOTH;
 		}
 		if (!isPrefixBalance(current) || !isSuffixBalance(current)) {
 			// badCows.add(key);
-			return false;
+			return FAIL_BOTH;
 		}
-		if (substringFail(current)) return false;
-		// String key = encodeCow(current);
+		if (substringFail(current)) return FAIL_CONTENT;
+		String key = encodeCow(current);
 		
 		
 		// if (!isGood(key)) {
@@ -293,7 +294,11 @@ public class cryptcow {
 			// System.out.println("prune");
 			// return false;
 		// }
-		if (seen.contains(current)) return false;
+		// if (seen.contains(current)) return false;
+		// if (cache.containsKey())
+		if (seen.contains(current)) {
+			return goodCows.contains(key) ? OK_COW : FAIL_CONTENT;
+		}
 		seen.add(current);
 		
 		
@@ -329,12 +334,16 @@ public class cryptcow {
 			while (oPt < k && oIdxs[oPt] < cIdx) oPt++;
 			if (oPt == k) {
 				// if (noMatch) badCows.add(key);
-				return false;
+				// System.out.println("prune1");
+				// return false;
+				break;
 			}
 			while (wPt < k && wIdxs[wPt] < oIdxs[oPt]) wPt++;
 			if (wPt == k) {
 				// if (noMatch) badCows.add(key);
-				return false;
+				// System.out.println("prune2");
+				// return false;
+				break;
 			}
 			for (int i = oPt; i < k; i++) {
 				int oIdx = oIdxs[i];
