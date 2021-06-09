@@ -24,33 +24,69 @@ public class prime3 {
 	static int topDia = 0, bottomDia = 0;
 	static int[] rows = new int[5];
 	static int[] cols = new int[5];
-	static List<Integer> firstRows = new ArrayList<>();
-	static List<Integer> others = new ArrayList<>();
-	static boolean checkOk(int r, int c)
+	
+	static int[] tenPows = new int[6];
+	static int hash(int p)
 	{
-		int nxtTopDia = 0, nxtBottomDia = 0;
-		int nxtRow = 0, nxtCol = 0;
-		int oldTopDia = 0, oldBottomDia = 0;
-		int oldRow = 0, oldCol = 0;
-		if (r == c) {
-			nxtTopDia = topDia * 10 + board[r][c];
-			if (!prefix[nxtTopDia]) {
-				return false;
+		int ans = 0;
+		int pp = 1;
+		for (int i = 0, pidx = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
+				if (board[i][j] == UNVISITED) return ans;
+				ans = add(ans, mul(board[i][j], pp));
+				pp = mul(pp, p);
 			}
 		}
-		if (r+c == 4) {
-			nxtBottomDia = bottomDia + tenPows[r] * board[r][c];
-			if (!suffix[nxtBottomDia]) {
-				return false;
+		return ans;
+	}
+	static long hashLong()
+	{
+		long ans = 0;
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
+				if (board[i][j] == UNVISITED) return ans;
+				ans = ans * p + board[i][j];
 			}
 		}
-		nxtRow = rows[r] * 10 + board[r][c];
-		if (!prefix[nxtRow]) {
-			return false;
+		return ans;
+	}
+	static String hashStr()
+	{
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 5; i++)
+			for (int j = 0; j < 5; j++) {
+				if (board[i][j] == UNVISITED) return sb.toString();
+				sb.append(board[i][j]).append('-');
+			}
+		return sb.toString();
+			
+	}
+	static int add(int a, int b)
+	{
+		int c = a + b;
+		if (c >= nax) c -= nax;
+		return c;
+	}
+	static int mul(int a, int b)
+	{
+		long c = a * b;
+		return (int)(c % nax);
+	}
+	static void calcPows()
+	{
+		pPows[0] = 1;
+		for (int i = 1; i < pPows.length; i++) {
+			pPows[i] = mul(p, pPows[i-1]);
 		}
-		nxtCol = cols[c] * 10 + board[r][c];
-		if (!prefix[nxtCol]) {
-			return false;
+		tenPows[0] = 1;
+		for (int i = 1; i < tenPows.length; i++) {
+			tenPows[i] = tenPows[i-1] * 10;
+		}
+	}
+	static void printBoard()
+	{
+		for (int[] row : board) {
+			System.out.println(Arrays.toString(row));
 		}
 	}
 	static void backtrack(int r, int c)
@@ -92,6 +128,14 @@ public class prime3 {
 				}
 				return;
 			}
+			// val = 0;
+			// for (int ri = 0, ci = 4, base = 1; ri <= r; ri++, ci--, base*=10) {
+				// val += base * board[ri][ci];
+				// if (!suffix[val]) {
+					// if (debug) System.out.println("B: " + val);
+					// return;
+				// }
+			// }
 		}
 		nxtRow = rows[r] * 10 + board[r][c];
 		if (!prefix[nxtRow]) {
@@ -103,7 +147,27 @@ public class prime3 {
 			if (debug) System.out.println("D");
 			return;
 		}
-
+		
+		// val = 0;
+		// for (int i = 0; i <= c; i++) {
+			// val = val * 10 + board[r][i];
+			// if (!prefix[val]) {
+				// if (debug) System.out.println("C: " + val);
+				// return;
+			// }
+		// }
+		// val = 0;
+		// for (int i = 0; i <= r; i++) {
+			// val = val * 10 + board[i][c];
+			// if (!prefix[val]) {
+				// if (debug) System.out.println("D: " + val);
+				// return;
+			// }
+		// }
+		// String sh = hashStr();
+		// int key = hash(11);
+		// if (seen[key]) return;
+		// seen[key] = true;
 		
 		if (debug) System.out.println("after prune: " + key);
 		// if (seenStr.contains(key)) {
@@ -166,49 +230,7 @@ public class prime3 {
 		
 		return true;
 	}
-	static void backtrack(int idx)
-	{
-		if (idx == 0) {
-			for (int choice : firstRows) {
-				int didx = 4;
-				int copy = choice;
-				while (choice > 0) {
-					board[0][didx--] = choice%10;
-					choice /= 10;
-				}
-				push(copy);
-				backtrack(idx + 1);
-				pop(copy);
-			}
-		}
-		else if (idx == 5) {
-			cnt++;
-			if (cnt>1) out.println();
-			for (int i = 0; i < 5; i++) {
-				for (int j = 0; j < 5; j++) {
-					out.print(board[i][j]);
-					if (j==4) out.println();
-				}
-			}
-		}
-		else {
-			outer:
-			for (int choice : firstRows) {
-				int didx = 4;
-				int copy = choice;
-				while (choice > 0) {
-					board[idx][didx] = choice % 10;
-					if (!checkOk(idx, didx)) continue outer;
-					choice /= 10;
-					didx--;
-				}
-				push(copy);
-				backtrack(idx + 1);
-				pop(copy);
-			}
-		}
-
-	}
+	
     static void solve()
     {
         sum = ni();
@@ -227,26 +249,36 @@ public class prime3 {
 			if (!isPrime(i)) continue;
 			for (int j = 0, pf = 0; j < 5; j++) {
 				pf = pf * 10 + digits[j];
+				// System.out.println(pf);
 				prefix[pf] = true;
 			}
 			for (int j = 4, sf = 0, base = 1; j >= 0; j--, base*=10) {
 				sf += base * digits[j];
 				suffix[sf] = true;
 			}
-			if (digits[0] == topLeft) firstRows.add(i);
-			others.add(i);
+			// System.out.println(Arrays.toString(digits));
 		}
-		// for (int i = 0; i < 5; i++)
-		// 	Arrays.fill(board[i], UNVISITED);
-		// board[0][0] = topLeft;
-		// Arrays.fill(rows, 0);
-		// Arrays.fill(cols, 0);
+		for (int i = 0; i < 5; i++)
+			Arrays.fill(board[i], UNVISITED);
+		board[0][0] = topLeft;
+		Arrays.fill(rows, 0);
+		Arrays.fill(cols, 0);
 		// rows[0] = topLeft;
 		// cols[0] = topLeft;
 		// topDia = topLeft;
-		backtrack(0);
-		// backtrack(0, 0);
+		backtrack(0, 0);
 		if (cnt == 0) out.print("NONE\n");
+		// System.out.println(prefix[11]);
+		// System.out.println(prefix[11]);
+		// System.out.println(suffix[17111]);
+		// System.out.println(prefix[7243]);
+		// System.out.println(prefix[72431]);
+		// System.out.println(prefix[7]);
+		// System.out.println(prefix[2]);
+		// System.out.println(prefix[4]);
+		// System.out.println(prefix[3]);
+		// System.out.println(prefix[1]);
+		// System.out.println(suffix[1]);
     }
 
 
