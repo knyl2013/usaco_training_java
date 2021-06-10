@@ -7,217 +7,41 @@ TASK: prime3
 import java.io.*;
 import java.util.*;
 
-public class prime3_bk {
+public class prime3_bk2 {
 	static int nax = (int)1e6+7;
 	static boolean[] prefix = new boolean[nax];
 	static boolean[] suffix = new boolean[nax];
 	static int[][] board = new int[5][5];
 	static int cnt = 0;
 	static int topLeft, sum;
-	static int p = 11;
-	static int[] pPows = new int[30];
-	static final int UNVISITED = 107;
-	static boolean[] seen = new boolean[1];
-	static String[] strings = new String[1];
-	static Set<String> seenStr = new HashSet<>();
-	static Set<Long> seenLong = new HashSet<>();
 	static int topDia = 0, bottomDia = 0;
-	static int[] rows = new int[5];
 	static int[] cols = new int[5];
-	
 	static int[] tenPows = new int[6];
-	static int hash(int p)
+	static List<Integer> firstRows = new ArrayList<>();
+	static List<Integer> others = new ArrayList<>();
+	static boolean checkOk(int r, int c)
 	{
-		int ans = 0;
-		int pp = 1;
-		for (int i = 0, pidx = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
-				if (board[i][j] == UNVISITED) return ans;
-				ans = add(ans, mul(board[i][j], pp));
-				pp = mul(pp, p);
-			}
-		}
-		return ans;
-	}
-	static long hashLong()
-	{
-		long ans = 0;
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
-				if (board[i][j] == UNVISITED) return ans;
-				ans = ans * p + board[i][j];
-			}
-		}
-		return ans;
-	}
-	static String hashStr()
-	{
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 5; i++)
-			for (int j = 0; j < 5; j++) {
-				if (board[i][j] == UNVISITED) return sb.toString();
-				sb.append(board[i][j]).append('-');
-			}
-		return sb.toString();
-			
-	}
-	static int add(int a, int b)
-	{
-		int c = a + b;
-		if (c >= nax) c -= nax;
-		return c;
-	}
-	static int mul(int a, int b)
-	{
-		long c = a * b;
-		return (int)(c % nax);
-	}
-	static void calcPows()
-	{
-		pPows[0] = 1;
-		for (int i = 1; i < pPows.length; i++) {
-			pPows[i] = mul(p, pPows[i-1]);
-		}
-		tenPows[0] = 1;
-		for (int i = 1; i < tenPows.length; i++) {
-			tenPows[i] = tenPows[i-1] * 10;
-		}
-	}
-	static void printBoard()
-	{
-		for (int[] row : board) {
-			System.out.println(Arrays.toString(row));
-		}
-	}
-	static void backtrack(int r, int c)
-	{
-		// boolean debug = key.startsWith("7-2-4-3-1-4-2-2-2-7-2-4-5-3-3-3-8-3");
-		// if (debug) printBoard();
-		// boolean debug = false;
-		// System.out.println(r + " " + c);
-		
-		// for (int[] row : board) {
-			// System.out.println(Arrays.toString(row));
-		// }
-		// System.out.println();
-		// String key = hashStr();
-		String key = "";
-		boolean debug = !true && key.startsWith("1-1-3-5-1-1-4-0");
-		// int val;
-		if (debug) {
-			System.out.println("before prune: " + key);
-			System.out.println(r + ", " + c);
-			System.out.println(rows[r] + " " + cols[c] + " " + topDia + " " + bottomDia);
-		}
-		int nxtTopDia = 0, nxtBottomDia = 0;
-		int nxtRow = 0, nxtCol = 0;
-		int oldTopDia = 0, oldBottomDia = 0;
-		int oldRow = 0, oldCol = 0;
+		int nxtTopDia = 0, nxtBottomDia = 0, nxtCol = 0;
 		if (r == c) {
 			nxtTopDia = topDia * 10 + board[r][c];
 			if (!prefix[nxtTopDia]) {
-				if (debug) System.out.println("A");
-				return;
+				return false;
 			}
 		}
 		if (r+c == 4) {
 			nxtBottomDia = bottomDia + tenPows[r] * board[r][c];
 			if (!suffix[nxtBottomDia]) {
-				if (debug) {
-					System.out.println("B " + nxtBottomDia);
-				}
-				return;
+				return false;
 			}
-			// val = 0;
-			// for (int ri = 0, ci = 4, base = 1; ri <= r; ri++, ci--, base*=10) {
-				// val += base * board[ri][ci];
-				// if (!suffix[val]) {
-					// if (debug) System.out.println("B: " + val);
-					// return;
-				// }
-			// }
-		}
-		nxtRow = rows[r] * 10 + board[r][c];
-		if (!prefix[nxtRow]) {
-			if (debug) System.out.println("C");
-			return;
 		}
 		nxtCol = cols[c] * 10 + board[r][c];
 		if (!prefix[nxtCol]) {
-			if (debug) System.out.println("D");
-			return;
+			return false;
 		}
-		
-		// val = 0;
-		// for (int i = 0; i <= c; i++) {
-			// val = val * 10 + board[r][i];
-			// if (!prefix[val]) {
-				// if (debug) System.out.println("C: " + val);
-				// return;
-			// }
-		// }
-		// val = 0;
-		// for (int i = 0; i <= r; i++) {
-			// val = val * 10 + board[i][c];
-			// if (!prefix[val]) {
-				// if (debug) System.out.println("D: " + val);
-				// return;
-			// }
-		// }
-		// String sh = hashStr();
-		// int key = hash(11);
-		// if (seen[key]) return;
-		// seen[key] = true;
-		
-		if (debug) System.out.println("after prune: " + key);
-		// if (seenStr.contains(key)) {
-			// System.out.println("prune");
-			// return;
-		// }
-		// seenStr.add(key);
-		// printBoard();
-		// long lh = hashLong();
-		// if (seenLong.contains(lh)) return;
-		// seenLong.add(lh);
-		if (r == 4 && c == 4) {
-			cnt++;
-			if (cnt>1) out.println();
-			for (int i = 0; i < 5; i++) {
-				for (int j = 0; j < 5; j++) {
-					out.print(board[i][j]);
-					if (j==4) out.println();
-				}
-			}
-			return;
-		}
-		int nextR = r, nextC = c + 1;
-		if (nextC == 5) {
-			nextR = r + 1;
-			nextC = 0;
-		}
-		if (nextR == 5) return;
-		if (r==c) oldTopDia = topDia;
-		if (r+c==4) oldBottomDia = bottomDia;
-		oldRow = rows[r];
-		oldCol = cols[c];
-		
-		if (r==c) topDia = nxtTopDia;
-		if (r+c==4) bottomDia = nxtBottomDia;
-		rows[r] = nxtRow;
+		if (r == c) topDia = nxtTopDia;
+		if (r+c == 4) bottomDia = nxtBottomDia;
 		cols[c] = nxtCol;
-		
-		
-		
-		for (int i = 0; i <= 9; i++) {
-			board[nextR][nextC] = i;
-			backtrack(nextR, nextC);
-		}
-		
-		if (r==c) topDia = oldTopDia;
-		if (r+c==4) bottomDia = oldBottomDia;
-		rows[r] = oldRow;
-		cols[c] = oldCol;
-		board[nextR][nextC] = UNVISITED;
+		return true;
 	}
 	static boolean isPrime(int x)
 	{
@@ -230,12 +54,49 @@ public class prime3_bk {
 		
 		return true;
 	}
+	static void backtrack(int idx)
+	{
+		if (idx == 5) {
+			// out.println(Arrays.toString(cols));
+			cnt++;
+			if (cnt>1) out.println();
+			for (int i = 0; i < 5; i++) {
+				for (int j = 0; j < 5; j++) {
+					out.print(board[i][j]);
+					if (j==4) out.println();
+				}
+			}
+			return;
+		}
+		int[] oldCols = cols.clone();
+		int oldBottomDia = bottomDia, oldTopDia = topDia;
+		List<Integer> choices = idx == 0 ? firstRows : others;
+
+		for (int choice : choices) {
+			int didx = 4;
+			boolean canGo = true;
+			while (choice > 0) {
+				board[idx][didx] = choice % 10;
+				if (!checkOk(idx, didx)) {
+					canGo = false;
+					break;
+				}
+				choice /= 10;
+				didx--;
+			}
+			if (canGo) backtrack(idx + 1);
+			for (int i = 0; i < 5; i++) {
+				cols[i] = oldCols[i];
+			}
+			bottomDia = oldBottomDia;
+			topDia = oldTopDia;
+		}
+	}
 	
     static void solve()
     {
         sum = ni();
 		topLeft = ni();
-		calcPows();
 		int[] digits = new int[5];
 		for (int i = 10000; i <= 99999; i++) {
 			int val = i;
@@ -249,36 +110,32 @@ public class prime3_bk {
 			if (!isPrime(i)) continue;
 			for (int j = 0, pf = 0; j < 5; j++) {
 				pf = pf * 10 + digits[j];
-				// System.out.println(pf);
 				prefix[pf] = true;
 			}
 			for (int j = 4, sf = 0, base = 1; j >= 0; j--, base*=10) {
 				sf += base * digits[j];
 				suffix[sf] = true;
 			}
-			// System.out.println(Arrays.toString(digits));
+			if (digits[0] == topLeft) firstRows.add(i);
+			others.add(i);
 		}
-		for (int i = 0; i < 5; i++)
-			Arrays.fill(board[i], UNVISITED);
-		board[0][0] = topLeft;
-		Arrays.fill(rows, 0);
-		Arrays.fill(cols, 0);
+		// for (int i = 0; i < 5; i++)
+		// 	Arrays.fill(board[i], UNVISITED);
+		// board[0][0] = topLeft;
+		// Arrays.fill(rows, 0);
+		// Arrays.fill(cols, 0);
 		// rows[0] = topLeft;
 		// cols[0] = topLeft;
 		// topDia = topLeft;
-		backtrack(0, 0);
+		// System.out.println(firstRows.size());
+		// System.out.println(others.size());
+		tenPows[0] = 1;
+		for (int i = 1; i < tenPows.length; i++) {
+			tenPows[i] = tenPows[i-1]*10;
+		}
+		backtrack(0);
+		// backtrack(0, 0);
 		if (cnt == 0) out.print("NONE\n");
-		// System.out.println(prefix[11]);
-		// System.out.println(prefix[11]);
-		// System.out.println(suffix[17111]);
-		// System.out.println(prefix[7243]);
-		// System.out.println(prefix[72431]);
-		// System.out.println(prefix[7]);
-		// System.out.println(prefix[2]);
-		// System.out.println(prefix[4]);
-		// System.out.println(prefix[3]);
-		// System.out.println(prefix[1]);
-		// System.out.println(suffix[1]);
     }
 
 
