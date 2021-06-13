@@ -78,11 +78,13 @@ public class wissqu {
                 if (!isGood('D', i, j)) continue;
                 char oldHerd = board[i][j];
                 board[i][j] = 'D';
+                marked[i][j] = true;
                 if (cnt == 0) stk.push(new Task('D', i+1, j+1));
                 level++;
                 dfs();
                 level--;
                 if (cnt == 0) stk.pop();
+                marked[i][j] = false;
                 board[i][j] = oldHerd;
             }
         }
