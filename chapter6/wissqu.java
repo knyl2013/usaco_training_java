@@ -18,7 +18,8 @@ public class wissqu {
             this.col = col;
         }
     }
-    static Stack<Task> stk;
+    static Stack<Task> stk = new Stack<>();
+    static Stack<Task> buffer = new Stack<>();
     static int cnt = 0;
     static int level = 0;
     static char[][] board = new char[4][4];
@@ -38,11 +39,15 @@ public class wissqu {
     static void dfs()
     {
         if (level == 16) {
+            cnt++;
+            if (stk.isEmpty()) return;
             while (!stk.isEmpty()) {
-                Task t = stk.pop();
+                buffer.push(stk.pop());
+            }
+            while (!buffer.isEmpty()) {
+                Task t = buffer.pop();
                 out.printf("%c %d %d\n", t.type, t.row, t.col);
             }
-            cnt++;
             return;
         }
         for (char type = 'A'; type <= 'E'; type++) {
@@ -72,7 +77,9 @@ public class wissqu {
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++)
                 board[i][j] = nc();
-        stk = new Stack<>();
+        // for (char[] row : board)
+        //     System.out.println(Arrays.toString(row));
+        // System.out.println(isGood('D', 2, 3));
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (!isGood('D', i, j)) continue;
@@ -99,7 +106,9 @@ public class wissqu {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
+    // static String taskName = null;
+    static String taskName = "wissqu";
+    static boolean logTime = !true;
     
     public static void main(String[] args) throws Exception
     {
@@ -240,7 +249,7 @@ public class wissqu {
         }
     }
     
-    private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
+    private static void tr(Object... o) { if(logTime)System.out.println(Arrays.deepToString(o)); }
 }
 
 
