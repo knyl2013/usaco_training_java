@@ -18,7 +18,22 @@ public class latin_bk {
     static int p = 7;
     static long[] memo = new long[nax];
     static int[] ppows = new int[100];
+    static int[][] perms;
+    static int[] facts = new int[8];
     static Map<String, Long> mp = new HashMap<>();
+    static void swap(int[] arr, int i, int j)
+    {
+        int tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+    
+    static void reverse(int[] arr, int start, int end)
+    {
+        while (start < end) {
+            swap(arr, start++, end--);
+        }
+    }
     static int add(int a, int b)
     {
         int c = a + b;
@@ -102,30 +117,76 @@ public class latin_bk {
         }
         return sb.toString();
     }
+    static void permutate()
+    {
+        perms = new int[facts[n]][];
+        int[] arr = new int[n];
+        for (int i = 0; i < n; i++)
+            arr[i] = i;
+        
+        perms[0] = arr.clone();
+        for (int i = 1; i < perms.length; i++) {
+            int maxsofar = arr[n-1];
+            int swapidx = -1;
+            for (int j = n-2; j >= 0; j--) {
+                if (arr[j] < maxsofar) {
+                    swapidx = j;
+                    break;
+                }
+                else {
+                    maxsofar = arr[j];
+                }
+            }
+            int minidx = -1;
+            
+            for (int j = swapidx+1; j < n; j++) {
+                if (arr[j] > arr[swapidx]) {
+                    if (minidx == -1 || arr[minidx] > arr[j])
+                        minidx = j;
+                }
+            }
+            
+            swap(arr, minidx, swapidx);
+            reverse(arr, swapidx+1, n-1);
+            
+            perms[i] = arr.clone();
+        }
+    }
 	static int f()
 	{
-		int ans = 0;
-		List<Integer> lst = new ArrayList<>();
-		Set<Integer> set = new HashSet<>();
-		for (int i = 0; i < n; i++) {
-			int cur = 0;
-			for (int j = 0; j < n; j++) {
-				// if (i==j) continue;
-				if (colappear[i][j]) {
-					cur = cur | (1 << (j));
-				}
-				// if (!colappear[i][j]&& !colappear[j][i]) {
-					// ans++;
-				// }
-			}
-			lst.add(cur);
-			set.add(cur);
-			ans += cur;
-		}
-		System.out.println(lst);
-		return set.size();
+		// int ans = 0;
+		// List<Integer> lst = new ArrayList<>();
+		// Set<Integer> set = new HashSet<>();
+		// for (int i = 0; i < n; i++) {
+		// 	int cur = 0;
+		// 	for (int j = 0; j < n; j++) {
+		// 		// if (i==j) continue;
+		// 		if (colappear[i][j]) {
+		// 			cur = cur | (1 << (j));
+		// 		}
+		// 		// if (!colappear[i][j]&& !colappear[j][i]) {
+		// 			// ans++;
+		// 		// }
+		// 	}
+		// 	lst.add(cur);
+		// 	set.add(cur);
+		// 	ans += cur;
+		// }
+		// System.out.println(lst);
+		// return set.size();
 		
 		// return ans;
+
+        int cnt = 0;
+        for (int[] perm : perms) {
+            int i;
+            for (i = 0; i < n; i++) {
+                int val = perm[i];
+                if (colappear[i][val]) break;
+            }
+            if (i == n) cnt++;
+        }
+        return cnt;
 	}
     static String encode(int r)
     {
@@ -180,7 +241,7 @@ public class latin_bk {
             colappear[c][i] = false;
         }
         mp.put(str, ans);
-		if (c == 0 && r == 3) {
+		if (c == 0) {
 			System.out.println(r + " " + ans + " " + f());
 			// for (boolean[] row : rowappear) {
 				// for (boolean b : row) {
@@ -208,7 +269,11 @@ public class latin_bk {
         limit = n*n-n;
         rorders = new int[limit];
         corders = new int[limit];
+        facts[0] = 1;
+        for (int i = 1; i < facts.length; i++)
+            facts[i] = facts[i-1] * i;
         calcpows();
+        permutate();
         Arrays.fill(memo, -1);
         int r = 1, c = 0;
         for (int i = 0; i < limit; i++) {
