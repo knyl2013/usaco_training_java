@@ -21,6 +21,7 @@ public class latin_bk {
     static int[][] perms;
     static int[] facts = new int[8];
     static Map<String, Long> mp = new HashMap<>();
+    static long[] seen;
     static void swap(int[] arr, int i, int j)
     {
         int tmp = arr[i];
@@ -229,6 +230,13 @@ public class latin_bk {
             // System.out.println("prune");
             return mp.get(str);
         }
+        int fv = -1;
+        if (c == 0) {
+            fv = f();
+            if (memo[fv] != -1) {
+                return memo[fv];
+            }
+        }
         long ans = 0;
         for (int i = 0; i < n; i++) {
             if (rowappear[r][i] || colappear[c][i]) continue;
@@ -241,8 +249,11 @@ public class latin_bk {
             colappear[c][i] = false;
         }
         mp.put(str, ans);
-		if (c == 0) {
-			System.out.println(r + " " + ans + " " + f());
+        if (c == 0) {
+            memo[fv] = ans;
+        }
+		// if (c == 0) {
+			// System.out.println(r + " " + ans + " " + f());
 			// for (boolean[] row : rowappear) {
 				// for (boolean b : row) {
 					// System.out.print(b ? 1 : 0);
@@ -256,7 +267,7 @@ public class latin_bk {
 				// }
 				// System.out.println();
 			// }
-		}
+		// }
         // memo[h] = ans;
         return ans;
     }
@@ -272,6 +283,8 @@ public class latin_bk {
         facts[0] = 1;
         for (int i = 1; i < facts.length; i++)
             facts[i] = facts[i-1] * i;
+        seen = new long[facts[facts.length-1]+1];
+        Arrays.fill(seen, -1);
         calcpows();
         permutate();
         Arrays.fill(memo, -1);
