@@ -21,6 +21,7 @@ public class latin {
     static int[] ppows = new int[100];
     static int[][] perms;
     static int[] facts = new int[8];
+    static int[] cols, recols;
     static Map<String, Long> mp = new HashMap<>();
     static long[][] seen;
     static void swap(int[] arr, int i, int j)
@@ -64,6 +65,14 @@ public class latin {
             ans = add(ans, mul(ppows[i], s.charAt(i)));
         }
         return ans;
+    }
+    static String encode4()
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int x : cols) {
+            sb.append(x);
+        }
+        return sb.toString();
     }
 	static int hash2()
     {
@@ -236,6 +245,13 @@ public class latin {
             ans[idx++] = rowappear[r][i] ? '1' : '0';
         return new String(ans);
     }
+    // TODO: replace a 'from' value to 'to' value in recols, and keep recols sorted
+    // [1,2,5,10,18] -> rr(2,13) -> [1,5,10,13,18]
+    // [1,5,10,13,18] -> rr(13,2) -> [1,2,5,10,18]
+    static void rr(int from, int to)
+    {
+
+    }
     static void dfs(int level)
     {
         if (level >= limit) {
@@ -264,7 +280,7 @@ public class latin {
         // int h = hash(encode2(r));
 		// int h = hash2();
 		// System.out.println(h + " " + encode2(r));
-		String str = encode2(r);
+		String str = encode4();
 		// if (memo[h] != -1 && !cmps[h].equals(str)) {
 			// System.out.println(h + " " + cmps[h] + " " + str);
 		// }
@@ -283,16 +299,21 @@ public class latin {
             // }
         // }
         long ans = 0;
+        int curcol = cols[c-1];
         for (int i = 0; i < n; i++) {
             if (rowappear[r][i] || colappear[c][i]) continue;
             rowappear[r][i] = true;
             colappear[c][i] = true;
 			board[r][c] = i;
+            cols[c-1] = curcol | (1 << i);
+            rr(curcol, cols[c-1]);
             int nextr = c == n-1 ? r + 1 : r;
             int nextc = c == n-1 ? 1 : c + 1;
             ans += dfs(nextr, nextc);
             rowappear[r][i] = false;
             colappear[c][i] = false;
+            rr(cols[c-1], curcol);
+            cols[c-1] = curcol;
         }
         mp.put(str, ans);
         // if (c == 0) {
@@ -323,9 +344,12 @@ public class latin {
         board = new int[n][n];
         rowappear = new boolean[n][n];
         colappear = new boolean[n][n];
+        cols = new int[n-1];
+        recols = new int[n-1];
         limit = n*n-n;
         rorders = new int[limit];
         corders = new int[limit];
+
         facts[0] = 1;
         for (int i = 1; i < facts.length; i++)
             facts[i] = facts[i-1] * i;
@@ -352,8 +376,14 @@ public class latin {
 			board[i][0] = i;
 			rowappear[i][i] = true;
 			colappear[0][i] = true;
+
+            if (i>0) {
+                cols[i-1] = (1 << i);
+                recols[i-1] = (1 << i);
+            }
         }
         // dfs(0);
+        System.out.println(Arrays.toString(cols));
         long ans = dfs(1, 1) * facts[n-1];
 		// System.out.println(mp.size());
         out.printf("%d\n", ans);
