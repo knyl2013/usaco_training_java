@@ -14,8 +14,8 @@ public class latin {
     static int[] rorders, corders;
     static int ans = 0;
     static int limit;
-    static int nax = (int) 1;
-    static int p = (int) 11;
+    static int nax = (int) 1e4;
+    static int p = (int) 131;
     static long[] memo = new long[nax];
 	static String[] cmps = new String[nax];
     static int[] ppows = new int[100];
@@ -53,7 +53,7 @@ public class latin {
     {
         ppows[0] = 1;
         for (int i = 1; i < ppows.length; i++) {
-            ppows[i] = mul(ppows[i-1], i);
+            ppows[i] = mul(ppows[i-1], p);
         }
     }
     static int hash(String s)
@@ -69,7 +69,7 @@ public class latin {
     {
         List<Integer> lst = new ArrayList<>();
 		int ans = 0;
-        for (int i = 0; i < n; i++) {
+        for (int i = 1; i < n; i++) {
             int cur = 0;
             for (int j = 0; j < n; j++) {
                 if (colappear[i][j])
@@ -84,13 +84,17 @@ public class latin {
         });
 		int pidx = 0;
 		for (int x : lst) {
-			while (x>0) {
-				ans = add(ans, mul(ppows[pidx++], x%10));
-				x/=10;
-			}
-			ans = add(ans, mul(ppows[pidx++], 10));
-			// ans = add(ans, mul(ppows[pidx++], x));
+			// System.out.println("p: " + pidx + " " + ppows[pidx] + " " + x);
+			ans = add(ans, mul(ppows[pidx++], x));
 		}
+		// for (int x : lst) {
+			// while (x>0) {
+				// ans = add(ans, mul(ppows[pidx++], x%10));
+				// x/=10;
+			// }
+			// ans = add(ans, mul(ppows[pidx++], 10));
+			// ans = add(ans, mul(ppows[pidx++], x));
+		// }
 		
 		return ans;
     }
@@ -122,7 +126,7 @@ public class latin {
     static String encode2(int r)
     {
         List<Integer> lst = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
+        for (int i = 1; i < n; i++) {
             int cur = 0;
             for (int j = 0; j < n; j++) {
                 if (colappear[i][j])
@@ -259,6 +263,7 @@ public class latin {
         }
         // int h = hash(encode2(r));
 		// int h = hash2();
+		// System.out.println(h + " " + encode2(r));
 		String str = encode2(r);
 		// if (memo[h] != -1 && !cmps[h].equals(str)) {
 			// System.out.println(h + " " + cmps[h] + " " + str);
@@ -362,9 +367,9 @@ public class latin {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    // static String taskName = null;
-    static String taskName = "latin";
-    static boolean logTime = !true;
+    static String taskName = null;
+    // static String taskName = "latin";
+    static boolean logTime = true;
     
     public static void main(String[] args) throws Exception
     {
