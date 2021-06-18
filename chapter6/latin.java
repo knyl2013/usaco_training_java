@@ -14,9 +14,10 @@ public class latin {
     static int[] rorders, corders;
     static int ans = 0;
     static int limit;
-    static int nax = (int) 1e4;
+    static int nax = (int) 1e6;
     static int p = (int) 131;
     static long[] memo = new long[nax];
+	static long[] reals = new long[nax];
 	static String[] cmps = new String[nax];
     static int[] ppows = new int[100];
     static int[][] perms;
@@ -24,6 +25,54 @@ public class latin {
     static int[] cols, recols;
     static Map<String, Long> mp = new HashMap<>();
     static long[][] seen;
+	static long[][][][][][] dp = new long[128][][][][][];
+	static class TrieNode {
+		TrieNode[] children;
+		long val;
+		public TrieNode()
+		{
+			val = -1;
+			children = new TrieNode[128];
+		}
+	}
+	static TrieNode root = new TrieNode();
+	static long getDp()
+	{
+		long[][][][][][] cur = dp;
+		if (cur[recols[0]] == null) cur[recols[0]] = new long[128][][][][];
+		long[][][][][] nxt = cur[recols[0]];
+		if (nxt[recols[1]] == null) nxt[recols[1]] = new long[128][][][];
+		long[][][][] nxt2 = nxt[recols[1]];
+		if (nxt2[recols[2]] == null) nxt2[recols[2]] = new long[128][][];
+		long[][][] nxt3 = nxt2[recols[2]];
+		if (nxt3[recols[3]] == null) nxt3[recols[3]] = new long[128][];
+		long[][] nxt4 = nxt3[recols[3]];
+		if (nxt4[recols[4]] == null) {
+			nxt4[recols[4]] = new long[128];
+			Arrays.fill(nxt4[recols[4]], -1);
+		}
+		long[] nxt5 = nxt4[recols[4]];
+		long nxt6 = nxt5[recols[5]];
+		return nxt6;
+	}
+	static void setDp(long val)
+	{
+		dp[recols[0]][recols[1]][recols[2]][recols[3]][recols[4]][recols[5]] = val;
+	}
+	static TrieNode getTrie()
+	{
+		TrieNode cur = root;
+		for (int x : recols) {
+			if (cur.children[x] == null)
+				cur.children[x] = new TrieNode();
+			// if (cur.children[x].val == 0) {
+				// return 
+			// }
+			cur = cur.children[x];
+			// if (cur.val == 0) {}
+		}
+		return cur;
+	}
     static void swap(int[] arr, int i, int j)
     {
         int tmp = arr[i];
@@ -66,14 +115,26 @@ public class latin {
         }
         return ans;
     }
+	
     static String encode4()
     {
         StringBuilder sb = new StringBuilder();
-        for (int x : recols) {
-            sb.append(x);
-        }
+		for (int i = 0; i < recols.length; i++) {
+			sb.append(recols[i]).append('-');
+		}
+        // for (int x : recols) {
+            // sb.append(x);
+        // }
         return sb.toString();
     }
+	static int hash3()
+	{
+		int ans = 0;
+		for (int i = 0; i < n-1; i++) {
+			ans = add(ans, mul(ppows[i], recols[i]));
+		}
+		return ans;
+	}
 	static int hash2()
     {
         List<Integer> lst = new ArrayList<>();
@@ -296,19 +357,56 @@ public class latin {
             colappear[c][i] = false;
         }
     }
+	static boolean impossible2(int c)
+	{
+		int can = 0;
+		for (int i = c; i < cols.length; i++)
+			can = can | cols[i];
+		return Integer.bitCount(can) < (cols.length-c);
+	}
+	static boolean impossible(int r, int c)
+	{
+		for (int i = 0; i < n; i++) {
+            if (rowappear[r][i] || colappear[c][i]) continue;
+			return false;
+		}
+		return true;
+	}
     static long dfs(int r, int c)
     {
-        if (r == n) {
+        if (r == n-1) {
 			// for (int[] row : board) {
 				// System.out.println(Arrays.toString(row));
 			// }
 			// System.out.println("==============");
             return 1;
         }
+		if (impossible(r, c)) {
+			return 0;
+		}
+		if (impossible2(c)) {
+			System.out.println("prune");
+			return 0;
+		}
         // int h = hash(encode2(r));
 		// int h = hash2();
+		// int h = hash3();
 		// System.out.println(h + " " + encode2(r));
-		String str = encode4();
+		String str = null;
+		long d = -1;
+		boolean useMP = n <= 7;
+		if (useMP) {
+			str = encode4();
+			if (mp.containsKey(str)) return mp.get(str);
+		}
+		else {
+			d = getDp();
+			if (d != -1) return d;
+		}
+		
+		// System.out.println(str);
+		// int h = Math.abs(str.hashCode()) % nax;
+		// System.out.println(h + " " + str.hashCode());
 		// String str = encode2(r);
 		// if (memo[h] != -1 && !cmps[h].equals(str)) {
 			// System.out.println(h + " " + cmps[h] + " " + str);
@@ -316,10 +414,10 @@ public class latin {
         // if (memo[h] != -1) return memo[h];
 		// cmps[h] = str;
         
-        if (mp.containsKey(str)) {
+        // if (mp.containsKey(str)) {
             // System.out.println("prune");
-            return mp.get(str);
-        }
+            // return mp.get(str);
+        // }
         // int fv = -1;
         // if (c == 0) {
             // fv = f();
@@ -327,6 +425,9 @@ public class latin {
                 // return seen[r][fv];
             // }
         // }
+		// TrieNode t = getTrie();
+		// if (t.val != -1) return t.val;
+		
         long ans = 0;
         int curcol = cols[c-1];
         for (int i = 0; i < n; i++) {
@@ -344,7 +445,15 @@ public class latin {
             rr(cols[c-1], curcol);
             cols[c-1] = curcol;
         }
-        mp.put(str, ans);
+		if (useMP) {
+			mp.put(str, ans);
+		}
+		else {
+			setDp(ans);
+		}
+		
+		// t.val = ans;
+
         // if (c == 0) {
             // seen[r][fv] = ans;
         // }
@@ -417,14 +526,38 @@ public class latin {
 		// System.out.println(mp.size());
         out.printf("%d\n", ans);
 		
+		// System.out.println(dp);
+		// System.out.println(mp);
+		// int cnt = 0;
+		// for (String key : mp.keySet()) {
+			// long val = mp.get(key);
+			// if (val > 0) continue;
+			// cnt++;
+			// int bits = 0;
+			// String[] words = key.split("-");
+			// for (String w : words) {
+				// int wi = Integer.parseInt(w);
+				// bits += Integer.bitCount(wi);
+			// }
+			// System.out.print(val > 0 ? "possible: " : "impossible: ");
+			// if (bits < 20) {
+				// for (String w : words) {
+					// int wi = Integer.parseInt(w);
+					// System.out.print(Integer.toBinaryString(wi) + " ");
+				// }
+				// System.out.println();
+			// }
+			
+		// }
+		// System.out.println(cnt);
 		
-		recols = new int[]{1,2,5,10,18};
-		rr(2, 13);
-		System.out.println(Arrays.toString(recols));
-		rr(13, 2);
-		System.out.println(Arrays.toString(recols));
-		rr(10, 0);
-		System.out.println(Arrays.toString(recols));
+		// recols = new int[]{1,2,5,10,18};
+		// rr(2, 13);
+		// System.out.println(Arrays.toString(recols));
+		// rr(13, 2);
+		// System.out.println(Arrays.toString(recols));
+		// rr(10, 0);
+		// System.out.println(Arrays.toString(recols));
     }
 
 
@@ -435,9 +568,9 @@ public class latin {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    // static String taskName = null;
-    static String taskName = "latin";
-    static boolean logTime = !true;
+    static String taskName = null;
+    // static String taskName = "latin";
+    static boolean logTime = true;
     
     public static void main(String[] args) throws Exception
     {
