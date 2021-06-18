@@ -250,7 +250,35 @@ public class latin {
     // [1,5,10,13,18] -> rr(13,2) -> [1,2,5,10,18]
     static void rr(int from, int to)
     {
-
+		boolean larger = to > from;
+		int idx = -1;
+		int len = recols.length;
+		if (larger) {
+			for (int i = 0; i < len; i++) {
+				if (recols[i] == from) {
+					idx = i;
+					break;
+				}
+			}
+			int i;
+			for (i = idx; i < len-1 && recols[i+1] < to; i++) {
+				recols[i] = recols[i+1];
+			}
+			recols[i] = to;
+		}
+		else {
+			for (int i = len-1; i >= 0; i--) {
+				if (recols[i] == from) {
+					idx = i;
+					break;
+				}
+			}
+			int i;
+			for (i = idx; i >= 1 && recols[i-1] > to; i--) {
+				recols[i] = recols[i-1];
+			}
+			recols[i] = to;
+		}
     }
     static void dfs(int level)
     {
@@ -383,10 +411,19 @@ public class latin {
             }
         }
         // dfs(0);
-        System.out.println(Arrays.toString(cols));
+        // System.out.println(Arrays.toString(cols));
         long ans = dfs(1, 1) * facts[n-1];
 		// System.out.println(mp.size());
         out.printf("%d\n", ans);
+		
+		
+		recols = new int[]{1,2,5,10,18};
+		rr(2, 13);
+		System.out.println(Arrays.toString(recols));
+		rr(13, 2);
+		System.out.println(Arrays.toString(recols));
+		rr(10, 0);
+		System.out.println(Arrays.toString(recols));
     }
 
 
