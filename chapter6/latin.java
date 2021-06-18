@@ -69,7 +69,7 @@ public class latin {
     static String encode4()
     {
         StringBuilder sb = new StringBuilder();
-        for (int x : cols) {
+        for (int x : recols) {
             sb.append(x);
         }
         return sb.toString();
@@ -309,6 +309,7 @@ public class latin {
 		// int h = hash2();
 		// System.out.println(h + " " + encode2(r));
 		String str = encode4();
+		// String str = encode2(r);
 		// if (memo[h] != -1 && !cmps[h].equals(str)) {
 			// System.out.println(h + " " + cmps[h] + " " + str);
 		// }
@@ -434,9 +435,9 @@ public class latin {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-    // static String taskName = "latin";
-    static boolean logTime = true;
+    // static String taskName = null;
+    static String taskName = "latin";
+    static boolean logTime = !true;
     
     public static void main(String[] args) throws Exception
     {
