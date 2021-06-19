@@ -14,7 +14,7 @@ public class latin {
     static int[] rorders, corders;
     static int ans = 0;
     static int limit;
-    static int nax = (int) 1e6;
+    static int nax = (int) 1e3;
     static int p = (int) 131;
     static long[] memo = new long[nax];
 	static long[] reals = new long[nax];
@@ -26,6 +26,7 @@ public class latin {
     static Map<String, Long> mp = new HashMap<>();
     static long[][] seen;
 	static long[][][][][][] dp = new long[128][][][][][];
+    static Set<String> imposs = new HashSet<>();
 	static class TrieNode {
 		TrieNode[] children;
 		long val;
@@ -193,6 +194,35 @@ public class latin {
         lst.add(cur);
         return lst;
     }
+    static String encode5(int c)
+    {
+        List<Integer> lst = new ArrayList<>();
+        for (int i = 1; i < n; i++) {
+            int cur = 0;
+            for (int j = 0; j < n; j++) {
+                if (colappear[i][j])
+                    cur = cur | (1 << j);
+            }
+            lst.add(cur);
+        }
+        Collections.sort(lst, (a, b) -> {
+            // int bita = Integer.bitCount(a), bitb = Integer.bitCount(b);
+            // if (bita != bitb) return bita - bitb;
+            return a - b;
+        });
+        // int cur = 0;
+        // for (int j = 0; j < n; j++) {
+            // if (rowappear[r][j]) {
+                // cur = cur | (1 << j);
+            // }
+        // }
+        // lst.add(cur);
+        StringBuilder sb = new StringBuilder();
+        for (int x : lst) {
+            sb.append(x);
+        }
+        return sb.toString();
+    }
     static String encode2(int r)
     {
         List<Integer> lst = new ArrayList<>();
@@ -218,7 +248,7 @@ public class latin {
         // lst.add(cur);
         StringBuilder sb = new StringBuilder();
         for (int x : lst) {
-            sb.append(x).append('-');
+            sb.append(x);
         }
         return sb.toString();
     }
@@ -357,11 +387,42 @@ public class latin {
             colappear[c][i] = false;
         }
     }
+    static boolean impossible4(int r, int c)
+    {
+        int nextr = c == n-1 ? r + 1 : r;
+        int nextc = c == n-1 ? 1 : c + 1;
+        for (int i = 0; i < n; i++) {
+            if (rowappear[r][i] || colappear[c][i]) continue;
+            rowappear[r][i] = true;
+            colappear[c][i] = true;
+            boolean possible = !impossible3(nextr, nextc);
+            rowappear[r][i] = false;
+            colappear[c][i] = false;
+            if (possible) return false;
+        }
+        return true;   
+    }
+    static boolean impossible3(int r, int c)
+    {
+        int nextr = c == n-1 ? r + 1 : r;
+        int nextc = c == n-1 ? 1 : c + 1;
+        for (int i = 0; i < n; i++) {
+            if (rowappear[r][i] || colappear[c][i]) continue;
+            rowappear[r][i] = true;
+            colappear[c][i] = true;
+            boolean possible = !impossible(nextr, nextc);
+            rowappear[r][i] = false;
+            colappear[c][i] = false;
+            if (possible) return false;
+        }
+        return true;
+    }
 	static boolean impossible2(int c)
 	{
 		int can = 0;
+        int mask = (1 << (n-1))-1;
 		for (int i = c; i < cols.length; i++)
-			can = can | cols[i];
+			can = can | (cols[i]^mask);
 		return Integer.bitCount(can) < (cols.length-c);
 	}
 	static boolean impossible(int r, int c)
@@ -384,10 +445,18 @@ public class latin {
 		if (impossible(r, c)) {
 			return 0;
 		}
-		if (impossible2(c)) {
-			System.out.println("prune");
-			return 0;
-		}
+        if (n-c>=2&&impossible3(r, c)) {
+            // System.out.println("prune 3");
+            return 0;
+        }
+        if (n-c>=3&&impossible4(r, c)) {
+            // System.out.println("prune 4");
+            return 0;
+        }
+		// if (impossible2(c)) {
+		// 	System.out.println("prune");
+		// 	return 0;
+		// }
         // int h = hash(encode2(r));
 		// int h = hash2();
 		// int h = hash3();
@@ -397,6 +466,7 @@ public class latin {
 		boolean useMP = n <= 7;
 		if (useMP) {
 			str = encode4();
+            // if (imposs.contains(str)) return 0;
 			if (mp.containsKey(str)) return mp.get(str);
 		}
 		else {
@@ -446,7 +516,13 @@ public class latin {
             cols[c-1] = curcol;
         }
 		if (useMP) {
-			mp.put(str, ans);
+            // if (ans == 0) {
+            //     imposs.add(str);
+            // }
+            // else {
+                mp.put(str, ans);    
+            // }
+			
 		}
 		else {
 			setDp(ans);
@@ -522,7 +598,9 @@ public class latin {
         }
         // dfs(0);
         // System.out.println(Arrays.toString(cols));
+        // System.out.println(mp);
         long ans = dfs(1, 1) * facts[n-1];
+        // System.out.println(imposs.size());;
 		// System.out.println(mp.size());
         out.printf("%d\n", ans);
 		
@@ -530,23 +608,30 @@ public class latin {
 		// System.out.println(mp);
 		// int cnt = 0;
 		// for (String key : mp.keySet()) {
-			// long val = mp.get(key);
-			// if (val > 0) continue;
-			// cnt++;
-			// int bits = 0;
-			// String[] words = key.split("-");
-			// for (String w : words) {
-				// int wi = Integer.parseInt(w);
-				// bits += Integer.bitCount(wi);
-			// }
-			// System.out.print(val > 0 ? "possible: " : "impossible: ");
-			// if (bits < 20) {
-				// for (String w : words) {
-					// int wi = Integer.parseInt(w);
-					// System.out.print(Integer.toBinaryString(wi) + " ");
-				// }
-				// System.out.println();
-			// }
+		// 	long val = mp.get(key);
+		// 	if (val > 0) continue;
+		// 	cnt++;
+		// 	int bits = 0;
+		// 	String[] words = key.split("-");
+		// 	for (String w : words) {
+		// 		int wi = Integer.parseInt(w);
+		// 		bits += Integer.bitCount(wi);
+		// 	}
+		// 	// System.out.print(val > 0 ? "possible: " : "impossible: ");
+		// 	if (bits < 20) {
+		// 		for (String w : words) {
+		// 			int wi = Integer.parseInt(w);
+  //                   // int mask = (1 << n)-1;
+  //                   // System.out.println("mask: " + Integer.toBinaryString(mask));
+  //                   String bs = Integer.toBinaryString(wi);
+  //                   while (bs.length() < n) {
+  //                       bs = "0" + bs;
+  //                   }
+		// 			System.out.println(bs);
+  //                   // System.out.print(wi + " ");
+		// 		}
+		// 		System.out.println("=========");
+		// 	}
 			
 		// }
 		// System.out.println(cnt);
@@ -558,6 +643,31 @@ public class latin {
 		// System.out.println(Arrays.toString(recols));
 		// rr(10, 0);
 		// System.out.println(Arrays.toString(recols));
+
+
+        // for (String key : mp.keySet()) {
+        //     long val = mp.get(key);
+        //     if (val != 0) continue;
+        //     int bits = 0;
+        //     // System.out.print(key);
+        //     String[] words = key.split("-");
+        //     for (String w : words) {
+        //         int wi = Integer.parseInt(w);
+        //         bits += Integer.bitCount(wi);
+        //     }
+        //     for (String w : words) {
+        //         int wi = Integer.parseInt(w);
+        //         String bs = Integer.toBinaryString(wi);
+        //         while (bs.length() < n) {
+        //             bs = "0" + bs;
+        //         }
+        //         System.out.println(bs);
+        //      }
+        //      System.out.println("=======");
+        //     // System.out.println(", bits: " + bits);
+        
+        
+        // }
     }
 
 
