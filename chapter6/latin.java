@@ -116,12 +116,25 @@ public class latin {
         }
         return ans;
     }
-	
+	static String encode5()
+    {
+        int len = recols.length;
+        char[] ans = new char[len*3+1];
+        for (int i = len-1, idx = 0; i >= 0; i--) {
+            int x = recols[i];
+            while (x>0) {
+                ans[idx++] = (char)(x%10);
+                x/=10;
+            }
+        }
+        ans[ans.length-1] = (char)len;
+        return new String(ans);
+    }
     static String encode4()
     {
         StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < recols.length; i++) {
-			sb.append(recols[i]).append('-');
+		for (int i = recols.length-1; i >= 0; i--) {
+			sb.append(recols[i]);
 		}
         // for (int x : recols) {
             // sb.append(x);
@@ -461,18 +474,23 @@ public class latin {
 		// int h = hash2();
 		// int h = hash3();
 		// System.out.println(h + " " + encode2(r));
-		String str = null;
-		long d = -1;
-		boolean useMP = n <= 7;
-		if (useMP) {
-			str = encode4();
-            // if (imposs.contains(str)) return 0;
-			if (mp.containsKey(str)) return mp.get(str);
-		}
-		else {
-			d = getDp();
-			if (d != -1) return d;
-		}
+		// String str = null;
+		// long d = -1;
+		// boolean useMP = n <= 7;
+		// if (useMP) {
+		// 	str = encode4();
+  //           // if (imposs.contains(str)) return 0;
+		// 	if (mp.containsKey(str)) return mp.get(str);
+		// }
+		// else {
+		// 	d = getDp();
+		// 	if (d != -1) return d;
+		// }
+
+        // String str = encode4();
+        String str = encode5();
+        long rmb = -1;
+        if ((rmb = mp.getOrDefault(str, -1L)) != -1) return rmb;
 		
 		// System.out.println(str);
 		// int h = Math.abs(str.hashCode()) % nax;
@@ -515,18 +533,22 @@ public class latin {
             rr(cols[c-1], curcol);
             cols[c-1] = curcol;
         }
-		if (useMP) {
-            // if (ans == 0) {
-            //     imposs.add(str);
-            // }
-            // else {
-                mp.put(str, ans);    
-            // }
+
+
+		// if (useMP) {
+  //           // if (ans == 0) {
+  //           //     imposs.add(str);
+  //           // }
+  //           // else {
+  //               mp.put(str, ans);    
+  //           // }
 			
-		}
-		else {
-			setDp(ans);
-		}
+		// }
+		// else {
+		// 	setDp(ans);
+		// }
+
+        mp.put(str, ans);
 		
 		// t.val = ans;
 
