@@ -14,8 +14,10 @@ public class latin {
     static int[] rorders, corders;
     static int ans = 0;
     static int limit;
-    static int nax = (int) 1e3;
+    static int nax = (int) 1e5;
     static int p = (int) 131;
+    // static long[][] mem2d = new long[700][nax];
+    // static long[][][] mem3d = new long[6][6][nax];
     static long[] memo = new long[nax];
 	static long[] reals = new long[nax];
 	static String[] cmps = new String[nax];
@@ -116,6 +118,27 @@ public class latin {
         }
         return ans;
     }
+
+    static String encode6()
+    {
+        int len = recols.length;
+        char[] ans = new char[len*3];
+        int sum = 0;
+        long product = 1;
+        for (int i = len-1, idx = 0; i >= 0; i--) {
+            int x = recols[i];
+            sum += x;
+            product *= x;
+            while (x>0) {
+                ans[idx++] = (char)((x%10)+'0');
+                x/=10;
+            }
+        }
+        // System.out.println("sum: " + sum + ", product: " + product);
+        // ans[ans.length-1] = (char)(r+'0');
+        // ans[ans.length-1] = (char)(c+'0');
+        return new String(ans);
+    }
 	static String encode5()
     {
         int len = recols.length;
@@ -123,24 +146,38 @@ public class latin {
         for (int i = len-1, idx = 0; i >= 0; i--) {
             int x = recols[i];
             while (x>0) {
-                ans[idx++] = (char)(x%10);
+                ans[idx++] = (char)((x%10)+'0');
                 x/=10;
             }
         }
-        ans[ans.length-1] = (char)len;
+        // ans[ans.length-1] = (char)(r+'0');
         return new String(ans);
     }
     static String encode4()
     {
         StringBuilder sb = new StringBuilder();
-		for (int i = recols.length-1; i >= 0; i--) {
-			sb.append(recols[i]);
-		}
-        // for (int x : recols) {
-            // sb.append(x);
-        // }
+		// for (int i = recols.length-1; i >= 0; i--) {
+		// 	sb.append(recols[i]).append('-');
+		// }
+        for (int x : recols) {
+            sb.append(x).append('-');
+        }
         return sb.toString();
     }
+
+    static String encode7(int r, int c)
+    {
+        StringBuilder sb = new StringBuilder();
+        // for (int i = recols.length-1; i >= 0; i--) {
+        //  sb.append(recols[i]).append('-');
+        // }
+        for (int x : recols) {
+            sb.append(x).append('-');
+        }
+        sb.append(r).append('-').append(c);
+        return sb.toString();
+    }
+
 	static int hash3()
 	{
 		int ans = 0;
@@ -417,6 +454,11 @@ public class latin {
     }
     static boolean impossible3(int r, int c)
     {
+        // int val = 1;
+        // for (int i = c; i < cols.length; i++)
+        //     val *= cols[i];
+        // // if (i4memo[val])
+        // System.out.println(val);
         int nextr = c == n-1 ? r + 1 : r;
         int nextc = c == n-1 ? 1 : c + 1;
         for (int i = 0; i < n; i++) {
@@ -446,6 +488,23 @@ public class latin {
 		}
 		return true;
 	}
+    static boolean impossible5(int r, int c)
+    {
+        int toFill = (n-1) - c + 1;
+        int mask = (1 << n) - 1;
+        int canUse = 0;
+        for (int i = c; i < n; i++) {
+            canUse = canUse | (cols[i-1]^mask);
+        }
+        int rowCanUse = 0;
+        for (int i = 0; i < n; i++) {
+            if (!rowappear[r][i]) {
+                rowCanUse = rowCanUse | (1 << i);
+            }
+        }
+        return Integer.bitCount(rowCanUse&canUse) < toFill;
+
+    }
     static long dfs(int r, int c)
     {
         if (r == n-1) {
@@ -455,17 +514,21 @@ public class latin {
 			// System.out.println("==============");
             return 1;
         }
-		if (impossible(r, c)) {
-			return 0;
-		}
-        if (n-c>=2&&impossible3(r, c)) {
-            // System.out.println("prune 3");
+        if (impossible5(r, c)) {
+            // System.out.println("prune5");
             return 0;
         }
-        if (n-c>=3&&impossible4(r, c)) {
-            // System.out.println("prune 4");
-            return 0;
-        }
+		// if (impossible(r, c)) {
+		// 	return 0;
+		// }
+  //       if (impossible3(r, c)) {
+  //           // System.out.println("prune 3");
+  //           return 0;
+  //       }
+  //       if (impossible4(r, c)) {
+  //           // System.out.println("prune 4");
+  //           return 0;
+  //       }
 		// if (impossible2(c)) {
 		// 	System.out.println("prune");
 		// 	return 0;
@@ -486,9 +549,15 @@ public class latin {
 		// 	d = getDp();
 		// 	if (d != -1) return d;
 		// }
-
+        int h = 1;
+        for (int i = 0; i < recols.length; i++)
+            h = add(h, mul(ppows[i], recols[i]));
+        // if (mem3d[r][c][h] != -1)
+        //     return mem3d[r][c][h];
         // String str = encode4();
-        String str = encode5();
+        // String str = encode5();
+        String str = encode6();
+        // String str = encode7(r, c);
         long rmb = -1;
         if ((rmb = mp.getOrDefault(str, -1L)) != -1) return rmb;
 		
@@ -515,7 +584,15 @@ public class latin {
         // }
 		// TrieNode t = getTrie();
 		// if (t.val != -1) return t.val;
-		
+        // int sum = 0;
+        // for (int x : recols) 
+        //     sum += x;
+        // int pn = sum;
+        // for (int i = 0; i < recols.length; i++) {
+        //     pn = add(pn, mul(ppows[i], recols[i]));
+        // }
+        // if (memo[pn] != -1) return memo[pn];
+		// if (mem2d[sum][pn] != -1) return mem2d[sum][pn];
         long ans = 0;
         int curcol = cols[c-1];
         for (int i = 0; i < n; i++) {
@@ -533,6 +610,12 @@ public class latin {
             rr(cols[c-1], curcol);
             cols[c-1] = curcol;
         }
+
+        // memo[pn] = ans;
+
+        // mem2d[sum][pn] = ans;
+
+        // mem3d[r][c][h] = ans;
 
 
 		// if (useMP) {
@@ -577,6 +660,8 @@ public class latin {
     static void solve()
     {
         n = ni();
+        // boolean is7 = n == 7;
+        // if (is7) n--;
         board = new int[n][n];
         rowappear = new boolean[n][n];
         colappear = new boolean[n][n];
@@ -592,6 +677,14 @@ public class latin {
         seen = new long[n][facts[facts.length-1]+1];
 		for (long[] row : seen)
 			Arrays.fill(row, -1);
+
+        // for (long[] row : mem2d)
+        //     Arrays.fill(row, -1);
+
+        // for (long[][] r1 : mem3d)
+        //     for (long[] r2 : r1)
+        //         Arrays.fill(r2, -1);
+
         calcpows();
         permutate();
         Arrays.fill(memo, -1);
@@ -607,6 +700,7 @@ public class latin {
         for (int i = 0; i < n; i++) {
             board[0][i] = i;
             rowappear[0][i] = true;
+            // rowappear[1][(i+1)%n] = true;
             colappear[i][i] = true;
 			
 			board[i][0] = i;
@@ -623,11 +717,33 @@ public class latin {
         // System.out.println(mp);
         long ans = dfs(1, 1) * facts[n-1];
         // System.out.println(imposs.size());;
-		// System.out.println(mp.size());
+		System.out.println(mp.size());
         out.printf("%d\n", ans);
+        // Map<Integer, List<Long>> dmap = new TreeMap<>();
+        // for (String key : mp.keySet()) {
+        //     String[] words = key.split("-");
+        //     int sum = 0;
+        //     for (int i = 0; i < words.length-2; i++) {
+        //         sum += Integer.parseInt(words[i]);
+        //     }
+        //     List<Long> lst = dmap.getOrDefault(sum, new ArrayList<>());
+        //     lst.add(mp.get(key));
+        //     dmap.put(sum, lst);
+        //     // System.out.println(sum + ": " + mp.get(key));
+        // }
+        // System.out.println(dmap);
+        // int[] counts = new int[10];
+        // long maxi = 0L;
+        // for (String key : mp.keySet()) {
+        //     // counts[key.charAt(key.length()-1)-'0']++;
+        //     // System.out.println(key + ": " + mp.get(key));
+        //     // maxi = Math.max(maxi, mp.get(key));
+        // }
+        // // System.out.println(maxi);
+        // System.out.println(Arrays.toString(counts));
 		
 		// System.out.println(dp);
-		// System.out.println(mp);
+		// System.out.println(mp.size());
 		// int cnt = 0;
 		// for (String key : mp.keySet()) {
 		// 	long val = mp.get(key);
