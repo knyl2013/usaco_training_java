@@ -627,6 +627,8 @@ public class latin {
         long ans = 0;
         int curcol = cols[c-1];
 		int nextr, nextc;
+        nextr = c == n-1 ? r + 1 : r;
+        nextc = c == n-1 ? 1 : c + 1;
         for (int i = 0; i < n; i++) {
             if (rowappear[r][i] || colappear[c][i]) continue;
             rowappear[r][i] = true;
@@ -635,8 +637,6 @@ public class latin {
             cols[c-1] = curcol | (1 << i);
 			rowCanUses[r-1] = rowCanUses[r-1] ^ (1 << i);
             rr(curcol, cols[c-1]);
-            nextr = c == n-1 ? r + 1 : r;
-            nextc = c == n-1 ? 1 : c + 1;
             ans += dfs(nextr, nextc);
 			rowCanUses[r-1] = rowCanUses[r-1] | (1 << i);
             rowappear[r][i] = false;
