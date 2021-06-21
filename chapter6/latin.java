@@ -14,7 +14,7 @@ public class latin {
     static int[] rorders, corders;
     static int ans = 0;
     static int limit;
-    static int nax = (int) 1e5;
+    static int nax = (int) 1e3;
     static int p = (int) 131;
     // static long[][] mem2d = new long[700][nax];
     // static long[][][] mem3d = new long[6][6][nax];
@@ -22,13 +22,17 @@ public class latin {
 	static long[] reals = new long[nax];
 	static String[] cmps = new String[nax];
     static int[] ppows = new int[100];
+	static long[] lppows = new long[100];
     static int[][] perms;
     static int[] facts = new int[8];
     static int[] cols, recols;
+	static int[] rowCanUses;
     static Map<String, Long> mp = new HashMap<>();
     static long[][] seen;
 	static long[][][][][][] dp = new long[128][][][][][];
     static Set<String> imposs = new HashSet<>();
+	static Map<Long, Long> lmp = new HashMap<>();
+	static int mask;
 	static class TrieNode {
 		TrieNode[] children;
 		long val;
@@ -108,6 +112,10 @@ public class latin {
         for (int i = 1; i < ppows.length; i++) {
             ppows[i] = mul(ppows[i-1], p);
         }
+		lppows[0] = 1;
+		for (int i = 1; i < lppows.length; i++) {
+			lppows[i] = lppows[i-1] * p;
+		}
     }
     static int hash(String s)
     {
@@ -491,17 +499,17 @@ public class latin {
     static boolean impossible5(int r, int c)
     {
         int toFill = (n-1) - c + 1;
-        int mask = (1 << n) - 1;
+        // int mask = (1 << n) - 1;
         int canUse = 0;
         for (int i = c; i < n; i++) {
             canUse = canUse | (cols[i-1]^mask);
         }
-        int rowCanUse = 0;
-        for (int i = 0; i < n; i++) {
-            if (!rowappear[r][i]) {
-                rowCanUse = rowCanUse | (1 << i);
-            }
-        }
+        int rowCanUse = rowCanUses[r-1];
+        // for (int i = 0; i < n; i++) {
+            // if (!rowappear[r][i]) {
+                // rowCanUse = rowCanUse | (1 << i);
+            // }
+        // }
         return Integer.bitCount(rowCanUse&canUse) < toFill;
 
     }
@@ -514,24 +522,21 @@ public class latin {
 			// System.out.println("==============");
             return 1;
         }
-        if (impossible5(r, c)) {
+        if (c > 1 && impossible5(r, c)) {
             // System.out.println("prune5");
             return 0;
         }
-		// if (impossible(r, c)) {
-		// 	return 0;
-		// }
-  //       if (impossible3(r, c)) {
-  //           // System.out.println("prune 3");
-  //           return 0;
-  //       }
-  //       if (impossible4(r, c)) {
-  //           // System.out.println("prune 4");
-  //           return 0;
-  //       }
+		if (impossible(r, c)) {
+			return 0;
+		}
+        // if (impossible3(r, c)) {
+            // return 0;
+        // }
+        // if (impossible4(r, c)) {
+            // return 0;
+        // }
 		// if (impossible2(c)) {
-		// 	System.out.println("prune");
-		// 	return 0;
+			// return 0;
 		// }
         // int h = hash(encode2(r));
 		// int h = hash2();
@@ -549,17 +554,20 @@ public class latin {
 		// 	d = getDp();
 		// 	if (d != -1) return d;
 		// }
-        int h = 1;
-        for (int i = 0; i < recols.length; i++)
-            h = add(h, mul(ppows[i], recols[i]));
+        long h = 7;
+        for (int i = 0; i < recols.length; i++) {
+			h = h + lppows[i] * recols[i];
+		}
+		// h = h % ((long)1e11);
+		if (lmp.containsKey(h)) return lmp.get(h);
         // if (mem3d[r][c][h] != -1)
         //     return mem3d[r][c][h];
         // String str = encode4();
         // String str = encode5();
-        String str = encode6();
+        // String str = encode6();
         // String str = encode7(r, c);
-        long rmb = -1;
-        if ((rmb = mp.getOrDefault(str, -1L)) != -1) return rmb;
+        // long rmb = -1;
+        // if ((rmb = mp.getOrDefault(str, -1L)) != -1) return rmb;
 		
 		// System.out.println(str);
 		// int h = Math.abs(str.hashCode()) % nax;
@@ -601,10 +609,12 @@ public class latin {
             colappear[c][i] = true;
 			board[r][c] = i;
             cols[c-1] = curcol | (1 << i);
+			rowCanUses[r-1] = rowCanUses[r-1] ^ (1 << i);
             rr(curcol, cols[c-1]);
             int nextr = c == n-1 ? r + 1 : r;
             int nextc = c == n-1 ? 1 : c + 1;
             ans += dfs(nextr, nextc);
+			rowCanUses[r-1] = rowCanUses[r-1] | (1 << i);
             rowappear[r][i] = false;
             colappear[c][i] = false;
             rr(cols[c-1], curcol);
@@ -631,7 +641,9 @@ public class latin {
 		// 	setDp(ans);
 		// }
 
-        mp.put(str, ans);
+        // mp.put(str, ans);
+		
+		lmp.put(h, ans);
 		
 		// t.val = ans;
 
@@ -660,6 +672,7 @@ public class latin {
     static void solve()
     {
         n = ni();
+		mask = (1 << n)-1;
         // boolean is7 = n == 7;
         // if (is7) n--;
         board = new int[n][n];
@@ -667,6 +680,7 @@ public class latin {
         colappear = new boolean[n][n];
         cols = new int[n-1];
         recols = new int[n-1];
+		rowCanUses = new int[n-1];
         limit = n*n-n;
         rorders = new int[limit];
         corders = new int[limit];
@@ -710,6 +724,7 @@ public class latin {
             if (i>0) {
                 cols[i-1] = (1 << i);
                 recols[i-1] = (1 << i);
+				rowCanUses[i-1] = (1 << i) ^ mask;
             }
         }
         // dfs(0);
@@ -717,7 +732,8 @@ public class latin {
         // System.out.println(mp);
         long ans = dfs(1, 1) * facts[n-1];
         // System.out.println(imposs.size());;
-		System.out.println(mp.size());
+		// System.out.println(mp.size());
+		System.out.println(lmp.size());
         out.printf("%d\n", ans);
         // Map<Integer, List<Long>> dmap = new TreeMap<>();
         // for (String key : mp.keySet()) {
