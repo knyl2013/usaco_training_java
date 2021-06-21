@@ -14,7 +14,7 @@ public class latin {
     static int[] rorders, corders;
     static int ans = 0;
     static int limit;
-    static int nax = (int) 1e3;
+    static int nax = (int) 1e1;
     static int p = (int) 131;
     // static long[][] mem2d = new long[700][nax];
     // static long[][][] mem3d = new long[6][6][nax];
@@ -29,9 +29,10 @@ public class latin {
 	static int[] rowCanUses;
     static Map<String, Long> mp = new HashMap<>();
     static long[][] seen;
-	static long[][][][][][] dp = new long[128][][][][][];
+	static long[][][][][][] dp = new long[1][][][][][];
     static Set<String> imposs = new HashSet<>();
-	static Map<Long, Long> lmp = new HashMap<>();
+	static Map<Long, Long> lmp = new HashMap<>(611630);
+	// static int[][][] imp3 = new int[128][128][128];
 	static int mask;
 	static class TrieNode {
 		TrieNode[] children;
@@ -467,6 +468,12 @@ public class latin {
         //     val *= cols[i];
         // // if (i4memo[val])
         // System.out.println(val);
+		
+		if (c==n-1) return false;
+		// if (imp3[rowCanUses[r-1]][cols[c-1]][cols[c]] != -1) {
+			// System.out.println("prune");
+			// return imp3[rowCanUses[r-1]][cols[c-1]][cols[c]] == 1;
+		// }
         int nextr = c == n-1 ? r + 1 : r;
         int nextc = c == n-1 ? 1 : c + 1;
         for (int i = 0; i < n; i++) {
@@ -476,8 +483,12 @@ public class latin {
             boolean possible = !impossible(nextr, nextc);
             rowappear[r][i] = false;
             colappear[c][i] = false;
-            if (possible) return false;
+            if (possible) {
+				// imp3[rowCanUses[r-1]][cols[c-1]][cols[c]] = 0;
+				return false;
+			}
         }
+		// imp3[rowCanUses[r-1]][cols[c-1]][cols[c]] = 1;
         return true;
     }
 	static boolean impossible2(int c)
@@ -490,11 +501,12 @@ public class latin {
 	}
 	static boolean impossible(int r, int c)
 	{
-		for (int i = 0; i < n; i++) {
-            if (rowappear[r][i] || colappear[c][i]) continue;
-			return false;
-		}
-		return true;
+		return (rowCanUses[r-1] & (cols[c-1] ^ mask)) == 0;
+		// for (int i = 0; i < n; i++) {
+            // if (rowappear[r][i] || colappear[c][i]) continue;
+			// return false;
+		// }
+		// return true;
 	}
     static boolean impossible5(int r, int c)
     {
@@ -510,6 +522,14 @@ public class latin {
                 // rowCanUse = rowCanUse | (1 << i);
             // }
         // }
+		// int tt = rowCanUse&canUse;
+		// for (int i = 0; i < n; i++) {
+			// if (((tt>>i)&1) == 1) {
+				// toFill--;
+				// if (toFill == 0) return false;
+			// }
+		// }
+		// return true;
         return Integer.bitCount(rowCanUse&canUse) < toFill;
 
     }
@@ -559,7 +579,10 @@ public class latin {
 			h = h + lppows[i] * recols[i];
 		}
 		// h = h % ((long)1e11);
-		if (lmp.containsKey(h)) return lmp.get(h);
+		// long rmb;
+		// if ((rmb = lmp.getOrDefault(h, -1L)) != -1) return rmb;
+		Long l = lmp.get(h);
+		if (l != null) return l;
         // if (mem3d[r][c][h] != -1)
         //     return mem3d[r][c][h];
         // String str = encode4();
@@ -603,6 +626,7 @@ public class latin {
 		// if (mem2d[sum][pn] != -1) return mem2d[sum][pn];
         long ans = 0;
         int curcol = cols[c-1];
+		int nextr, nextc;
         for (int i = 0; i < n; i++) {
             if (rowappear[r][i] || colappear[c][i]) continue;
             rowappear[r][i] = true;
@@ -611,8 +635,8 @@ public class latin {
             cols[c-1] = curcol | (1 << i);
 			rowCanUses[r-1] = rowCanUses[r-1] ^ (1 << i);
             rr(curcol, cols[c-1]);
-            int nextr = c == n-1 ? r + 1 : r;
-            int nextc = c == n-1 ? 1 : c + 1;
+            nextr = c == n-1 ? r + 1 : r;
+            nextc = c == n-1 ? 1 : c + 1;
             ans += dfs(nextr, nextc);
 			rowCanUses[r-1] = rowCanUses[r-1] | (1 << i);
             rowappear[r][i] = false;
@@ -681,17 +705,21 @@ public class latin {
         cols = new int[n-1];
         recols = new int[n-1];
 		rowCanUses = new int[n-1];
-        limit = n*n-n;
-        rorders = new int[limit];
-        corders = new int[limit];
+        // limit = n*n-n;
+        // rorders = new int[limit];
+        // corders = new int[limit];
 
         facts[0] = 1;
         for (int i = 1; i < facts.length; i++)
             facts[i] = facts[i-1] * i;
-        seen = new long[n][facts[facts.length-1]+1];
-		for (long[] row : seen)
-			Arrays.fill(row, -1);
-
+        // seen = new long[n][facts[facts.length-1]+1];
+		// for (long[] row : seen)
+			// Arrays.fill(row, -1);
+		// for (int i = 0; i < 128; i++) {
+			// for (int j = 0; j < 128; j++) {
+				// Arrays.fill(imp3[i][j], -1);
+			// }
+		// }
         // for (long[] row : mem2d)
         //     Arrays.fill(row, -1);
 
@@ -700,17 +728,17 @@ public class latin {
         //         Arrays.fill(r2, -1);
 
         calcpows();
-        permutate();
-        Arrays.fill(memo, -1);
-        int r = 1, c = 0;
-        for (int i = 0; i < limit; i++) {
-            rorders[i] = r;
-            corders[i] = c;
-            int nextr = r == n-1 ? 1 : r+1;
-            int nextc = r == n-1 ? c+1 : c;
-            r = nextr;
-            c = nextc;
-        }
+        // permutate();
+        // Arrays.fill(memo, -1);
+        // int r = 1, c = 0;
+        // for (int i = 0; i < limit; i++) {
+            // rorders[i] = r;
+            // corders[i] = c;
+            // int nextr = r == n-1 ? 1 : r+1;
+            // int nextc = r == n-1 ? c+1 : c;
+            // r = nextr;
+            // c = nextc;
+        // }
         for (int i = 0; i < n; i++) {
             board[0][i] = i;
             rowappear[0][i] = true;
@@ -733,7 +761,18 @@ public class latin {
         long ans = dfs(1, 1) * facts[n-1];
         // System.out.println(imposs.size());;
 		// System.out.println(mp.size());
-		System.out.println(lmp.size());
+		// System.out.println(lmp.size());
+		// Map<Long, List<Long>> dmp = new HashMap<>();
+		// for (Long key : lmp.keySet()) {
+			// long val = lmp.get(key);
+			// List<Long> lst = dmp.getOrDefault(val, new ArrayList<>());
+			// lst.add(key);
+			// dmp.put(val, lst);
+		// }
+		// for (Long key : dmp.keySet()) {
+			// System.out.println(key + " " + dmp.get(key).size());
+		// }
+		// System.out.println(dmp);
         out.printf("%d\n", ans);
         // Map<Integer, List<Long>> dmap = new TreeMap<>();
         // for (String key : mp.keySet()) {
