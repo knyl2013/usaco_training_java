@@ -32,6 +32,7 @@ public class latin {
 	static long[][][][][][] dp = new long[1][][][][][];
     static Set<String> imposs = new HashSet<>();
 	static Map<Long, Long> lmp = new HashMap<>(611630);
+    static Map<String, Long> cycleMp = new HashMap<>();
 	// static int[][][] imp3 = new int[128][128][128];
 	static int mask;
 	static class TrieNode {
@@ -533,6 +534,46 @@ public class latin {
         return Integer.bitCount(rowCanUse&canUse) < toFill;
 
     }
+    static String getCycleKey()
+    {
+        UnionFind uf = new UnionFind(n);
+        List<List<Integer>> groups = new ArrayList<>();
+        List<Integer> mag = null;
+
+        for (int i = 1; i < n; i++) {
+            uf.union(board[1][i], i);
+            int grp = uf.find(i);
+            List<Integer> g;
+            if (grp >= groups.size()) {
+                g = new ArrayList<>();
+                groups.add(g);
+            }
+            else {
+                g = groups.get(grp);
+            }
+            g.add(board[1][i]);
+            // if (mag == null || mag.size() < g.size()) {
+            //     mag = g;
+            // }
+        }
+        for (List<Integer> g : groups) {
+            Collections.sort(g);
+        }
+        Collections.sort(groups, (a, b) -> a.size() - b.size());
+        System.out.println(groups);
+        return groups.toString();
+        // Collections.sort(mag);
+
+        // System.out.println(mag);
+
+        // long key = 1;
+
+        // for (int x : mag) {
+        //     key = key * p + x;
+        // }
+
+        // return key;
+    }
     static long dfs(int r, int c)
     {
         if (r == n-1) {
@@ -549,6 +590,15 @@ public class latin {
 		if (impossible(r, c)) {
 			return 0;
 		}
+        String cycleKey = null;
+        if (r == 2 && c == 1) {
+            cycleKey = getCycleKey();
+            // System.out.println(cycleKey);
+            if (cycleMp.containsKey(cycleKey)) {
+                // System.out.println("prune");
+                return cycleMp.get(cycleKey);
+            }
+        }
         // if (impossible3(r, c)) {
             // return 0;
         // }
@@ -668,6 +718,10 @@ public class latin {
         // mp.put(str, ans);
 		
 		lmp.put(h, ans);
+
+        if (cycleKey != null) {
+            cycleMp.put(cycleKey, ans);
+        }
 		
 		// t.val = ans;
 
@@ -864,6 +918,44 @@ public class latin {
     }
 
 
+
+
+static class UnionFind {
+    int[] parent;
+    int[] size;
+    
+    public UnionFind(int n) {
+        parent = new int[n];
+        size = new int[n];
+        Arrays.fill(size, 1);
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+
+    int find(int x) {
+        if (x == parent[x]) return x;
+        return parent[x] = this.find(parent[x]);
+    }
+
+    void union(int u, int v) {
+        int u_p = this.find(u);
+        int v_p = this.find(v);
+        if (u_p != v_p) {
+            size[u_p] += size[v_p];
+            size[v_p] = 0;
+            parent[v_p] = u_p;
+        }
+    }
+
+    boolean same(int u, int v) {
+        return this.find(u) == this.find(v);
+    }
+
+    int size(int x) {
+        return this.size[find(x)];
+    }
+}
 
 
 
