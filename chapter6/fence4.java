@@ -54,33 +54,53 @@ public class fence4 {
             double y1 = l1.y1, y2 = l1.y2, y3 = l2.y1, y4 = l2.y2;
             double D = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
             if (D == 0) return null;
-            double numX = ((x1 * y2) - (y1 * x2)) * (x3 - x4) - (x1 - x2) * ((x3 * y4) - (y3 * x4));
-            double numY = ((x1 * y2) - (y1 * x2)) * (x3 - x4) - (y1 - y2) * ((x3 * y4) - (y3 * x4));
-            Point ans = new Point();
-            ans.x = numX / D;
-            ans.y = numY / D;
-            return ans;
+            double numX = (((x1 * y2) - (y1 * x2)) * (x3 - x4)) - ((x1 - x2) * ((x3 * y4) - (y3 * x4)));
+            double numY = (((x1 * y2) - (y1 * x2))) * (y3 - y4) - ((y1 - y2) * ((x3 * y4) - (y3 * x4)));
+            return new Point(numX / D, numY / D);
+        }
+        // rotate the line by degree (from is the center)
+        void rotateLineClockWise(int angle) 
+        {
+            double xRot = x1 + Math.cos(Math.toRadians(angle)) * (x2 - x1) - Math.sin(Math.toRadians(angle)) * (y2 - y1);
+            double yRot = y1 + Math.sin(Math.toRadians(angle)) * (y2 - x1) + Math.cos(Math.toRadians(angle)) * (y2 - y1);
+            x2 = xRot;
+            y2 = yRot;
+        }
+        public String toString()
+        {
+            return "(" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")"; 
         }
     }
+    
     // tell the distance of the hit point from the ray to the boundary
     // return -1 if ray does not hit the boundary
     static double hit(Line ray, Line boundary)
     {
         Point intersectPt = Line.getIntersectPoint(ray, boundary);
         if (!boundary.onLine(intersectPt)) return -1;
-        return Point.distance(new Point(ray.x1, ray.y1), intersectPt);
+        Point ori = new Point(ray.x1, ray.y1);
+        System.out.println(ori);
+        System.out.println(intersectPt);
+        return Point.distance(ori, intersectPt);
     }
     static void solve()
     {
         Line l1 = new Line(0, 0, 0, 15);
         Line l2 = new Line(1, 0, 0.9, 1);
-        Point intersect = l1.getIntersectPoint(l1, l2);
-        System.out.println(intersect);
-        System.out.println(l1.onLine(intersect));
-        System.out.println(l2.onLine(intersect));
 
-        System.out.println(hit(l1, l2));
-        System.out.println(hit(l2, l1));
+        System.out.println(l2);
+        for (int i = 0; i < 360; i++) {
+            l2.rotateLineClockWise(1);
+            System.out.println(l2);
+        }
+
+        // Point intersect = Line.getIntersectPoint(l1, l2);
+        // System.out.println(intersect);
+        // System.out.println(l1.onLine(intersect));
+        // System.out.println(l2.onLine(intersect));
+
+        // System.out.println(hit(l1, l2));
+        // System.out.println(hit(l2, l1));
     }
 
 
