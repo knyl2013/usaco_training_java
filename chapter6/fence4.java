@@ -10,12 +10,18 @@ import java.util.*;
 public class fence4 {
     static class Point {
         double x, y;
-        // get squared distance of two points
+        public Point() {}
+        public Point(double x, double y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+        // get distance of two points
         static double distance(Point p1, Point p2)
         {
             double dx = p1.x - p2.x;
             double dy = p1.y - p2.y;
-            return dx*dx + dy*dy;
+            return Math.sqrt(dx*dx + dy*dy);
         }
         public String toString()
         {
@@ -30,6 +36,16 @@ public class fence4 {
             this.y1 = y1;
             this.x2 = x2;
             this.y2 = y2;
+        }
+        // tell if point is on this line
+        boolean onLine(Point p)
+        {
+            Point from = new Point(x1, y1);
+            Point to = new Point(x2, y2);
+            double dist = Point.distance(from, to);
+            double a = Point.distance(from, p);
+            double b = Point.distance(p, to);
+            return a + b == dist;
         }
         // get intersect point of two lines, null if no intersect
         static Point getIntersectPoint(Line l1, Line l2)
@@ -46,12 +62,25 @@ public class fence4 {
             return ans;
         }
     }
-
+    // tell the distance of the hit point from the ray to the boundary
+    // return -1 if ray does not hit the boundary
+    static double hit(Line ray, Line boundary)
+    {
+        Point intersectPt = Line.getIntersectPoint(ray, boundary);
+        if (!boundary.onLine(intersectPt)) return -1;
+        return Point.distance(new Point(ray.x1, ray.y1), intersectPt);
+    }
     static void solve()
     {
-        Line l1 = new Line(0, 0, 0, 1);
-        Line l2 = new Line(1, 0, 1, 1);
-        System.out.println(l1.getIntersectPoint(l1, l2));
+        Line l1 = new Line(0, 0, 0, 15);
+        Line l2 = new Line(1, 0, 0.9, 1);
+        Point intersect = l1.getIntersectPoint(l1, l2);
+        System.out.println(intersect);
+        System.out.println(l1.onLine(intersect));
+        System.out.println(l2.onLine(intersect));
+
+        System.out.println(hit(l1, l2));
+        System.out.println(hit(l2, l1));
     }
 
 
