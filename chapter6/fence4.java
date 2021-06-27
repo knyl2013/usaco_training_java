@@ -7,7 +7,7 @@ TASK: fence4
 import java.io.*;
 import java.util.*;
 
-public class Main {
+public class fence4 {
     static class Point {
         double x, y;
         public Point() {}
@@ -98,7 +98,7 @@ public class Main {
     static double hit(Line ray, Line boundary)
     {
         Point intersectPt = Line.getIntersectPoint(ray, boundary);
-        if (!boundary.onLine(intersectPt)) return -1;
+        if (intersectPt == null || !boundary.onLine(intersectPt)) return -1;
         Point ori = new Point(ray.x1, ray.y1);
         return Point.distance(ori, intersectPt);
     }
@@ -118,6 +118,7 @@ public class Main {
             prevY = curY;
         }
         boundaries[bIdx++] = new Line(prevX, prevY, firstX, firstY);
+        // System.out.println(Arrays.toString(boundaries));
         int split = 360;
         double tot = 2 * Math.PI;
         List<Line> ans = new ArrayList<>();
@@ -136,6 +137,7 @@ public class Main {
             if (best != null) {
                 String key = best.toString();
                 if (!seen.contains(key)) {
+                    System.out.println("angle: " + i + ", line: " + best);
                     ans.add(best);
                     seen.add(key);
                 }
@@ -144,7 +146,7 @@ public class Main {
         }
         out.printf("%d\n", ans.size());
         for (Line line : ans) {
-            out.printf("%d %d %d %d\n", line.x1, line.y1, line.x2, line.y2);
+            out.printf("%d %d %d %d\n", (int)line.x1, (int)line.y1, (int)line.x2, (int)line.y2);
         }
 
         // Line l1 = new Line(0, 0, 0, 15);
