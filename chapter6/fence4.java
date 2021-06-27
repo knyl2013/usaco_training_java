@@ -7,7 +7,7 @@ TASK: fence4
 import java.io.*;
 import java.util.*;
 
-public class fence4 {
+public class Main {
     static class Point {
         double x, y;
         public Point() {}
@@ -100,20 +100,62 @@ public class fence4 {
         Point intersectPt = Line.getIntersectPoint(ray, boundary);
         if (!boundary.onLine(intersectPt)) return -1;
         Point ori = new Point(ray.x1, ray.y1);
-        System.out.println(ori);
-        System.out.println(intersectPt);
         return Point.distance(ori, intersectPt);
     }
     static void solve()
     {
-        Line l1 = new Line(0, 0, 0, 15);
-        Line l2 = new Line(1, 0, 0.9, 1);
-
-        System.out.println(l2);
-        for (int i = 0; i < 360; i++) {
-            l2.rotatePoint(((2*Math.PI)/360));
-            System.out.println(l2);
+        int n = ni();
+        double ox = nd(), oy = nd();
+        Line observer = new Line(ox, oy, ox+0.1, oy);
+        Line[] boundaries = new Line[n];
+        int firstX = ni(), firstY = ni();
+        int prevX = firstX, prevY = firstY;
+        int bIdx = 0;
+        for (int i = 0; i < n-1; i++) {
+            int curX = ni(), curY = ni();
+            boundaries[bIdx++] = new Line(prevX, prevY, curX, curY);
+            prevX = curX;
+            prevY = curY;
         }
+        boundaries[bIdx++] = new Line(prevX, prevY, firstX, firstY);
+        int split = 360;
+        double tot = 2 * Math.PI;
+        List<Line> ans = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (int i = 0; i < split; i++) {
+            Line best = null;
+            double bestDist = -1;
+            for (Line b : boundaries) {
+                double d = hit(observer, b);
+                if (d == -1) continue;
+                if (best == null || d < bestDist) {
+                    best = b;
+                    bestDist = d;
+                }
+            }
+            if (best != null) {
+                String key = best.toString();
+                if (!seen.contains(key)) {
+                    ans.add(best);
+                    seen.add(key);
+                }
+            }
+            observer.rotatePoint(tot / split);
+        }
+        out.printf("%d\n", ans.size());
+        for (Line line : ans) {
+            out.printf("%d %d %d %d\n", line.x1, line.y1, line.x2, line.y2);
+        }
+
+        // Line l1 = new Line(0, 0, 0, 15);
+        // Line l2 = new Line(1, 0, 0.9, 1);
+        // int split = 360;
+        // double tot = 2 * Math.PI;
+        // System.out.println(l2);
+        // for (int i = 0; i < split; i++) {
+        //     l2.rotatePoint(tot / 360);
+        //     System.out.println(l2);
+        // }
         // for (int i = 0; i < 720; i++) {
         //     l2.rotateLineClockWise(1);
         //     System.out.println(l2);
