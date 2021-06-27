@@ -66,9 +66,30 @@ public class fence4 {
             x2 = xRot;
             y2 = yRot;
         }
+        void rotatePoint(double angle) {
+          double s = Math.sin(angle);
+          double c = Math.cos(angle);
+          double px = x2;
+          double py = y2;
+          
+          // translate point back to origin:
+          px -= x1;
+          py -= y1;
+
+          // rotate point
+          double xnew = px * c - py * s;
+          double ynew = px * s + py * c;
+          
+          // translate point back:
+          px = xnew + x1;
+          py = ynew + y1;
+
+          x2 = px;
+          y2 = py;
+        }
         public String toString()
         {
-            return "(" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")"; 
+            return "(" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")" + ", dist: "  + Point.distance(new Point(x1, y1), new Point(x2, y2)); 
         }
     }
     
@@ -90,9 +111,13 @@ public class fence4 {
 
         System.out.println(l2);
         for (int i = 0; i < 360; i++) {
-            l2.rotateLineClockWise(1);
+            l2.rotatePoint(((2*Math.PI)/360));
             System.out.println(l2);
         }
+        // for (int i = 0; i < 720; i++) {
+        //     l2.rotateLineClockWise(1);
+        //     System.out.println(l2);
+        // }
 
         // Point intersect = Line.getIntersectPoint(l1, l2);
         // System.out.println(intersect);
