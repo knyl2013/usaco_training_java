@@ -126,16 +126,43 @@ public class fence4 {
     // return -1 if ray does not hit the boundary
     static double hit(Line ray, Line boundary)
     {
-        Point intersectPt = Line.getIntersectPoint(ray, boundary);
-		if (debug) System.out.println("intersectPt: " + intersectPt);
-        if (intersectPt == null || !boundary.onLine(intersectPt)) return -1;
-		boolean dirx = (ray.x2 - ray.x1) > 0;
-		boolean diry = (ray.y2 - ray.y1) > 0;
-		boolean hitx = (intersectPt.x - ray.x1) > 0;
-		boolean hity = (intersectPt.y - ray.y1) > 0;
-		if (dirx != hitx || diry != hity) return -1	;
-        Point ori = new Point(ray.x1, ray.y1);
-        return Point.distance(ori, intersectPt);
+        // Point intersectPt = Line.getIntersectPoint(ray, boundary);
+		// if (debug) System.out.println("intersectPt: " + intersectPt);
+        // if (intersectPt == null || !boundary.onLine(intersectPt)) return -1;
+		// boolean dirx = (ray.x2 - ray.x1) > 0;
+		// boolean diry = (ray.y2 - ray.y1) > 0;
+		// boolean hitx = (intersectPt.x - ray.x1) > 0;
+		// boolean hity = (intersectPt.y - ray.y1) > 0;
+		// if (dirx != hitx || diry != hity) return -1	;
+        // Point ori = new Point(ray.x1, ray.y1);
+        // return Point.distance(ori, intersectPt);
+		
+		double x1 = boundary.x1;
+		double x2 = boundary.x2;
+		double x3 = ray.x1;
+		double x4 = ray.x2;
+		
+		double y1 = boundary.y1;
+		double y2 = boundary.y2;
+		double y3 = ray.y1;
+		double y4 = ray.y2;
+		
+		double den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+		if (den == 0) {
+			return -1;
+		}
+
+		double t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
+		double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
+		if (t > 0 && t < 1 && u > 0) {
+			Point pt = new Point();
+			pt.x = x1 + t * (x2 - x1);
+			pt.y = y1 + t * (y2 - y1);
+			return Point.distance(pt, new Point(ray.x1, ray.y1));
+		} else {
+			return -1;
+		}
+	
     }
     static void solve()
     {
@@ -171,12 +198,13 @@ public class fence4 {
 			} else {
 				debug = false;
 			}
-			// debug = false;
+			debug = false;
             Line best = null;
 			Point pt = null;
             double bestDist = -1;
             for (Line b : boundaries) {
                 double d = hit(observer, b);
+				// System.out.println(d);
 				if (debug) {
 					// if (b.toString().startsWith("(5.0, 7.0), (3.0, 5.0)")) {
 						// System.out.println("===========");
@@ -190,19 +218,19 @@ public class fence4 {
 				}
                 if (d == -1) continue;
                 if (best == null || d < bestDist) {
-					pt = Line.getIntersectPoint(observer, b);
+					// pt = Line.getIntersectPoint(observer, b);
                     best = b;
                     bestDist = d;
 					
 					if (debug) {
-						System.out.println(best + " " + pt + " " + bestDist);
+						System.out.println(best + " " + bestDist);
 					}
                 }
             }
             if (best != null) {
                 String key = best.toString();
                 if (!seen.contains(key)) {
-                    System.out.println("angle: " + i + ", line: " + best + ", intersection: " + pt);
+                    // System.out.println("angle: " + i + ", line: " + best + ", intersection: " + pt);
                     ans.add(best);
                     seen.add(key);
                 }
