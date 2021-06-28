@@ -10,24 +10,30 @@ def add_line(x1, y1, x2, y2):
 fig, ax = plt.subplots()
 
 #create simple line plot
+input() # skip first line
+x, y = input().split()
+# l = ""
+# while (l = input()):
+# 	print(l)
+print(x, y)
 ax.plot([0, 0],[0, 10], alpha=0)
-add_point(5, 5)
-inputs = """
-0 0
-7 0
-5 2
-7 5
-5 7
-3 5
-4 9
-1 8
-2 5
-0 9
--2 7
-0 3
--3 1
-"""
+add_point(x, y)
+# inputs = """
+# 0 0
+# 2 0
+# 2 2
+# 0 2
+# """
+inputs = ""
 
+try:
+	while True:
+		s = input()
+		inputs = s + "\n"
+except Exception as e:
+	pass
+
+print(inputs)
 lines = inputs.split('\n')
 mini, maxi = float('inf'), float('-inf')
 prev = None

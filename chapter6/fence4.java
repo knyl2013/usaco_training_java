@@ -118,7 +118,7 @@ public class fence4 {
         }
         public String toString()
         {
-            return "(" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")" + ", dist: "  + Point.distance(new Point(x1, y1), new Point(x2, y2)); 
+            return "{(" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")" + ", dist: "  + Point.distance(new Point(x1, y1), new Point(x2, y2)) + "}"; 
         }
     }
     
@@ -184,15 +184,15 @@ public class fence4 {
         }
         boundaries[bIdx] = new Line(firstX, firstY, prevX, prevY, bIdx-1);
         // System.out.println(Arrays.toString(boundaries));
-        int split = 360;
+        int split = 360 * 5;
         double tot = 2 * Math.PI;
         List<Line> ans = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         for (int i = 0; i < split; i++) {
-			if (i == 0 || i == 90 || i == 180 || i == 270) {
-				observer.rotatePoint(tot / split);
-				continue;
-			}
+			// if (i == 0 || i == 90 || i == 180 || i == 270) {
+			// 	observer.rotatePoint(tot / split);
+			// 	continue;
+			// }
 			if (i == 200) {
 				debug = true;
 			} else {
@@ -206,15 +206,15 @@ public class fence4 {
                 double d = hit(observer, b);
 				// System.out.println(d);
 				if (debug) {
-					// if (b.toString().startsWith("(5.0, 7.0), (3.0, 5.0)")) {
-						// System.out.println("===========");
-						// System.out.println(b + " " + d);
-						// System.out.println(observer + " || " + b + " || " + d);
-						// Point temp = Line.getIntersectPoint(observer, b);
-						// System.out.println(temp);
-						// System.out.println(b.onLine(temp));
-						// System.out.println("===========");
-					// }
+					if (b.toString().startsWith("{(2.0, 2.0), (0.0, 2.0)")) {
+						System.out.println("===========");
+						System.out.println(b + " " + d);
+						System.out.println(observer + " || " + b + " || " + d);
+						Point temp = Line.getIntersectPoint(observer, b);
+						System.out.println(temp);
+						System.out.println(b.onLine(temp));
+						System.out.println("===========");
+					}
 				}
                 if (d == -1) continue;
                 if (best == null || d < bestDist) {
@@ -278,8 +278,8 @@ public class fence4 {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-	// static String taskName = "fence4";
+    // static String taskName = null;
+	static String taskName = "fence4";
     static boolean logTime = !true;
     
     public static void main(String[] args) throws Exception
