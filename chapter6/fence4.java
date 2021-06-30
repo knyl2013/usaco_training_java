@@ -8,40 +8,34 @@ import java.io.*;
 import java.util.*;
 
 public class fence4 {
-	static boolean debug = false;
     static class Point {
-        double x, y;
+        int x, y;
         public Point() {}
-        public Point(double x, double y)
+        public Point(int x, int y)
         {
             this.x = x;
             this.y = y;
         }
-        // get distance of two points
-        static double distance(Point p1, Point p2)
-        {
-            double dx = p1.x - p2.x;
-            double dy = p1.y - p2.y;
-            return Math.sqrt(dx*dx + dy*dy);
-        }
+		public static boolean equal(Point a, Point b)
+		{
+			return a.x == b.x && a.y == b.y;
+		}
         public String toString()
         {
             return "(" + x + ", " + y + ")";
         }
     }
     static class Line implements Comparable<Line> {
-        double x1, y1, x2, y2;
+		Point a, b;
 		int idx;
-        public Line(double x1, double y1, double x2, double y2)
-        {
-            this.x1 = x1;
-            this.y1 = y1;
-            this.x2 = x2;
-            this.y2 = y2;
-        }
-		public Line(double x1, double y1, double x2, double y2, int idx)
+		public Line(int x1, int y1, int x2, int y2)
 		{
-			this(x1, y1, x2, y2);
+			this(x1, y1, x2, y2, -1);
+		}
+		public Line(int x1, int y1, int x2, int y2, int idx)
+		{
+			this.a = new Point(x1, y1);
+			this.b = new Point(x2, y2);
 			this.idx = idx;
 		}
 		@Override
@@ -49,127 +43,76 @@ public class fence4 {
 		{
 			return this.idx - other.idx;
 		}
-		boolean isOnLine(Point endPoint1, Point endPoint2, Point checkPoint) {
-			return ((checkPoint.y - endPoint1.y)) * ((endPoint2.x - endPoint1.x))
-				== ((endPoint2.y - endPoint1.y)) *((checkPoint.x - endPoint1.x));
-		}
-        // tell if point is on this line
-        boolean onLine(Point p)
-        {
-            Point from = new Point(x1, y1);
-            Point to = new Point(x2, y2);
-			// return isOnLine(from, to, p);
-            double dist = Point.distance(from, to);
-            double a = Point.distance(from, p);
-            double b = Point.distance(p, to);
-			if (debug)
-				System.out.println(a + " " + b + " " + dist + " " + (a+b));
-            return Math.abs((a + b) - dist) < 0.00001;
-			
-			// Point A = new Point(x1, y1);
-			// Point C = new Point(x2, y2);
-			
-			// if AC is vertical
-			// if (A.x == C.x) return B.x == C.x;
-			// if AC is horizontal
-			// if (A.y == C.y) return B.y == C.y;
-			// match the gradients
-			// return (A.x - C.x)*(A.y - C.y) == (C.x - B.x)*(C.y - B.y);
-        }
-        // get intersect point of two lines, null if no intersect
-        static Point getIntersectPoint(Line l1, Line l2)
-        {
-            double x1 = l1.x1, x2 = l1.x2, x3 = l2.x1, x4 = l2.x2;
-            double y1 = l1.y1, y2 = l1.y2, y3 = l2.y1, y4 = l2.y2;
-            double D = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-            if (D == 0) return null;
-            double numX = (((x1 * y2) - (y1 * x2)) * (x3 - x4)) - ((x1 - x2) * ((x3 * y4) - (y3 * x4)));
-            double numY = (((x1 * y2) - (y1 * x2))) * (y3 - y4) - ((y1 - y2) * ((x3 * y4) - (y3 * x4)));
-            return new Point(numX / D, numY / D);
-        }
-        // rotate the line by degree (from is the center)
-        void rotateLineClockWise(int angle) 
-        {
-            double xRot = x1 + Math.cos(Math.toRadians(angle)) * (x2 - x1) - Math.sin(Math.toRadians(angle)) * (y2 - y1);
-            double yRot = y1 + Math.sin(Math.toRadians(angle)) * (y2 - x1) + Math.cos(Math.toRadians(angle)) * (y2 - y1);
-            x2 = xRot;
-            y2 = yRot;
-        }
-        void rotatePoint(double angle) {
-          double s = Math.sin(angle);
-          double c = Math.cos(angle);
-          double px = x2;
-          double py = y2;
-          
-          // translate point back to origin:
-          px -= x1;
-          py -= y1;
-
-          // rotate point
-          double xnew = px * c - py * s;
-          double ynew = px * s + py * c;
-          
-          // translate point back:
-          px = xnew + x1;
-          py = ynew + y1;
-
-          x2 = px;
-          y2 = py;
-        }
         public String toString()
         {
-            return "{(" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")" + ", dist: "  + Point.distance(new Point(x1, y1), new Point(x2, y2)) + "}"; 
+            return a.x + " " + a.y + " " + b.x + " " + b.y;
         }
     }
-    
-    // tell the distance of the hit point from the ray to the boundary
-    // return -1 if ray does not hit the boundary
-    static double hit(Line ray, Line boundary)
+	
+	static Point observer;
+	static Line[] boundaries;
+	static int n;
+	
+	static int[] getDir(Point a, Point b)
+	{
+		return new int[]{a.x-b.x>0?1:0, a.y-b.y>0?1:0};
+	}
+	
+	// Return true if l1 and l2 has any intersection
+	static boolean hasIntersection(Line l1, Line l2)
     {
-        // Point intersectPt = Line.getIntersectPoint(ray, boundary);
-		// if (debug) System.out.println("intersectPt: " + intersectPt);
-        // if (intersectPt == null || !boundary.onLine(intersectPt)) return -1;
-		// boolean dirx = (ray.x2 - ray.x1) > 0;
-		// boolean diry = (ray.y2 - ray.y1) > 0;
-		// boolean hitx = (intersectPt.x - ray.x1) > 0;
-		// boolean hity = (intersectPt.y - ray.y1) > 0;
-		// if (dirx != hitx || diry != hity) return -1	;
-        // Point ori = new Point(ray.x1, ray.y1);
-        // return Point.distance(ori, intersectPt);
+		double x1 = l1.a.x;
+		double x2 = l1.b.x;
+		double x3 = l2.a.x;
+		double x4 = l2.b.x;
 		
-		double x1 = boundary.x1;
-		double x2 = boundary.x2;
-		double x3 = ray.x1;
-		double x4 = ray.x2;
-		
-		double y1 = boundary.y1;
-		double y2 = boundary.y2;
-		double y3 = ray.y1;
-		double y4 = ray.y2;
+		double y1 = l1.a.y;
+		double y2 = l1.b.y;
+		double y3 = l2.a.y;
+		double y4 = l2.b.y;
 		
 		double den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
 		if (den == 0) {
-			return -1;
+			return false;
 		}
 
 		double t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
 		double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
-		if (t > 0 && t < 1 && u > 0) {
-			Point pt = new Point();
-			pt.x = x1 + t * (x2 - x1);
-			pt.y = y1 + t * (y2 - y1);
-			return Point.distance(pt, new Point(ray.x1, ray.y1));
-		} else {
-			return -1;
-		}
-	
+		return (t > 0 && t <= 1 && u > 0 && u <= 1);
     }
+	
+	// Return true if (pt-observer) line has no intersection in the middle
+	static boolean isGood(Point pt, Line line, int idx)
+	{
+		Point otherEnd = line.a == pt ? line.b : line.a;
+		Line ptObserver = new Line(observer.x, observer.y, pt.x, pt.y);
+		// boolean debug = line.toString().equals("1 8 2 5");
+		for (int i = 0; i < n; i++) {
+			if (idx == i) continue;
+			Line cur = boundaries[i];
+			boolean endPtIntersect = (Point.equal(pt, cur.a) || Point.equal(pt, cur.b));
+			if (endPtIntersect) {
+				if (hasIntersection(new Line(observer.x, observer.y, otherEnd.x, otherEnd.y), cur)) {
+					return false;
+				}
+				Point endPtOther = Point.equal(pt, cur.a) ? cur.b : cur.a;
+				if (hasIntersection(new Line(observer.x, observer.y, endPtOther.x, endPtOther.y), cur)) {
+					return false;
+				}
+			}
+			else if (hasIntersection(ptObserver, cur)) {
+				return false;
+			}
+		}
+		return true;
+	}
+    
     static void solve()
     {
-        int n = ni();
-        double ox = nd(), oy = nd();
-        Line observer = new Line(ox, oy, ox+0.1, oy);
-        Line[] boundaries = new Line[n];
+        n = ni();
+        int ox = ni(), oy = ni();
+        observer = new Point(ox, oy);
+        boundaries = new Line[n];
         int firstX = ni(), firstY = ni();
         int prevX = firstX, prevY = firstY;
         int bIdx = 0;
@@ -183,60 +126,13 @@ public class fence4 {
 			bIdx++;
         }
         boundaries[bIdx] = new Line(firstX, firstY, prevX, prevY, bIdx-1);
-        // System.out.println(Arrays.toString(boundaries));
-        int split = 360 * 5;
-        double tot = 2 * Math.PI;
         List<Line> ans = new ArrayList<>();
-        Set<String> seen = new HashSet<>();
-        for (int i = 0; i < split; i++) {
-			// if (i == 0 || i == 90 || i == 180 || i == 270) {
-			// 	observer.rotatePoint(tot / split);
-			// 	continue;
-			// }
-			if (i == 200) {
-				debug = true;
-			} else {
-				debug = false;
+		for (int i = 0; i < n; i++) {
+			Line line = boundaries[i];
+			if (isGood(line.a, line, i) || isGood(line.b, line, i)) {
+				ans.add(line);
 			}
-			debug = false;
-            Line best = null;
-			Point pt = null;
-            double bestDist = -1;
-            for (Line b : boundaries) {
-                double d = hit(observer, b);
-				// System.out.println(d);
-				if (debug) {
-					if (b.toString().startsWith("{(2.0, 2.0), (0.0, 2.0)")) {
-						System.out.println("===========");
-						System.out.println(b + " " + d);
-						System.out.println(observer + " || " + b + " || " + d);
-						Point temp = Line.getIntersectPoint(observer, b);
-						System.out.println(temp);
-						System.out.println(b.onLine(temp));
-						System.out.println("===========");
-					}
-				}
-                if (d == -1) continue;
-                if (best == null || d < bestDist) {
-					// pt = Line.getIntersectPoint(observer, b);
-                    best = b;
-                    bestDist = d;
-					
-					if (debug) {
-						System.out.println(best + " " + bestDist);
-					}
-                }
-            }
-            if (best != null) {
-                String key = best.toString();
-                if (!seen.contains(key)) {
-                    // System.out.println("angle: " + i + ", line: " + best + ", intersection: " + pt);
-                    ans.add(best);
-                    seen.add(key);
-                }
-            }
-            observer.rotatePoint(tot / split);
-        }
+		}
 		if (ans.isEmpty()) {
 			out.print("NOFENCE\n");
 			return;
@@ -244,30 +140,12 @@ public class fence4 {
 		Collections.sort(ans);
         out.printf("%d\n", ans.size());
         for (Line line : ans) {
-            out.printf("%d %d %d %d\n", (int)line.x1, (int)line.y1, (int)line.x2, (int)line.y2);
+            out.printf("%d %d %d %d\n", line.a.x, line.a.y, line.b.x, line.b.y);
         }
-
-        // Line l1 = new Line(0, 0, 0, 15);
-        // Line l2 = new Line(1, 0, 0.9, 1);
-        // int split = 360;
-        // double tot = 2 * Math.PI;
-        // System.out.println(l2);
-        // for (int i = 0; i < split; i++) {
-        //     l2.rotatePoint(tot / 360);
-        //     System.out.println(l2);
-        // }
-        // for (int i = 0; i < 720; i++) {
-        //     l2.rotateLineClockWise(1);
-        //     System.out.println(l2);
-        // }
-
-        // Point intersect = Line.getIntersectPoint(l1, l2);
-        // System.out.println(intersect);
-        // System.out.println(l1.onLine(intersect));
-        // System.out.println(l2.onLine(intersect));
-
-        // System.out.println(hit(l1, l2));
-        // System.out.println(hit(l2, l1));
+		
+		
+		
+		// System.out.println(hasIntersection(new Line(2,5,5,5), new Line(3,5,4,9)));
     }
 
 
@@ -278,8 +156,8 @@ public class fence4 {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    // static String taskName = null;
-	static String taskName = "fence4";
+    static String taskName = null;
+	// static String taskName = "fence4";
     static boolean logTime = !true;
     
     public static void main(String[] args) throws Exception
