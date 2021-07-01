@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+import numpy as np
+from sys import stdin
 
 def add_point(x, y):
 	plt.plot(x, y, 'ro')
@@ -11,12 +13,13 @@ fig, ax = plt.subplots()
 
 #create simple line plot
 input() # skip first line
-x, y = input().split()
+x, y = [int(x) for x in input().split()]
+# x, y = 100, 100
 # l = ""
 # while (l = input()):
 # 	print(l)
-print(x, y)
-ax.plot([0, 0],[0, 10], alpha=0)
+# print(x, y)
+ax.plot([0, 0],[0, 5], alpha=0)
 add_point(x, y)
 # inputs = """
 # 0 0
@@ -24,20 +27,21 @@ add_point(x, y)
 # 2 2
 # 0 2
 # """
-inputs = ""
+# inputs = ""
+lines = []
+for line in stdin:
+	if not len(line):
+		continue
+	# print(line)
+	# inputs = line + "\n"
+	lines.append(line)
 
-try:
-	while True:
-		s = input()
-		inputs = s + "\n"
-except Exception as e:
-	pass
-
-print(inputs)
-lines = inputs.split('\n')
+# print(inputs)
+# lines = inputs.split('\n')
 mini, maxi = float('inf'), float('-inf')
 prev = None
 first = None
+mini, maxi = min(x, y), max(x, y)
 for line in lines:
 	if not len(line):
 		continue
@@ -51,4 +55,6 @@ for line in lines:
 	prev = cur
 add_line(first[0], first[1], prev[0], prev[1])
 ax.plot(mini, mini, maxi, maxi)
+plt.xticks(np.arange(mini, maxi+1, 5.0))
+plt.yticks(np.arange(mini, maxi+1, 5.0))
 plt.show()
