@@ -175,7 +175,7 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
 
         double t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
         double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
-        if (t > 0 && t < 1 && u > 0) {
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
             return 1;
             // Point pt = new Point();
             // pt.x = x1 + t * (x2 - x1);
