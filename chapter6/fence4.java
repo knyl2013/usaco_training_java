@@ -175,7 +175,7 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
 
         double t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
         double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
-        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+        if (t >= 0 && t <= 1 && u >= 0) {
             return 1;
             // Point pt = new Point();
             // pt.x = x1 + t * (x2 - x1);
@@ -186,6 +186,12 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
         }
     
     }
+    static double length(Line l)
+    {
+        int dx = l.a.x - l.b.x;
+        int dy = l.a.y - l.b.y;
+        return Math.sqrt(dx*dx + dy*dy);
+    }
 	// Return true if (pt-observer) line has no intersection in the middle
 	static boolean isGood(Point pt, Line line, int idx)
 	{
@@ -193,18 +199,38 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
 		Line ptObserver = new Line(observer.x, observer.y, pt.x, pt.y);
         Line otherEndObserver = new Line(observer.x, observer.y, otherEnd.x, otherEnd.y);
         int[] ptObserverDir = getDir(pt, observer);
-		boolean debug = line.toString().equals("1 50 0 50");
+		// boolean debug = line.toString().equals("2 10 0 10");
+        boolean debug = false;
 		for (int i = 0; i < n; i++) {
 			if (idx == i) continue;
 			Line cur = boundaries[i];
 			boolean endPtIntersect = (Point.equal(pt, cur.a) || Point.equal(pt, cur.b));
-			if (endPtIntersect) {
+            if (endPtIntersect) {
                 Point endPtOther = Point.equal(pt, cur.a) ? cur.b : cur.a;
+                // Line tot = new Line(otherEnd.x, otherEnd.y, endPtOther.x, endPtOther.y);
+                // if (Math.abs(length(tot) - (length(cur) + length(line))) < 0.1) {
+                //     continue;
+                // }
+                // if (endPtOther.x == otherEnd.x || endPtOther.y == otherEnd.y) {
+                //     continue;
+                // }
                 int[] ptCurDir = getDir(pt, endPtOther);
-                if (Arrays.equals(ptObserverDir, ptCurDir)) {
+                int[] otherEndCurDir = getDir(otherEnd, endPtOther);
+                int[] curObserverDir = getDir(endPtOther, observer);
+
+                if (Arrays.equals(ptObserverDir, ptCurDir) && Arrays.equals(curObserverDir, ptObserverDir)) {
+                    if (debug) {
+                        System.out.println("arrays.equals");
+                        System.out.println("line: " + line + ", cur: " + cur + ", pt: " + pt);
+                    }
                     return false;
                 }
-                if (hit(cur, otherEndObserver) != -1) {
+                boolean opposite = (ptObserverDir[0] + otherEndCurDir[0] == 0) && (ptObserverDir[1] + otherEndCurDir[1] == 0);
+                if (hit(cur, otherEndObserver) != -1 && !opposite) {
+                    if (debug) {
+                        System.out.println("hit");
+                        System.out.println("line: " + line + ", cur: " + cur + ", pt: " + pt);
+                    }
                     return false;
                 }
                 if (debug) {
@@ -248,6 +274,9 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
         List<Line> ans = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
 			Line line = boundaries[i];
+            // if (line.toString().equals("2 98 0 98")) {
+            //     System.out.println("hv");
+            // }
 			if (isGood(line.a, line, i) || isGood(line.b, line, i)) {
 				ans.add(line);
 			}

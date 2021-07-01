@@ -7,7 +7,7 @@ def add_point(x, y):
 	plt.plot(x, y, 'ro')
 
 def add_line(x1, y1, x2, y2):
-	plt.plot([x1, x2], [y1, y2])
+	plt.plot([x1, x2], [y1, y2], label = "{} {} {} {}".format(x1, x2, y1, y2))
 #define Matplotlib figure and axis
 fig, ax = plt.subplots()
 
@@ -55,6 +55,6 @@ for line in lines:
 	prev = cur
 add_line(first[0], first[1], prev[0], prev[1])
 ax.plot(mini, mini, maxi, maxi)
-plt.xticks(np.arange(mini, maxi+1, 5.0))
-plt.yticks(np.arange(mini, maxi+1, 5.0))
+plt.xticks(np.arange(mini, maxi+1, 1.0))
+plt.yticks(np.arange(mini, maxi+1, 1.0))
 plt.show()
