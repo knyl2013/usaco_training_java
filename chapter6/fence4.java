@@ -20,10 +20,6 @@ public class fence4 {
 		{
 			return a.x == b.x && a.y == b.y;
 		}
-        public String toString()
-        {
-            return "(" + x + ", " + y + ")";
-        }
     }
     static class Line implements Comparable<Line> {
 		Point a, b;
@@ -43,91 +39,12 @@ public class fence4 {
 		{
 			return this.idx - other.idx;
 		}
-        public String toString()
-        {
-            return a.x + " " + a.y + " " + b.x + " " + b.y;
-        }
     }
 	
 	static Point observer;
 	static Line[] boundaries;
 	static int n;
-	static int orientation(Point p, Point q, Point r)
-{
-    // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
-    // for details of below formula.
-    int val = (q.y - p.y) * (r.x - q.x) -
-            (q.x - p.x) * (r.y - q.y);
-  
-    if (val == 0) return 0; // colinear
-  
-    return (val > 0)? 1: 2; // clock or counterclock wise
-}
-  static boolean onSegment(Point p, Point q, Point r)
-{
-    if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
-        q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y))
-    return true;
-  
-    return false;
-}
-// The main function that returns true if line segment 'p1q1'
-// and 'p2q2' intersect.
-static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
-{
-    // Find the four orientations needed for general and
-    // special cases
-    int o1 = orientation(p1, q1, p2);
-    int o2 = orientation(p1, q1, q2);
-    int o3 = orientation(p2, q2, p1);
-    int o4 = orientation(p2, q2, q1);
-  
-    // General case
-    if (o1 != o2 && o3 != o4)
-        return true;
-  
-    // Special Cases
-    // p1, q1 and p2 are colinear and p2 lies on segment p1q1
-    if (o1 == 0 && onSegment(p1, p2, q1)) return true;
-  
-    // p1, q1 and q2 are colinear and q2 lies on segment p1q1
-    if (o2 == 0 && onSegment(p1, q2, q1)) return true;
-  
-    // p2, q2 and p1 are colinear and p1 lies on segment p2q2
-    if (o3 == 0 && onSegment(p2, p1, q2)) return true;
-  
-    // p2, q2 and q1 are colinear and q1 lies on segment p2q2
-    if (o4 == 0 && onSegment(p2, q1, q2)) return true;
-  
-    return false; // Doesn't fall in any of the above cases
-}
 	
-	// Return true if l1 and l2 has any intersection
-	static boolean hasIntersection(Line l1, Line l2)
-    {
-        return doIntersect(l1.a, l1.b, l2.a, l2.b);
-        // Point A = l1.a, B = l1.b, C = l2.a, D = l2.b;
-        // return ccw(A,C,D) != ccw(B,C,D) && ccw(A,B,C) != ccw(A,B,D);
-		// double x1 = l1.a.x;
-		// double x2 = l1.b.x;
-		// double x3 = l2.a.x;
-		// double x4 = l2.b.x;
-		
-		// double y1 = l1.a.y;
-		// double y2 = l1.b.y;
-		// double y3 = l2.a.y;
-		// double y4 = l2.b.y;
-		
-		// double den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-		// if (den == 0) {
-		// 	return false;
-		// }
-
-		// double t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
-		// double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
-  //       System.out.println(t + " " + u);
-		// return (t > 0 && t <= 1 && u > 0 && u <= 1);
-    }
 	static int[] getDir(Point a, Point b)
     {
         int dx = a.x - b.x;
@@ -138,26 +55,9 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
         if (dy > 0) dy = 1;
         return new int[]{dx, dy};
     }
-    // // Return extended version of l from the origin point
-    // static Line extend(Line l, Point origin)
-    // {
-    //     Point ept = Point.equal(l.a, origin) ? l.b : l.a;
-    //     double slope = (double) ept.x / ept.y;
-    //     return new Point((ept.x + ((int)slope * 1000)), (ept.y + (int)(slope * 1000)));
-    // }
+
     static double hit(Line ray, Line boundary)
     {
-        // Point intersectPt = Line.getIntersectPoint(ray, boundary);
-        // if (debug) System.out.println("intersectPt: " + intersectPt);
-        // if (intersectPt == null || !boundary.onLine(intersectPt)) return -1;
-        // boolean dirx = (ray.x2 - ray.x1) > 0;
-        // boolean diry = (ray.y2 - ray.y1) > 0;
-        // boolean hitx = (intersectPt.x - ray.x1) > 0;
-        // boolean hity = (intersectPt.y - ray.y1) > 0;
-        // if (dirx != hitx || diry != hity) return -1  ;
-        // Point ori = new Point(ray.x1, ray.y1);
-        // return Point.distance(ori, intersectPt);
-        
         double x1 = boundary.a.x;
         double x2 = boundary.b.x;
         double x3 = ray.a.x;
@@ -177,10 +77,6 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
         double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
         if (t >= 0 && t <= 1 && u >= 0) {
             return 1;
-            // Point pt = new Point();
-            // pt.x = x1 + t * (x2 - x1);
-            // pt.y = y1 + t * (y2 - y1);
-            // return Point.distance(pt, new Point(ray.x1, ray.y1));
         } else {
             return -1;
         }
@@ -198,7 +94,7 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
 		int arun = a.a.x - a.b.x;
 		int brise = b.a.y - b.b.y;
 		int brun = b.a.x - b.b.x;
-		// return arise / arun == brise / brun;
+		// Same line if (arise / arun == brise / brun);
 		return arise * brun == brise * arun;
 	}
 	// Return true if (pt-observer) line has no intersection in the middle
@@ -211,8 +107,6 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
 		Line ptObserver = new Line(observer.x, observer.y, pt.x, pt.y);
         Line otherEndObserver = new Line(observer.x, observer.y, otherEnd.x, otherEnd.y);
         int[] ptObserverDir = getDir(pt, observer);
-		// boolean debug = line.toString().equals("0 3 0 2");
-        boolean debug = false;
 		for (int i = 0; i < n; i++) {
 			if (idx == i) continue;
 			Line cur = boundaries[i];
@@ -224,59 +118,22 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
                 int[] ptCurDir = getDir(pt, endPtOther);
                 int[] otherEndCurDir = getDir(otherEnd, endPtOther);
                 int[] curObserverDir = getDir(endPtOther, observer);
-
                 if (Arrays.equals(ptObserverDir, ptCurDir) && Arrays.equals(curObserverDir, ptObserverDir)) {
-                    if (debug) {
-                        System.out.println("arrays.equals");
-                        System.out.println("line: " + line + ", cur: " + cur + ", pt: " + pt);
-                    }
                     return false;
                 }
                 boolean opposite = (ptObserverDir[0] + otherEndCurDir[0] == 0) && (ptObserverDir[1] + otherEndCurDir[1] == 0);
-				// if (debug) {
-					// System.out.println("ptObserverDir: " + Arrays.toString(ptObserverDir));
-					// System.out.println("otherEndCurDir: " + Arrays.toString(otherEndCurDir));
-				// }
 				if (opposite) continue;
 				opposite = (ptObserverDir[0] + ptCurDir[0] == 0) && (ptObserverDir[1] + ptCurDir[1] == 0);
 				if (opposite) continue;
 				if (sameLine(cur, endPtOtherObserver)) continue;
-				// Line tot = new Line(otherEnd.x, otherEnd.y, endPtOther.x, endPtOther.y);
-                // if (Math.abs(length(tot) - (length(cur) + length(line))) < 0.1) {
-                    // continue;
-                // }
-				// tot = new Line(endPtOther.x, endPtOther.y, observer.x, observer.y);
-				// double diff = Math.abs(length(tot) - (length(cur) + length(ptObserver)));
-				// if (diff < 0.001) {
-                    // continue;
-                // }
-				// if (debug) {
-					// System.out.println("diff: " + diff);
-				// }
-				// boolean straight = otherEnd.x == endPtOther.x || otherEnd.y == endPtOther.y;
                 if (hit(cur, otherEndObserver) != -1) {
-                    if (debug) {
-                        System.out.println("hit");
-                        System.out.println("line: " + line + ", cur: " + cur + ", pt: " + pt);
-                    }
                     return false;
                 }
-                if (debug) {
-                    System.out.println("hasIntersection: " + observer.x + " " + observer.y + " " + otherEnd.x + " " + otherEnd.y + ", cur: " + cur + ", pt: " + pt + ", line: " + line);
-                }
-				// if (hasIntersection(new Line(observer.x, observer.y, otherEnd.x, otherEnd.y), cur)) {
-				// 	return false;
-				// }
-				
-				// if (hasIntersection(new Line(observer.x, observer.y, endPtOther.x, endPtOther.y), cur)) {
-				// 	return false;
-				// }
 			}
 			else if (hasIntersection(ptObserver, cur)) {
 				return false;
 			}
 		}
-        // System.out.println("pt: " + pt + ", line: " + line);
 		return true;
 	}
     
@@ -302,9 +159,6 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
         List<Line> ans = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
 			Line line = boundaries[i];
-            // if (line.toString().equals("2 98 0 98")) {
-            //     System.out.println("hv");
-            // }
 			if (isGood(line.a, line, i) || isGood(line.b, line, i)) {
 				ans.add(line);
 			}
@@ -318,14 +172,61 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
         for (Line line : ans) {
             out.printf("%d %d %d %d\n", line.a.x, line.a.y, line.b.x, line.b.y);
         }
-		
-		
-		
-		// System.out.println(hasIntersection(new Line(100,100,0,0), new Line(2,2,0,2)));
     }
 
 
-
+	/*Intersection lib from g4g starts*/
+	static int orientation(Point p, Point q, Point r)
+	{
+		// See https://www.geeksforgeeks.org/orientation-3-ordered-points/
+		// for details of below formula.
+		int val = (q.y - p.y) * (r.x - q.x) -
+				(q.x - p.x) * (r.y - q.y);
+	  
+		if (val == 0) return 0; // colinear
+	  
+		return (val > 0)? 1: 2; // clock or counterclock wise
+	}
+	  static boolean onSegment(Point p, Point q, Point r)
+	{
+		if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
+			q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y))
+		return true;
+	  
+		return false;
+	}
+	// The main function that returns true if line segment l1-'p1q1'
+	// and l2-'p2q2' intersect.
+	static boolean hasIntersection(Line l1, Line l2)
+	{
+		Point p1 = l1.a, q1 = l1.b, p2 = l2.a, q2 = l2.b;
+		// Find the four orientations needed for general and
+		// special cases
+		int o1 = orientation(p1, q1, p2);
+		int o2 = orientation(p1, q1, q2);
+		int o3 = orientation(p2, q2, p1);
+		int o4 = orientation(p2, q2, q1);
+	  
+		// General case
+		if (o1 != o2 && o3 != o4)
+			return true;
+	  
+		// Special Cases
+		// p1, q1 and p2 are colinear and p2 lies on segment p1q1
+		if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+	  
+		// p1, q1 and q2 are colinear and q2 lies on segment p1q1
+		if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+	  
+		// p2, q2 and p1 are colinear and p1 lies on segment p2q2
+		if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+	  
+		// p2, q2 and q1 are colinear and q1 lies on segment p2q2
+		if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+	  
+		return false; // Doesn't fall in any of the above cases
+	}
+	/*Intersection lib from g4g ends*/
 
 
     /*I/O Template*/
