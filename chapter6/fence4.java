@@ -192,28 +192,35 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
         int dy = l.a.y - l.b.y;
         return Math.sqrt(dx*dx + dy*dy);
     }
+	static boolean sameLine(Line a, Line b)
+	{
+		int arise = a.a.y - a.b.y;
+		int arun = a.a.x - a.b.x;
+		int brise = b.a.y - b.b.y;
+		int brun = b.a.x - b.b.x;
+		// return arise / arun == brise / brun;
+		return arise * brun == brise * arun;
+	}
 	// Return true if (pt-observer) line has no intersection in the middle
 	static boolean isGood(Point pt, Line line, int idx)
 	{
+		boolean parallelX = line.a.x == observer.x && line.b.x == observer.x;
+		boolean parallelY = line.a.y == observer.y && line.b.y == observer.y;
+		if (parallelX || parallelY) return false;
 		Point otherEnd = line.a == pt ? line.b : line.a;
 		Line ptObserver = new Line(observer.x, observer.y, pt.x, pt.y);
         Line otherEndObserver = new Line(observer.x, observer.y, otherEnd.x, otherEnd.y);
         int[] ptObserverDir = getDir(pt, observer);
-		// boolean debug = line.toString().equals("2 10 0 10");
+		// boolean debug = line.toString().equals("0 3 0 2");
         boolean debug = false;
 		for (int i = 0; i < n; i++) {
 			if (idx == i) continue;
 			Line cur = boundaries[i];
 			boolean endPtIntersect = (Point.equal(pt, cur.a) || Point.equal(pt, cur.b));
             if (endPtIntersect) {
+				if (sameLine(cur, line)) continue;
                 Point endPtOther = Point.equal(pt, cur.a) ? cur.b : cur.a;
-                // Line tot = new Line(otherEnd.x, otherEnd.y, endPtOther.x, endPtOther.y);
-                // if (Math.abs(length(tot) - (length(cur) + length(line))) < 0.1) {
-                //     continue;
-                // }
-                // if (endPtOther.x == otherEnd.x || endPtOther.y == otherEnd.y) {
-                //     continue;
-                // }
+                Line endPtOtherObserver = new Line(endPtOther.x, endPtOther.y, observer.x, observer.y);
                 int[] ptCurDir = getDir(pt, endPtOther);
                 int[] otherEndCurDir = getDir(otherEnd, endPtOther);
                 int[] curObserverDir = getDir(endPtOther, observer);
@@ -226,7 +233,28 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
                     return false;
                 }
                 boolean opposite = (ptObserverDir[0] + otherEndCurDir[0] == 0) && (ptObserverDir[1] + otherEndCurDir[1] == 0);
-                if (hit(cur, otherEndObserver) != -1 && !opposite) {
+				// if (debug) {
+					// System.out.println("ptObserverDir: " + Arrays.toString(ptObserverDir));
+					// System.out.println("otherEndCurDir: " + Arrays.toString(otherEndCurDir));
+				// }
+				if (opposite) continue;
+				opposite = (ptObserverDir[0] + ptCurDir[0] == 0) && (ptObserverDir[1] + ptCurDir[1] == 0);
+				if (opposite) continue;
+				if (sameLine(cur, endPtOtherObserver)) continue;
+				// Line tot = new Line(otherEnd.x, otherEnd.y, endPtOther.x, endPtOther.y);
+                // if (Math.abs(length(tot) - (length(cur) + length(line))) < 0.1) {
+                    // continue;
+                // }
+				// tot = new Line(endPtOther.x, endPtOther.y, observer.x, observer.y);
+				// double diff = Math.abs(length(tot) - (length(cur) + length(ptObserver)));
+				// if (diff < 0.001) {
+                    // continue;
+                // }
+				// if (debug) {
+					// System.out.println("diff: " + diff);
+				// }
+				// boolean straight = otherEnd.x == endPtOther.x || otherEnd.y == endPtOther.y;
+                if (hit(cur, otherEndObserver) != -1) {
                     if (debug) {
                         System.out.println("hit");
                         System.out.println("line: " + line + ", cur: " + cur + ", pt: " + pt);
@@ -304,8 +332,8 @@ static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-	// static String taskName = "fence4";
+    // static String taskName = null;
+	static String taskName = "fence4";
     static boolean logTime = !true;
     
     public static void main(String[] args) throws Exception
