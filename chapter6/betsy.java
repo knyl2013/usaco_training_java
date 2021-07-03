@@ -10,17 +10,41 @@ import java.util.*;
 
 public class betsy {
     static int n;
-    // static boolean[][] visited;
+    static boolean[][] visited, fillTable;
+    static int visitedCnt;
     static int[] dr = new int[]{0, 0, 1, -1};
     static int[] dc = new int[]{1, -1, 0, 0};
     static int nax = 1000000;
     static int[] memo = new int[nax];
     static long end;
     static List<Map<Long, Integer>> dp = new ArrayList<>();
+    static int fcnt;
+    static long callCnt = 0;
     static int mul(int a, int b)
     {
         long c = a * b;
         return (int)(c % nax);
+    }
+    static void floodFill(int r, int c)
+    {
+        fillTable[r][c] = true;
+        fcnt++;
+        for (int i = 0; i < 4; i++) {
+            int nr = r + dr[i], nc = c + dc[i];
+            boolean out = nr < 0 || nc < 0 || nr >= n || nc >= n;
+            boolean isMarket = nr == n-1 && nc == 0;
+            if (out || isMarket || visited[nr][nc] || fillTable[nr][nc]) continue;
+            floodFill(nr, nc);
+        }
+    }
+    // true if all unvisited cells are connected 4-directionally
+    static boolean allConnected(int r, int c)
+    {
+        fcnt = 0;
+        fillTable = new boolean[n][n];
+        floodFill(r, c);
+        // System.out.println("r: " + r + ", c: " + c + ", fcnt: " + fcnt + ", visitedCnt: " + visitedCnt);
+        return (fcnt + visitedCnt) == n*n;
     }
     // static Map<String, Integer> mp = new HashMap<>();
     // how many ways to go to (n-1, 0) if cur pos is (r, c) and bit is visited
@@ -33,6 +57,10 @@ public class betsy {
         if (r == n-1 && c == 0) {
             return 0;
         }
+        if (!allConnected(r, c)) {
+            return 0;
+        }
+        callCnt++;
         // int key = mul((int)(bit % nax), r*n+c);
         // if (memo[key] != -1) return memo[key];
         // int val = r * n + c;
@@ -44,7 +72,8 @@ public class betsy {
         // String key = encode(r, c);
         // if (mp.containsKey(key)) return mp.get(key);
         int ans = 0;
-        // visited[r][c] = true;
+        visited[r][c] = true;
+        visitedCnt++;
         for (int i = 0; i < 4; i++) {
             int nr = r + dr[i], nc = c + dc[i];
             boolean out = nr < 0 || nc < 0 || nr >= n || nc >= n;
@@ -52,8 +81,9 @@ public class betsy {
             if (out || ((bit >> nval) & 1) == 1) continue;
             ans += dfs(nr, nc, bit | (1L << nval));
         }
+        visitedCnt--;
         // curDp.put(bit, ans);
-        // visited[r][c] = false;
+        visited[r][c] = false;
         // mp.put(key, ans);
         // memo[key] = ans;
         return ans;
@@ -66,11 +96,15 @@ public class betsy {
             dp.add(new HashMap<>());
         }
         end = (1L << (n*n)) - 1L;
+        visitedCnt = 1;
         Arrays.fill(memo, -1);
         // System.out.println(Long.toBinaryString(end));
-        // visited = new boolean[n][n];
+        visited = new boolean[n][n];
+        fillTable = new boolean[n][n];
         int ans = dfs(0, 0, 1);
         out.printf("%d\n", ans);
+        if (logTime)
+            System.out.println("callCnt: " + callCnt);
     }
 	
 
