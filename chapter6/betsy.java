@@ -17,18 +17,35 @@ public class betsy {
     static int nax = 1000000;
     static int[] memo = new int[nax];
     static long end;
+    static Map<Long, Integer> mp = new HashMap<>();
     static List<Map<Long, Integer>> dp = new ArrayList<>();
     static int fcnt;
     static long callCnt = 0;
+    static int want;
+    static boolean ffSuccess;
     static int mul(int a, int b)
     {
         long c = a * b;
         return (int)(c % nax);
     }
+    static void floodClose(int r, int c)
+    {
+        fillTable[r][c] = false;
+        for (int i = 0; i < 4; i++) {
+            int nr = r + dr[i], nc = c + dc[i];
+            boolean out = nr < 0 || nc < 0 || nr >= n || nc >= n;
+            boolean isMarket = nr == n-1 && nc == 0;
+            if (out || isMarket || visited[nr][nc] || !fillTable[nr][nc]) continue;
+            floodClose(nr, nc);
+        }
+    }
     static void floodFill(int r, int c)
     {
         fillTable[r][c] = true;
         fcnt++;
+        if (fcnt == want) {
+            ffSuccess = true;
+        }
         for (int i = 0; i < 4; i++) {
             int nr = r + dr[i], nc = c + dc[i];
             boolean out = nr < 0 || nc < 0 || nr >= n || nc >= n;
@@ -41,10 +58,47 @@ public class betsy {
     static boolean allConnected(int r, int c)
     {
         fcnt = 0;
-        fillTable = new boolean[n][n];
+        // fillTable = new boolean[n][n];
+        ffSuccess = false;
+        want = n * n - visitedCnt;
         floodFill(r, c);
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                fillTable[i][j] = false;
+        // floodClose(r, c);
         // System.out.println("r: " + r + ", c: " + c + ", fcnt: " + fcnt + ", visitedCnt: " + visitedCnt);
+        // return (fcnt + visitedCnt) == n*n;
+        return ffSuccess;
+    }
+    // true if can end at (n-1, 0)
+    static boolean canEnd(int r, int c)
+    {
+        fcnt = 1;
+        fillTable = new boolean[n][n];
+        fillTable[n-1][1] = true;
+        floodFill(r, c);
+        if ((fcnt + visitedCnt) == n*n) return true;
+        fcnt = 1;
+        fillTable = new boolean[n][n];
+        fillTable[n-2][0] = true;
+        floodFill(r, c);
         return (fcnt + visitedCnt) == n*n;
+    }
+    // true if border and (n-1, 0) cannot reach in one path
+    static boolean isBorderBad()
+    {
+        for (int j = 0, i = 0; j < n; j++) {
+            if (visited[i][j]) continue;
+            int vcnt = 0;
+            if (i + 1 < n && !visited[i+1][j])
+                vcnt++;
+            if (j - 1 >= 0 && !visited[i][j-1])
+                vcnt++;
+            if (j + 1 < n && !visited[i][j+1])
+                vcnt++;
+            if (vcnt <= 1) return true;
+        }
+        return false;
     }
     // static Map<String, Integer> mp = new HashMap<>();
     // how many ways to go to (n-1, 0) if cur pos is (r, c) and bit is visited
@@ -60,7 +114,17 @@ public class betsy {
         if (!allConnected(r, c)) {
             return 0;
         }
+        // if (isBorderBad()) {
+        //     return 0;
+        // }
+        // if (!canEnd(r, c)) {
+        //     return 0;
+        // }
+        long key = (r * n + c) * bit;
+        // long key = bit;
+        if (mp.containsKey(key)) return mp.get(key);
         callCnt++;
+
         // int key = mul((int)(bit % nax), r*n+c);
         // if (memo[key] != -1) return memo[key];
         // int val = r * n + c;
@@ -84,7 +148,7 @@ public class betsy {
         visitedCnt--;
         // curDp.put(bit, ans);
         visited[r][c] = false;
-        // mp.put(key, ans);
+        mp.put(key, ans);
         // memo[key] = ans;
         return ans;
     }
