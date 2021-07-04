@@ -85,19 +85,26 @@ public class betsy {
         return (fcnt + visitedCnt) == n*n;
     }
     // true if border and (n-1, 0) cannot reach in one path
-    static boolean isBorderBad()
+    static boolean isBorderBad(int r, int c)
     {
-        for (int j = 0, i = 0; j < n; j++) {
-            if (visited[i][j]) continue;
-            int vcnt = 0;
-            if (i + 1 < n && !visited[i+1][j])
-                vcnt++;
-            if (j - 1 >= 0 && !visited[i][j-1])
-                vcnt++;
-            if (j + 1 < n && !visited[i][j+1])
-                vcnt++;
-            if (vcnt <= 1) return true;
+        boolean hasPrevUnVisit, isPrevVisited, isAtStart;
+        hasPrevUnVisit = false;
+        isPrevVisited = false;
+        for (int j = n-1, i = 0; i < n; i++) {
+            if (visited[i][j]) {
+                if (hasPrevUnVisit) return true;
+                isPrevVisited = true;
+                continue;
+            }
+            isAtStart = i == r && j == c;
+            if (visited[i][j-1] && isPrevVisited && !isAtStart) {
+                return true;
+            }
+            hasPrevUnVisit = true;
+            isPrevVisited = false;
         }
+        
+
         return false;
     }
     // static Map<String, Integer> mp = new HashMap<>();
@@ -111,16 +118,17 @@ public class betsy {
         if (r == n-1 && c == 0) {
             return 0;
         }
+        if (isBorderBad(r, c)) {
+            return 0;
+        }
         if (!allConnected(r, c)) {
             return 0;
         }
-        // if (isBorderBad()) {
-        //     return 0;
-        // }
         // if (!canEnd(r, c)) {
         //     return 0;
         // }
-        long key = (r * n + c) * bit;
+        long key = bit;
+        key = key * (n*n) + (n*r+c);
         // long key = bit;
         if (mp.containsKey(key)) return mp.get(key);
         callCnt++;
