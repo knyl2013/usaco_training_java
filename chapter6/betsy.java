@@ -88,6 +88,8 @@ public class betsy {
     static boolean isBorderBad(int r, int c)
     {
         boolean hasPrevUnVisit, isPrevVisited, isAtStart;
+
+        // right border
         hasPrevUnVisit = false;
         isPrevVisited = false;
         for (int j = n-1, i = 0; i < n; i++) {
@@ -98,6 +100,57 @@ public class betsy {
             }
             isAtStart = i == r && j == c;
             if (visited[i][j-1] && isPrevVisited && !isAtStart) {
+                return true;
+            }
+            hasPrevUnVisit = true;
+            isPrevVisited = false;
+        }
+
+        // left border
+        hasPrevUnVisit = false;
+        isPrevVisited = false;
+        for (int j = 0, i = 0; i < n; i++) {
+            if (visited[i][j]) {
+                if (hasPrevUnVisit) return true;
+                isPrevVisited = true;
+                continue;
+            }
+            isAtStart = i == r && j == c;
+            if (visited[i][j+1] && isPrevVisited && !isAtStart) {
+                return true;
+            }
+            hasPrevUnVisit = true;
+            isPrevVisited = false;
+        }
+
+        // top border
+        hasPrevUnVisit = false;
+        isPrevVisited = false;
+        for (int j = 0, i = 0; j < n; j++) {
+            if (visited[i][j]) {
+                if (hasPrevUnVisit) return true;
+                isPrevVisited = true;
+                continue;
+            }
+            isAtStart = i == r && j == c;
+            if (visited[i+1][j] && isPrevVisited && !isAtStart) {
+                return true;
+            }
+            hasPrevUnVisit = true;
+            isPrevVisited = false;
+        }
+
+        // bottom border
+        hasPrevUnVisit = false;
+        isPrevVisited = false;
+        for (int j = n-1, i = n-1; j >= 0; j--) {
+            if (visited[i][j]) {
+                if (hasPrevUnVisit) return true;
+                isPrevVisited = true;
+                continue;
+            }
+            isAtStart = i == r && j == c;
+            if (visited[i-1][j] && isPrevVisited && !isAtStart) {
                 return true;
             }
             hasPrevUnVisit = true;
