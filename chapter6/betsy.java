@@ -62,6 +62,8 @@ public class betsy {
         ffSuccess = false;
         want = n * n - visitedCnt;
         floodFill(r, c);
+        // if (!fillTable[n-1][1] && !fillTable[n-2][0])
+        //     ffSuccess = false;
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
                 fillTable[i][j] = false;
@@ -160,6 +162,25 @@ public class betsy {
 
         return false;
     }
+
+    // return true if current map has a tunnel (1 way in/out path)
+    static boolean hasTunnel(int r, int c)
+    {
+        for (int i = 1; i < n-1; i++) {
+            for (int j = 1; j < n-1; j++) {
+                if (visited[i][j] || (r == i && c == j)) 
+                    continue;
+                if ((visited[i-1][j] || visited[i+1][j]) && visited[i][j-1] && visited[i][j+1]) {
+                    return true;
+                }
+                if ((visited[i][j-1] || visited[i][j+1]) && visited[i+1][j] && visited[i-1][j]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // static Map<String, Integer> mp = new HashMap<>();
     // how many ways to go to (n-1, 0) if cur pos is (r, c) and bit is visited
     static int dfs(int r, int c, long bit)
@@ -172,6 +193,9 @@ public class betsy {
             return 0;
         }
         if (isBorderBad(r, c)) {
+            return 0;
+        }
+        if (hasTunnel(r, c)) {
             return 0;
         }
         if (!allConnected(r, c)) {
