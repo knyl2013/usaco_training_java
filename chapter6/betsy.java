@@ -93,7 +93,7 @@ public class betsy {
 
         // right border
         hasPrevUnVisit = false;
-        isPrevVisited = false;
+        isPrevVisited = true;
         for (int j = n-1, i = 0; i < n; i++) {
             if (visited[i][j]) {
                 if (hasPrevUnVisit) return true;
@@ -110,7 +110,7 @@ public class betsy {
 
         // left border
         hasPrevUnVisit = false;
-        isPrevVisited = false;
+        isPrevVisited = true;
         for (int j = 0, i = 0; i < n; i++) {
             if (visited[i][j]) {
                 if (hasPrevUnVisit) return true;
@@ -127,7 +127,7 @@ public class betsy {
 
         // top border
         hasPrevUnVisit = false;
-        isPrevVisited = false;
+        isPrevVisited = true;
         for (int j = 0, i = 0; j < n; j++) {
             if (visited[i][j]) {
                 if (hasPrevUnVisit) return true;
@@ -144,7 +144,7 @@ public class betsy {
 
         // bottom border
         hasPrevUnVisit = false;
-        isPrevVisited = false;
+        isPrevVisited = true;
         for (int j = n-1, i = n-1; j >= 0; j--) {
             if (visited[i][j]) {
                 if (hasPrevUnVisit) return true;
@@ -179,6 +179,17 @@ public class betsy {
             }
         }
         return false;
+    }
+
+    static void displayBoard()
+    {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                System.out.print(visited[i][j] ? 1 : 0);
+            }
+            System.out.println();
+        }
+        System.out.println("=========");
     }
 
     // static Map<String, Integer> mp = new HashMap<>();
@@ -234,6 +245,10 @@ public class betsy {
         // curDp.put(bit, ans);
         visited[r][c] = false;
         mp.put(key, ans);
+        if (ans == 0) {
+            System.out.println("r: " + r + ", c: " + c);
+            displayBoard();
+        }
         // memo[key] = ans;
         return ans;
     }
@@ -252,6 +267,7 @@ public class betsy {
         fillTable = new boolean[n][n];
         int ans = dfs(0, 0, 1);
         out.printf("%d\n", ans);
+        // System.out.println(mp);
         if (logTime)
             System.out.println("callCnt: " + callCnt);
     }
