@@ -195,6 +195,14 @@ public class betsy {
 			}
 			if (vcnt == n-1) return true;
 		}
+		for (int j = n-1; j > c; j--) {
+			int vcnt = 0;
+			for (int i = 0; i < n; i++) {
+				if (visited[i][j])
+					vcnt++;
+			}
+			if (vcnt == n-1) return true;
+		}
 		return false;
 	}
     static void displayBoard()
