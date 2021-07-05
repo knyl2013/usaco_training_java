@@ -23,6 +23,15 @@ public class betsy {
     static long callCnt = 0;
     static int want;
     static boolean ffSuccess;
+    static int[][] bottomRightBadSample = new int[][] {
+        new int[]{-1, 1, 0},
+        new int[]{1, 0, 0},
+        new int[]{0, 0, 0},
+    };
+    static int[][] oneWayBadSample = new int[][]{
+        new int[]{0, 0},
+        new int[]{0, 1}
+    };
     static int mul(int a, int b)
     {
         long c = a * b;
@@ -225,11 +234,6 @@ public class betsy {
 		else
 			return visited[n-1][1] && (n*n)-visitedCnt > 1;
 	}
-	static int[][] bottomRightBadSample = new int[][]{
-		new int[]{-1, 1, 0},
-		new int[]{1, 0, 0},
-		new int[]{0, 0, 0},
-	};
 	static boolean equals(int[][] ref, int startR, int startC)
 	{
 		for (int i = 0; i < ref.length; i++) {
@@ -309,8 +313,8 @@ public class betsy {
         visited[r][c] = false;
         mp.put(key, ans);
         if (ans == 0) {
-            // System.out.println("r: " + r + ", c: " + c);
-            // displayBoard();
+            System.out.println("r: " + r + ", c: " + c);
+            displayBoard();
         }
         // memo[key] = ans;
         return ans;
