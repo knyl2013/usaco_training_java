@@ -184,7 +184,19 @@ public class betsy {
         }
         return false;
     }
-
+	static boolean onlyOneWayOut(int r, int c)
+	{
+		// boolean hasUnvisit = false;
+		for (int i = 0; i < r; i++) {
+			int vcnt = 0;
+			for (int j = 0; j < n; j++) {
+				if (visited[i][j])
+					vcnt++;
+			}
+			if (vcnt == n-1) return true;
+		}
+		return false;
+	}
     static void displayBoard()
     {
         for (int i = 0; i < n; i++) {
@@ -225,6 +237,9 @@ public class betsy {
         if (hasTunnel(r, c)) {
             return 0;
         }
+		if (onlyOneWayOut(r, c)) {
+			return 0;
+		}
         if (!allConnected(r, c)) {
             return 0;
         }
@@ -262,8 +277,8 @@ public class betsy {
         visited[r][c] = false;
         mp.put(key, ans);
         if (ans == 0) {
-            System.out.println("r: " + r + ", c: " + c);
-            displayBoard();
+            // System.out.println("r: " + r + ", c: " + c);
+            // displayBoard();
         }
         // memo[key] = ans;
         return ans;
