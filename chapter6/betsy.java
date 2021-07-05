@@ -225,6 +225,27 @@ public class betsy {
 		else
 			return visited[n-1][1] && (n*n)-visitedCnt > 1;
 	}
+	static int[][] bottomRightBadSample = new int[][]{
+		new int[]{-1, 1, 0},
+		new int[]{1, 0, 0},
+		new int[]{0, 0, 0},
+	};
+	static boolean equals(int[][] ref, int startR, int startC)
+	{
+		for (int i = 0; i < ref.length; i++) {
+			for (int j = 0; j < ref[i].length; j++) {
+				if (ref[i][j] == -1) continue;
+				int val = visited[startR+i][startC+j] ? 1 : 0;
+				if (val != ref[i][j]) return false;
+			}
+		}
+		return true;
+	}
+	static boolean bottomRightBad()
+	{
+		if (n < 5) return false;
+		return equals(bottomRightBadSample, n-3, n-3);
+	}
     // static Map<String, Integer> mp = new HashMap<>();
     // how many ways to go to (n-1, 0) if cur pos is (r, c) and bit is visited
     static int dfs(int r, int c, long bit)
@@ -246,6 +267,9 @@ public class betsy {
             return 0;
         }
 		if (onlyOneWayOut(r, c)) {
+			return 0;
+		}
+		if (bottomRightBad()) {
 			return 0;
 		}
         if (!allConnected(r, c)) {
