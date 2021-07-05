@@ -39,6 +39,7 @@ public class betsy {
             floodClose(nr, nc);
         }
     }
+	static int startR, startC;
     static void floodFill(int r, int c)
     {
         fillTable[r][c] = true;
@@ -52,6 +53,7 @@ public class betsy {
             boolean isMarket = nr == n-1 && nc == 0;
             if (out || isMarket || visited[nr][nc] || fillTable[nr][nc]) continue;
             floodFill(nr, nc);
+			if (r == startR && c == startC) break;
         }
     }
     // true if all unvisited cells are connected 4-directionally
@@ -61,6 +63,8 @@ public class betsy {
         // fillTable = new boolean[n][n];
         ffSuccess = false;
         want = n * n - visitedCnt;
+		startR = r;
+		startC = c;
         floodFill(r, c);
         // if (!fillTable[n-1][1] && !fillTable[n-2][0])
         //     ffSuccess = false;
@@ -191,7 +195,16 @@ public class betsy {
         }
         System.out.println("=========");
     }
-
+	static boolean isEndBlock(int r, int c)
+	{
+		boolean endRight = r == n-1 && c == 1;
+		boolean endUp = r == n-2 && c == 0;
+		if (!endRight && !endUp) return false;
+		if (endRight)
+			return visited[n-2][0] && (n*n)-visitedCnt > 1;
+		else
+			return visited[n-1][1] && (n*n)-visitedCnt > 1;
+	}
     // static Map<String, Integer> mp = new HashMap<>();
     // how many ways to go to (n-1, 0) if cur pos is (r, c) and bit is visited
     static int dfs(int r, int c, long bit)
@@ -203,6 +216,9 @@ public class betsy {
         if (r == n-1 && c == 0) {
             return 0;
         }
+		if (isEndBlock(r, c)) {
+			return 0;
+		}
         if (isBorderBad(r, c)) {
             return 0;
         }
