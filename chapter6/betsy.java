@@ -257,7 +257,7 @@ public class betsy {
 		}
 		return true;
 	}
-	static boolean oneWayBadRightCorner(int r, int c)
+	static boolean oneWayBadRightCorner(int r, int c, long bit)
 	{
 		if (n < 5) return false;
 		for (int i = 0; i < n-1; i++) {
@@ -269,6 +269,14 @@ public class betsy {
 				floodFill(i, n-2);
 				want = -1;
 				boolean rcAtIsland = fillTable[r][c];
+                for (int a = 0; a < n; a++) {
+                    for (int b = 0; b < n; b++) {
+                        if (fillTable[a][b]) {
+                            long key = bit * (n*n) + (n*a+b);
+                            mp.put(key, 0);
+                        }
+                    }
+                }
 				return !rcAtIsland;
 			}
 		}
@@ -333,12 +341,6 @@ public class betsy {
         if (!allConnected(r, c)) {
             return 0;
         }
-		if (oneWayBadRightCorner(r, c)) {
-			return 0;
-		}
-		if (oneWayBadLeftCorner(r, c)) {
-			return 0;
-		}
         // if (!canEnd(r, c)) {
         //     return 0;
         // }
@@ -349,6 +351,12 @@ public class betsy {
         // long mkey = mbit * (n*n) + (n*mr+mc);
         // long key = bit;
         if (mp.containsKey(key)) return mp.get(key);
+        if (oneWayBadRightCorner(r, c, bit)) {
+            return 0;
+        }
+        if (oneWayBadLeftCorner(r, c)) {
+            return 0;
+        }
 		// if (mp.containsKey(mkey)) {
 			// System.out.println("mirror");
 			// return mp.get(mkey);
