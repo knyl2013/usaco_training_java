@@ -28,9 +28,18 @@ public class betsy {
         new int[]{1, 0, 0},
         new int[]{0, 0, 0},
     };
-    static int[][] oneWayBadSample = new int[][]{
+	static int[][] bottomLeftBadSample = new int[][] {
+		new int[]{1, 1, -1},
+		new int[]{0, -1, 0},
+		new int[]{0, 0, 1}
+	};
+    static int[][] oneWayBadLeftSample = new int[][]{
         new int[]{0, 0},
         new int[]{0, 1}
+    };
+	static int[][] oneWayBadRightSample = new int[][]{
+        new int[]{0, 0},
+        new int[]{1, 0}
     };
     static int mul(int a, int b)
     {
@@ -74,12 +83,13 @@ public class betsy {
         want = n * n - visitedCnt;
 		startR = r;
 		startC = c;
+		for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                fillTable[i][j] = false;
         floodFill(r, c);
         // if (!fillTable[n-1][1] && !fillTable[n-2][0])
         //     ffSuccess = false;
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                fillTable[i][j] = false;
+        
         // floodClose(r, c);
         // System.out.println("r: " + r + ", c: " + c + ", fcnt: " + fcnt + ", visitedCnt: " + visitedCnt);
         // return (fcnt + visitedCnt) == n*n;
@@ -245,10 +255,49 @@ public class betsy {
 		}
 		return true;
 	}
+	static boolean oneWayBadRightCorner(int r, int c)
+	{
+		if (n < 5) return false;
+		for (int i = 0; i < n-1; i++) {
+			if (equals(oneWayBadRightSample, i, n-2)) {
+				for (int a = 0; a < n; a++)
+					for (int b = 0; b < n; b++)
+						fillTable[a][b] = false;
+				fillTable[i][n-1] = true;
+				floodFill(i, n-2);
+				want = -1;
+				boolean rcAtIsland = fillTable[r][c];
+				return !rcAtIsland;
+			}
+		}
+		return false;
+	}
+	static boolean oneWayBadLeftCorner(int r, int c)
+	{
+		if (n < 5) return false;
+		for (int i = 0; i < n-1; i++) {
+			if (equals(oneWayBadLeftSample, i, 0)) {
+				for (int a = 0; a < n; a++)
+					for (int b = 0; b < n; b++)
+						fillTable[a][b] = false;
+				fillTable[i][0] = true;
+				floodFill(i, 1);
+				want = -1;
+				boolean rcAtIsland = fillTable[r][c];
+				return !rcAtIsland;
+			}
+		}
+		return false;
+	}
 	static boolean bottomRightBad()
 	{
 		if (n < 5) return false;
 		return equals(bottomRightBadSample, n-3, n-3);
+	}
+	static boolean bottomLeftBad(int r, int c)
+	{
+		if (n < 5) return false;
+		return equals(bottomLeftBadSample, n-3, 0);
 	}
     // static Map<String, Integer> mp = new HashMap<>();
     // how many ways to go to (n-1, 0) if cur pos is (r, c) and bit is visited
@@ -276,9 +325,18 @@ public class betsy {
 		if (bottomRightBad()) {
 			return 0;
 		}
+		if (bottomLeftBad(r, c)) {
+			return 0;
+		}
         if (!allConnected(r, c)) {
             return 0;
         }
+		// if (oneWayBadRightCorner(r, c)) {
+			// return 0;
+		// }
+		// if (oneWayBadLeftCorner(r, c)) {
+			// return 0;
+		// }
         // if (!canEnd(r, c)) {
         //     return 0;
         // }
@@ -308,13 +366,19 @@ public class betsy {
             if (out || ((bit >> nval) & 1) == 1) continue;
             ans += dfs(nr, nc, bit | (1L << nval));
         }
+		
         visitedCnt--;
         // curDp.put(bit, ans);
         visited[r][c] = false;
+		// if (ans != 0 && oneWayBadCorner(r, c)) {
+			// System.out.println("r: " + r + ", c: " + c);
+            // displayBoard();
+		// }
         mp.put(key, ans);
+		
         if (ans == 0) {
-            System.out.println("r: " + r + ", c: " + c);
-            displayBoard();
+            // System.out.println("r: " + r + ", c: " + c);
+            // displayBoard();
         }
         // memo[key] = ans;
         return ans;
