@@ -14,13 +14,11 @@ public class betsy {
     static int visitedCnt;
     static int[] dr = new int[]{0, 0, 1, -1};
     static int[] dc = new int[]{1, -1, 0, 0};
-    static int nax = 10000;
-    static int[] memo = new int[nax];
     static long end;
-    static Map<Long, Integer> mp = new HashMap<>(88418 * 2);
+    static Map<Long, Integer> mp;
     static List<Map<Long, Integer>> dp = new ArrayList<>();
     static int fcnt;
-    static long callCnt = 0;
+    static long callCnt;
     static int want;
     static boolean ffSuccess;
 	static int[][][] mirror;
@@ -42,12 +40,7 @@ public class betsy {
         new int[]{0, 0},
         new int[]{1, 0}
     };
-    static int mul(int a, int b)
-    {
-        long c = a * b;
-        return (int)(c % nax);
-    }
-	
+
     static void floodClose(int r, int c)
     {
         fillTable[r][c] = false;
@@ -257,7 +250,7 @@ public class betsy {
 		}
 		return true;
 	}
-	static boolean oneWayBadRightCorner(int r, int c, long bit)
+	static boolean oneWayBadRightCorner(int r, int c)
 	{
 		if (n < 5) return false;
 		for (int i = 0; i < n-1; i++) {
@@ -269,14 +262,14 @@ public class betsy {
 				floodFill(i, n-2);
 				want = -1;
 				boolean rcAtIsland = fillTable[r][c];
-                for (int a = 0; a < n; a++) {
-                    for (int b = 0; b < n; b++) {
-                        if (fillTable[a][b]) {
-                            long key = bit * (n*n) + (n*a+b);
-                            mp.put(key, 0);
-                        }
-                    }
-                }
+                // for (int a = 0; a < n; a++) {
+                    // for (int b = 0; b < n; b++) {
+                        // if (fillTable[a][b]) {
+                            // long key = bit * (n*n) + (n*a+b);
+                            // mp.put(key, 0);
+                        // }
+                    // }
+                // }
 				return !rcAtIsland;
 			}
 		}
@@ -345,18 +338,22 @@ public class betsy {
         //     return 0;
         // }
 		int mr, mc;
-        long key = bit * (n*n) + (n*r+c);
+        
+		// long key = bit;
 		// mr = mirror[r][c][0];
 		// mc = mirror[r][c][1];
         // long mkey = mbit * (n*n) + (n*mr+mc);
         // long key = bit;
-        if (mp.containsKey(key)) return mp.get(key);
-        if (oneWayBadRightCorner(r, c, bit)) {
-            return 0;
-        }
-        if (oneWayBadLeftCorner(r, c)) {
-            return 0;
-        }
+        
+        // if (oneWayBadRightCorner(r, c)) {
+            // return 0;
+        // }
+        // if (oneWayBadLeftCorner(r, c)) {
+            // return 0;
+        // }
+		long key = bit * (n*n) + (n*r+c);
+		// long key = bit;
+		if (mp.containsKey(key)) return mp.get(key);
 		// if (mp.containsKey(mkey)) {
 			// System.out.println("mirror");
 			// return mp.get(mkey);
@@ -391,13 +388,17 @@ public class betsy {
         visitedCnt--;
         // curDp.put(bit, ans);
         visited[r][c] = false;
-		// if (ans != 0 && oneWayBadCorner(r, c)) {
+		// if (ans != 0) {
 			// System.out.println("r: " + r + ", c: " + c);
             // displayBoard();
 		// }
         mp.put(key, ans);
+		if (ans == 86) {
+			// System.out.println("r: " + r + ", c: " + c);
+            // displayBoard();
+		}
 		// mp.put(mkey, ans);
-		
+		// System.out.println("bit: " + Long.toBinaryString(bit) + ", ans: " + ans);
         if (ans == 0) {
             // System.out.println("r: " + r + ", c: " + c);
             // displayBoard();
@@ -447,32 +448,31 @@ public class betsy {
 			}
 		}
 	}
-	static void solve()
-    {
-        n = ni();
-        for (int i = 0; i < n*n; i++) {
-            dp.add(new HashMap<>());
-        }
-		// createMirror();
-		// System.out.println("mirror: ");
-		// for (int[][] r1 : mirror) {
-			// for (int[] r2 : r1) {
-				// System.out.print("(" + r2[0] + ", " + r2[1] + ") ");
-			// }
-			// System.out.println();
-		// }
+	static int six, five;
+	static int helper(int inp)
+	{
+		n = inp;
         end = (1L << (n*n)) - 1L;
         visitedCnt = 1;
-        Arrays.fill(memo, -1);
-        // System.out.println(Long.toBinaryString(end));
         visited = new boolean[n][n];
         fillTable = new boolean[n][n];
-        // int ans = dfs(0, 0, 1, 1 << (n*n));
-		int ans = dfs(0, 0, 1);
+		mp = new HashMap<>(88418 * 2);
+		callCnt = 0;
+		return dfs(0, 0, 1);
+	}
+	static void solve()
+    {
+		int inp = ni();
+		if (inp == 7) {
+			five = helper(inp-2);
+			six = helper(inp-1);
+		}
+        int ans = helper(inp);
         out.printf("%d\n", ans);
-        // System.out.println(mp);
         if (logTime)
             System.out.println("callCnt: " + callCnt);
+		
+		System.out.println("five: " + five + ", six: " + six);
     }
 	
 
