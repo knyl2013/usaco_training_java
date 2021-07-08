@@ -16,6 +16,7 @@ public class betsy {
     static int[] dc = new int[]{1, -1, 0, 0};
     static long end;
     static Map<Long, Integer> mp;
+	static Map<Long, Boolean> connectedMp = new HashMap<>();
     static List<Map<Long, Integer>> dp = new ArrayList<>();
     static int fcnt;
     static long callCnt;
@@ -33,6 +34,11 @@ public class betsy {
 		new int[]{1, 1, -1},
 		new int[]{0, -1, 0},
 		new int[]{0, 0, 1}
+	};
+	static int[][] bottomLeftBadSample2 = new int[][] {
+		new int[]{1, 1, 1},
+		new int[]{0, 0, 1},
+		new int[]{0, 1, 1}
 	};
     static int[][] oneWayBadLeftSample = new int[][]{
         new int[]{0, 0},
@@ -74,6 +80,11 @@ public class betsy {
     // true if all unvisited cells are connected 4-directionally
     static boolean allConnected(int r, int c)
     {
+		boolean verticalSafe = (r-1>=0&&!visited[r-1][c]) || (r+1<n&&!visited[r+1][c]);
+		boolean horizontalSafe = (c-1>=0&&!visited[r][c-1]) || (c+1<n&&!visited[r][c+1]);
+		if (verticalSafe && horizontalSafe) return true;
+		// if (visitedCnt < 5) return true;
+		// if (connectedMp.containsKey(key)) return connectedMp.get(key);
         fcnt = 0;
         // fillTable = new boolean[n][n];
         ffSuccess = false;
@@ -90,6 +101,7 @@ public class betsy {
         // floodClose(r, c);
         // System.out.println("r: " + r + ", c: " + c + ", fcnt: " + fcnt + ", visitedCnt: " + visitedCnt);
         // return (fcnt + visitedCnt) == n*n;
+		// connectedMp.put(key, ffSuccess);
         return ffSuccess;
     }
     // true if can end at (n-1, 0)
@@ -337,9 +349,11 @@ public class betsy {
 		if (bottomLeftBad(r, c)) {
 			return 0;
 		}
+		
         if (!allConnected(r, c)) {
             return 0;
         }
+		long key = bit * (n*n) + (n*r+c);
         // if (!canEnd(r, c)) {
         //     return 0;
         // }
@@ -357,7 +371,7 @@ public class betsy {
         // if (oneWayBadLeftCorner(r, c)) {
             // return 0;
         // }
-		long key = bit * (n*n) + (n*r+c);
+		
 		// long key = bit;
 		if (mp.containsKey(key)) return mp.get(key);
 		// if (mp.containsKey(mkey)) {
@@ -388,7 +402,11 @@ public class betsy {
 			// mr = mirror[nr][nc][0]; 
 			// mc = mirror[nr][nc][1];
             // ans += dfs(nr, nc, bit | (1L << nval), mbit | (1L << mval));
+			
 			ans += dfs(nr, nc, bit | (1L << nval));
+			if (r == 0 && c == 0) {
+				System.out.println("nr: " + nr + ", nc: " + nc + ", val: " + dfs(nr, nc, bit | (1L << nval)));
+			}
         }
 		
         visitedCnt--;
