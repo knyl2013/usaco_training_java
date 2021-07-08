@@ -275,11 +275,12 @@ public class betsy {
 				fcnt = 0;
 				fillTable[i][n-1] = true;
 				floodFill(i, n-2);
-				want = -1;
+                want = -1;
 				boolean rcAtIsland = fillTable[r][c];
-				if (!rcAtIsland) return true;
-				int sameColor = chessboard[r][c] == chessboard[i][n-1] ? 1 : 0;
-				return fcnt % 2 == sameColor;
+                return !rcAtIsland;
+				// if (!rcAtIsland) return true;
+				// int sameColor = chessboard[r][c] == chessboard[i][n-1] ? 0 : 1;
+				// return fcnt % 2 == sameColor;
                 // for (int a = 0; a < n; a++) {
                     // for (int b = 0; b < n; b++) {
                         // if (fillTable[a][b]) {
@@ -366,11 +367,12 @@ public class betsy {
         // long key = bit;
         
         // if (oneWayBadRightCorner(r, c)) {
-            // return 0;
+        //     return 0;
         // }
-        // if (oneWayBadLeftCorner(r, c)) {
-            // return 0;
-        // }
+        if (oneWayBadLeftCorner(r, c)) {
+            // System.out.println("prune");
+            return 0;
+        }
 		
 		// long key = bit;
 		if (mp.containsKey(key)) return mp.get(key);
@@ -404,16 +406,16 @@ public class betsy {
             // ans += dfs(nr, nc, bit | (1L << nval), mbit | (1L << mval));
 			
 			ans += dfs(nr, nc, bit | (1L << nval));
-			if (r == 0 && c == 0) {
-				System.out.println("nr: " + nr + ", nc: " + nc + ", val: " + dfs(nr, nc, bit | (1L << nval)));
-			}
+			// if (r == 0 && c == 0) {
+				// System.out.println("nr: " + nr + ", nc: " + nc + ", val: " + dfs(nr, nc, bit | (1L << nval)));
+			// }
         }
 		
         visitedCnt--;
         // curDp.put(bit, ans);
         visited[r][c] = false;
 		if (ans == 1) {
-			oneCnt++;
+			// oneCnt++;
 			// System.out.println("r: " + r + ", c: " + c);
             // displayBoard();
 		}
@@ -488,27 +490,27 @@ public class betsy {
 	static void solve()
     {
 		int inp = ni();
-		chessboard = new int[inp][inp];
-		for (int i = 0; i < inp; i++) {
-			int curColor = i % 2 == 0 ? 0 : 1;
-			for (int j = 0; j < inp; j++) {
-				chessboard[i][j] = curColor;
-				curColor ^= 1;
-			}
-		}
+		// chessboard = new int[inp][inp];
+		// for (int i = 0; i < inp; i++) {
+		// 	int curColor = i % 2 == 0 ? 0 : 1;
+		// 	for (int j = 0; j < inp; j++) {
+		// 		chessboard[i][j] = curColor;
+		// 		curColor ^= 1;
+		// 	}
+		// }
 		// for (int[] row : chessboard) {
 			// System.out.println(Arrays.toString(row));
 		// }
-		if (inp == 7) {
+		// if (inp == 7) {
 			// five = helper(inp-2);
 			// six = helper(inp-1);
-		}
+		// }
         int ans = helper(inp);
         out.printf("%d\n", ans);
         if (logTime)
             System.out.println("callCnt: " + callCnt + ", oneCnt: " + oneCnt);
 		
-		System.out.println("five: " + five + ", six: " + six);
+		// System.out.println("five: " + five + ", six: " + six);
     }
 	
 
