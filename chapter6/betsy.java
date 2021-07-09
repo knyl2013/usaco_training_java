@@ -369,10 +369,10 @@ public class betsy {
         // if (oneWayBadRightCorner(r, c)) {
         //     return 0;
         // }
-        if (oneWayBadLeftCorner(r, c)) {
+        // if (oneWayBadLeftCorner(r, c)) {
             // System.out.println("prune");
-            return 0;
-        }
+            // return 0;
+        // }
 		
 		// long key = bit;
 		if (mp.containsKey(key)) return mp.get(key);
@@ -521,9 +521,9 @@ public class betsy {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-    static boolean logTime = true;
-	// static String taskName = "betsy";
+    // static String taskName = null;
+    static boolean logTime = !true;
+	static String taskName = "betsy";
     
     public static void main(String[] args) throws Exception
     {
