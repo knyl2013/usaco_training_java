@@ -172,7 +172,6 @@ public class betsy {
     }
 	static boolean onlyOneWayOut(int r, int c)
 	{
-		// boolean hasUnvisit = false;
 		for (int i = 0; i < r; i++) {
 			int vcnt = 0;
 			for (int j = 0; j < n; j++) {
@@ -225,7 +224,6 @@ public class betsy {
     // how many ways to go to (n-1, 0) if cur pos is (r, c) and bit is visited
     static int dfs(int r, int c, long bit)
     {
-        // System.out.println(Long.toBinaryString(bit));
         if (bit == end) {
             return (r == n-1 && c == 0) ? 1 : 0;
         }
