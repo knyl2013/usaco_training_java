@@ -19,7 +19,6 @@ public class clocks {
         for (int i = 2; i >= 0; i--) {
             for (int j = 2; j >= 0; j--) {
                 int val = b[i][j] == 12 ? 0 : b[i][j] / 3;
-                // System.out.println(val);
                 ans = (ans << 2) + val;
             }
         }
@@ -85,17 +84,7 @@ public class clocks {
         Queue<String> strQ = new ArrayDeque<>();
         int key = encode(board);
         int nax = (int) Math.pow(4, 9);
-        // int cur = key;
-        // display(decode(cur));
-        // cur = move(cur, 3);
-        // display(decode(cur));
-        // cur = move(cur, 4);
-        // display(decode(cur));
-        // cur = move(cur, 7);
-        // display(decode(cur));
-        // cur = move(cur, 8);
-        // display(decode(cur));
-
+        
         boolean[] visited = new boolean[nax];
         q.offer(key);
         visited[key] = true;
@@ -106,7 +95,9 @@ public class clocks {
                 int b = q.poll();
                 String s = strQ.poll();
                 if (b == 0) {
-                    finalAns = s;
+                    if (finalAns.isEmpty() || finalAns.compareTo(s) > 0) {
+                        finalAns = s;
+                    }
                     return;
                 }
                 for (int i = 0; i < 9; i++) {
@@ -117,20 +108,8 @@ public class clocks {
                     strQ.offer(s + (i+1));
                 }
             }
+            if (!finalAns.isEmpty()) break;
         }
-    }
-
-
-
-    static void display(int[][] b)
-    {
-        System.out.println("========");
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++)
-                System.out.print(b[i][j]);
-            System.out.println();
-        }
-        System.out.println("========");
     }
 
     static void input()
@@ -167,9 +146,9 @@ public class clocks {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-    static boolean logTime = true;
-	// static String taskName = "betsy";
+    // static String taskName = null;
+    static boolean logTime = !true;
+	static String taskName = "clocks";
     
     public static void main(String[] args) throws Exception
     {
