@@ -19,26 +19,10 @@ public class checker {
 	static int[] revs;
 	static int callCnt = 0;
 	static int[] mem, mem2;
-	static Map<String, Integer> mp = new HashMap<>();
 	static int[][] canUse;
 	static int[] canUseCnt;
 	
-	
-	static boolean someLvImpossible(int lv)
-	{
-		for (int i = lv; i < n; i++) {
-			boolean ok = false;
-			for (int j = 0; j < n; j++) {
-				int grp1 = dia1Grp[i][j];
-				int grp2 = dia2Grp[i][j];
-				if (visitedCol[j] || dia1[grp1] || dia2[grp2]) continue;
-				ok = true;
-				break;
-			}
-			if (!ok) return true;
-		}
-		return false;
-	}
+
 	static String encode(int lv, boolean reverse)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -58,17 +42,7 @@ public class checker {
         if (lv == n) {
             return 1;
         }
-		// if (someLvImpossible(lv)) {
-			// return 0;
-		// }
-		// String key = encode(lv, false);
-		// String rkey = encode(lv, true);
-		// if (mp.containsKey(key)) {
-			// return mp.get(key);
-		// }
-		// if (mp.containsKey(rkey)) {
-			// return mp.get(rkey);
-		// }
+
 		if (lv == 1 && mem[revs[board[0]]] != -1)
 			return mem[revs[board[0]]];
 		if (lv == 1 && mem[board[0]] != -1)
@@ -80,10 +54,6 @@ public class checker {
 			if (lv == 2 && mem2[board[1]] != -1)
 				return mem2[board[1]];
 		}
-		// if (someLvImpossible(lv)) {
-			// return 0;
-		// }
-		
 		
 		callCnt++;
 		int ans = 0;
@@ -92,40 +62,13 @@ public class checker {
             int grp2 = dia2Grp[lv][i];
             if (visitedCol[i] || dia1[grp1] || dia2[grp2]) continue;
 			boolean validUse = true;
-			
-			// for (int r = lv + 1, c1 = i - 1, c2 = i + 1; r < n; r++, c1--, c2++) {
-				// if (canUse[r][i]-- == 3) {
-					// canUseCnt[r]--;
-				// }
-				// if (c1 >= 0 && canUse[r][c1]-- == 3) {
-					// canUseCnt[r]--;
-				// }
-				// if (c2 < n && canUse[r][c2]-- == 3) {
-					// canUseCnt[r]--;
-				// }
-				// if (canUseCnt[r] <= 0)
-					// validUse = false;
-			// }
-			
+
             dia1[grp1] = true;
             dia2[grp2] = true;
             visitedCol[i] = true;
             board[lv] = i;
 			
-			// if (validUse)
-				ans += dfs2(lv + 1);
-			
-			// for (int r = lv + 1, c1 = i - 1, c2 = i + 1; r < n; r++, c1--, c2++) {
-				// if (++canUse[r][i] == 3) {
-					// canUseCnt[r]++;
-				// }
-				// if (c1 >= 0 && ++canUse[r][c1] == 3) {
-					// canUseCnt[r]++;
-				// }
-				// if (c2 < n && ++canUse[r][c2] == 3) {
-					// canUseCnt[r]++;
-				// }
-			// }
+			ans += dfs2(lv + 1);
 			
             dia1[grp1] = false;
             dia2[grp2] = false;
@@ -140,9 +83,6 @@ public class checker {
 			mem2[revs[board[1]]] = ans;
 			mem2[board[1]] = ans;
 		}
-		
-		// mp.put(key, ans);
-		// mp.put(rkey, ans);
 		
 		return ans;
     }
@@ -186,6 +126,7 @@ public class checker {
     {
         n = ni();
     }
+
     static void fillGrp(int[][] diaGrp, int startR, int startC, int endR, int endC, int dr, int dc, int id)
     {
         diaGrp[startR][startC] = id;
@@ -196,6 +137,7 @@ public class checker {
         }
         diaGrp[endR][endC] = id;
     }
+
 	static void init()
 	{
 		board = new int[n];
@@ -215,6 +157,7 @@ public class checker {
 		for (int[] row : canUse) {
 			Arrays.fill(row, 3);
 		}
+        
 		Arrays.fill(canUseCnt, n);
 		
 		for (int i = 0, j = n-1; i < n; i++, j--) {
