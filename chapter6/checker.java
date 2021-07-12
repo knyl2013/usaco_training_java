@@ -16,7 +16,10 @@ public class checker {
     static boolean[] visitedCol;
     static int[][] dia1Grp, dia2Grp;
     static boolean[] dia1, dia2;
+	static int[] revs;
 	static int callCnt = 0;
+	static int[] mem;
+	static Map<String, Integer> mp = new HashMap<>();
 	static boolean someLvImpossible(int lv)
 	{
 		for (int i = lv; i < n; i++) {
@@ -32,11 +35,41 @@ public class checker {
 		}
 		return false;
 	}
+	static String encode(int lv, boolean reverse)
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < lv; i++) {
+			if (reverse)
+				sb.append(revs[board[i]]);
+			else
+				sb.append(board[i]);
+			sb.append('-');
+		}
+		
+		return sb.toString();
+	}
 	static int dfs2(int lv)
     {
         if (lv == n) {
             return 1;
         }
+		// if (someLvImpossible(lv)) {
+			// return 0;
+		// }
+		// String key = encode(lv, false);
+		// String rkey = encode(lv, true);
+		// if (mp.containsKey(key)) {
+			// return mp.get(key);
+		// }
+		// if (mp.containsKey(rkey)) {
+			// return mp.get(rkey);
+		// }
+		if (lv == 1 && mem[revs[board[0]]] != -1)
+			return mem[revs[board[0]]];
+		if (lv == 1 && mem[board[0]] != -1)
+			return mem[board[0]];
+		
 		callCnt++;
 		int ans = 0;
         for (int i = 0; i < n; i++) {
@@ -49,11 +82,23 @@ public class checker {
             board[lv] = i;
 
             ans += dfs2(lv + 1);
+			// if (lv == 0) {
+				// System.out.println("ans: " + ans);
+			// }
 
             dia1[grp1] = false;
             dia2[grp2] = false;
             visitedCol[i] = false;
         }
+		
+		if (lv == 1) {
+			mem[revs[board[0]]] = ans;
+			mem[board[0]] = ans;
+		}
+		
+		// mp.put(key, ans);
+		// mp.put(rkey, ans);
+		
 		return ans;
     }
     static void dfs(int lv)
@@ -114,6 +159,13 @@ public class checker {
         dia2Grp = new int[n][n];
         dia1 = new boolean[n + (n - 1)];
         dia2 = new boolean[n + (n - 1)];
+		revs = new int[n];
+		mem = new int[n];
+		Arrays.fill(mem, -1);
+		
+		for (int i = 0, j = n-1; i < n; i++, j--) {
+			revs[i] = j;
+		}
 
         int id, startR, startC, endR, endC;
 
