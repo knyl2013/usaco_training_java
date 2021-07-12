@@ -15,7 +15,7 @@ public class checker {
     static int[] board;
     static boolean[] visitedCol;
     static int[][] dia1Grp, dia2Grp;
-    static boolean[][] dia1, dia2;
+    static boolean[] dia1, dia2;
 
     static void dfs(int lv)
     {
@@ -35,7 +35,7 @@ public class checker {
         for (int i = 0; i < n; i++) {
             int grp1 = dia1Grp[lv][i];
             int grp2 = dia2Grp[lv][i];
-            if (visitedCol[i] || dia1[grp1][i] || dia2[grp2][i]) continue;
+            if (visitedCol[i] || dia1[grp1] || dia2[grp2]) continue;
             // boolean invalid = false;
             // for (int j = lv-1, k = i - 1, m = i + 1; j >= 0 && (k >= 0 || m < n); j--, k--, m++) {
             //     if (j >= 0 && board[j] == k) {
@@ -49,15 +49,15 @@ public class checker {
             // }
             // if (invalid) continue;
 
-            dia1[grp1][i] = true;
-            dia2[grp2][i] = true;
+            dia1[grp1] = true;
+            dia2[grp2] = true;
             visitedCol[i] = true;
             board[lv] = i;
 
             dfs(lv + 1);
 
-            dia1[grp1][i] = false;
-            dia2[grp2][i] = false;
+            dia1[grp1] = false;
+            dia2[grp2] = false;
             visitedCol[i] = false;
         }
 
@@ -67,15 +67,15 @@ public class checker {
     {
         n = ni();
     }
-    static void fillGrp(int[][] dia, int startR, int startC, int endR, int endC, int dr, int dc, int id)
+    static void fillGrp(int[][] diaGrp, int startR, int startC, int endR, int endC, int dr, int dc, int id)
     {
-        dia[startR][startC] = id;
+        diaGrp[startR][startC] = id;
         while (!(startR == endR && startC == endC)) {
-            dia[startR][startC] = id;
+            diaGrp[startR][startC] = id;
             startR += dr;
             startC += dc;
         }
-        dia[endR][endC] = id;
+        diaGrp[endR][endC] = id;
     }
     static void solve()
     {
@@ -83,8 +83,8 @@ public class checker {
         visitedCol = new boolean[n];
         dia1Grp = new int[n][n];
         dia2Grp = new int[n][n];
-        dia1 = new boolean[n + (n - 1)][n];
-        dia2 = new boolean[n + (n - 1)][n];
+        dia1 = new boolean[n + (n - 1)];
+        dia2 = new boolean[n + (n - 1)];
 
         int id, startR, startC, endR, endC;
 
@@ -126,15 +126,15 @@ public class checker {
             id++;
         }
 
-        for (int[] row : dia1Grp) {
-            System.out.println(Arrays.toString(row));
-        }
-        System.out.println("======");
+        // for (int[] row : dia1Grp) {
+            // System.out.println(Arrays.toString(row));
+        // }
+        // System.out.println("======");
 
-        for (int[] row : dia2Grp) {
-            System.out.println(Arrays.toString(row));
-        }
-        System.out.println("======");
+        // for (int[] row : dia2Grp) {
+            // System.out.println(Arrays.toString(row));
+        // }
+        // System.out.println("======");
 
         dfs(0);
     }
