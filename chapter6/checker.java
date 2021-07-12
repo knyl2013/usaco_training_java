@@ -16,7 +16,46 @@ public class checker {
     static boolean[] visitedCol;
     static int[][] dia1Grp, dia2Grp;
     static boolean[] dia1, dia2;
+	static int callCnt = 0;
+	static boolean someLvImpossible(int lv)
+	{
+		for (int i = lv; i < n; i++) {
+			boolean ok = false;
+			for (int j = 0; j < n; j++) {
+				int grp1 = dia1Grp[i][j];
+				int grp2 = dia2Grp[i][j];
+				if (visitedCol[j] || dia1[grp1] || dia2[grp2]) continue;
+				ok = true;
+				break;
+			}
+			if (!ok) return true;
+		}
+		return false;
+	}
+	static int dfs2(int lv)
+    {
+        if (lv == n) {
+            return 1;
+        }
+		callCnt++;
+		int ans = 0;
+        for (int i = 0; i < n; i++) {
+            int grp1 = dia1Grp[lv][i];
+            int grp2 = dia2Grp[lv][i];
+            if (visitedCol[i] || dia1[grp1] || dia2[grp2]) continue;
+            dia1[grp1] = true;
+            dia2[grp2] = true;
+            visitedCol[i] = true;
+            board[lv] = i;
 
+            ans += dfs2(lv + 1);
+
+            dia1[grp1] = false;
+            dia2[grp2] = false;
+            visitedCol[i] = false;
+        }
+		return ans;
+    }
     static void dfs(int lv)
     {
         if (lv == n) {
@@ -32,23 +71,13 @@ public class checker {
             }
             return;
         }
+		if (finalAnsCnt >= 3) {
+			return;
+		}
         for (int i = 0; i < n; i++) {
             int grp1 = dia1Grp[lv][i];
             int grp2 = dia2Grp[lv][i];
             if (visitedCol[i] || dia1[grp1] || dia2[grp2]) continue;
-            // boolean invalid = false;
-            // for (int j = lv-1, k = i - 1, m = i + 1; j >= 0 && (k >= 0 || m < n); j--, k--, m++) {
-            //     if (j >= 0 && board[j] == k) {
-            //         invalid = true;
-            //         break;
-            //     }
-            //     if (m < n && board[j] == m) {
-            //         invalid = true;
-            //         break;
-            //     }
-            // }
-            // if (invalid) continue;
-
             dia1[grp1] = true;
             dia2[grp2] = true;
             visitedCol[i] = true;
@@ -77,9 +106,9 @@ public class checker {
         }
         diaGrp[endR][endC] = id;
     }
-    static void solve()
-    {
-        board = new int[n];
+	static void init()
+	{
+		board = new int[n];
         visitedCol = new boolean[n];
         dia1Grp = new int[n][n];
         dia2Grp = new int[n][n];
@@ -112,8 +141,8 @@ public class checker {
         startC = 0;
         endR = n-1;
         endC = 0;
-
-        while (id < dia2.length) {
+		
+		while (id < dia2.length) {
             fillGrp(dia2Grp, startR, startC, endR, endC, 1, 1, id);
             if (startR > 0) {
                 startR--;
@@ -125,18 +154,13 @@ public class checker {
             }
             id++;
         }
-
-        // for (int[] row : dia1Grp) {
-            // System.out.println(Arrays.toString(row));
-        // }
-        // System.out.println("======");
-
-        // for (int[] row : dia2Grp) {
-            // System.out.println(Arrays.toString(row));
-        // }
-        // System.out.println("======");
-
+	}
+    static void solve()
+    {
+		init();
         dfs(0);
+		init();
+		finalAnsCnt = dfs2(0);
     }
     
     static void output()
@@ -152,6 +176,10 @@ public class checker {
         input();
         solve();
         output();
+		
+		if (logTime) {
+			out.println("[callCnt: " + callCnt + "]");
+		}
     }
 
 
