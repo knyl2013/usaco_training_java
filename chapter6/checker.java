@@ -18,7 +18,7 @@ public class checker {
     static boolean[] dia1, dia2;
 	static int[] revs;
 	static int callCnt = 0;
-	static int[] mem;
+	static int[] mem, mem2;
 	static Map<String, Integer> mp = new HashMap<>();
 	static boolean someLvImpossible(int lv)
 	{
@@ -69,6 +69,14 @@ public class checker {
 			return mem[revs[board[0]]];
 		if (lv == 1 && mem[board[0]] != -1)
 			return mem[board[0]];
+		boolean firstOnMiddle = n % 2 == 1 && board[0] == n / 2;
+		if (firstOnMiddle) {
+			if (lv == 2 && mem2[revs[board[1]]] != -1)
+				return mem2[revs[board[1]]];
+			if (lv == 2 && mem2[board[1]] != -1)
+				return mem2[board[1]];
+		}
+		
 		
 		callCnt++;
 		int ans = 0;
@@ -94,6 +102,10 @@ public class checker {
 		if (lv == 1) {
 			mem[revs[board[0]]] = ans;
 			mem[board[0]] = ans;
+		}
+		if (lv == 2 && firstOnMiddle) {
+			mem2[revs[board[1]]] = ans;
+			mem2[board[1]] = ans;
 		}
 		
 		// mp.put(key, ans);
@@ -161,7 +173,9 @@ public class checker {
         dia2 = new boolean[n + (n - 1)];
 		revs = new int[n];
 		mem = new int[n];
+		mem2 = new int[n];
 		Arrays.fill(mem, -1);
+		Arrays.fill(mem2, -1);
 		
 		for (int i = 0, j = n-1; i < n; i++, j--) {
 			revs[i] = j;
