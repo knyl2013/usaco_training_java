@@ -22,21 +22,6 @@ public class checker {
 	static int[][] canUse;
 	static int[] canUseCnt;
 	
-
-	static String encode(int lv, boolean reverse)
-	{
-		StringBuilder sb = new StringBuilder();
-		
-		for (int i = 0; i < lv; i++) {
-			if (reverse)
-				sb.append(revs[board[i]]);
-			else
-				sb.append(board[i]);
-			sb.append('-');
-		}
-		
-		return sb.toString();
-	}
 	static int dfs2(int lv)
     {
         if (lv == n) {
@@ -157,7 +142,7 @@ public class checker {
 		for (int[] row : canUse) {
 			Arrays.fill(row, 3);
 		}
-        
+
 		Arrays.fill(canUseCnt, n);
 		
 		for (int i = 0, j = n-1; i < n; i++, j--) {
