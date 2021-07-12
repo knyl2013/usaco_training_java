@@ -296,8 +296,9 @@ public class checker {
     static InputStream is;
     static PrintWriter out;
     static String INPUT = "";
-    static String taskName = null;
-    static boolean logTime = true;
+    // static String taskName = null;
+    static String taskName = "checker";
+    static boolean logTime = !true;
     
     public static void main(String[] args) throws Exception
     {
