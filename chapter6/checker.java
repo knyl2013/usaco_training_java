@@ -20,6 +20,10 @@ public class checker {
 	static int callCnt = 0;
 	static int[] mem, mem2;
 	static Map<String, Integer> mp = new HashMap<>();
+	static int[][] canUse;
+	static int[] canUseCnt;
+	
+	
 	static boolean someLvImpossible(int lv)
 	{
 		for (int i = lv; i < n; i++) {
@@ -76,6 +80,9 @@ public class checker {
 			if (lv == 2 && mem2[board[1]] != -1)
 				return mem2[board[1]];
 		}
+		// if (someLvImpossible(lv)) {
+			// return 0;
+		// }
 		
 		
 		callCnt++;
@@ -84,16 +91,42 @@ public class checker {
             int grp1 = dia1Grp[lv][i];
             int grp2 = dia2Grp[lv][i];
             if (visitedCol[i] || dia1[grp1] || dia2[grp2]) continue;
+			boolean validUse = true;
+			
+			// for (int r = lv + 1, c1 = i - 1, c2 = i + 1; r < n; r++, c1--, c2++) {
+				// if (canUse[r][i]-- == 3) {
+					// canUseCnt[r]--;
+				// }
+				// if (c1 >= 0 && canUse[r][c1]-- == 3) {
+					// canUseCnt[r]--;
+				// }
+				// if (c2 < n && canUse[r][c2]-- == 3) {
+					// canUseCnt[r]--;
+				// }
+				// if (canUseCnt[r] <= 0)
+					// validUse = false;
+			// }
+			
             dia1[grp1] = true;
             dia2[grp2] = true;
             visitedCol[i] = true;
             board[lv] = i;
-
-            ans += dfs2(lv + 1);
-			// if (lv == 0) {
-				// System.out.println("ans: " + ans);
+			
+			// if (validUse)
+				ans += dfs2(lv + 1);
+			
+			// for (int r = lv + 1, c1 = i - 1, c2 = i + 1; r < n; r++, c1--, c2++) {
+				// if (++canUse[r][i] == 3) {
+					// canUseCnt[r]++;
+				// }
+				// if (c1 >= 0 && ++canUse[r][c1] == 3) {
+					// canUseCnt[r]++;
+				// }
+				// if (c2 < n && ++canUse[r][c2] == 3) {
+					// canUseCnt[r]++;
+				// }
 			// }
-
+			
             dia1[grp1] = false;
             dia2[grp2] = false;
             visitedCol[i] = false;
@@ -176,6 +209,13 @@ public class checker {
 		mem2 = new int[n];
 		Arrays.fill(mem, -1);
 		Arrays.fill(mem2, -1);
+		canUse = new int[n][n];
+		canUseCnt = new int[n];
+		
+		for (int[] row : canUse) {
+			Arrays.fill(row, 3);
+		}
+		Arrays.fill(canUseCnt, n);
 		
 		for (int i = 0, j = n-1; i < n; i++, j--) {
 			revs[i] = j;
